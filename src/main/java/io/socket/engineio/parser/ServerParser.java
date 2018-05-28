@@ -175,6 +175,67 @@ public final class ServerParser {
         }
     }
 
+    public static void decodePayload(Object data, Parser.DecodePayloadCallback callback) {
+        assert callback != null;
+
+        ArrayList<Packet> packets = new ArrayList<>();
+        if(data instanceof String) {
+            final String stringData = (String) data;
+            for (int payloadIdx = 0; payloadIdx < stringData.length(); ) {
+                final int separatorIdx = stringData.indexOf(':', payloadIdx);
+                if(separatorIdx < 0) {
+                    throw new IllegalArgumentException("Invalid payload: " + stringData);
+                }
+
+                int length = Integer.parseInt(stringData.substring(payloadIdx, separatorIdx));
+                String packetData = stringData.substring(
+                        separatorIdx + 1,
+                        length + separatorIdx + 1);
+                Packet packet = decodePacket(packetData);
+                packets.add(packet);
+
+                payloadIdx = length + separatorIdx + 1;
+            }
+        } else if(data instanceof byte[]) {
+            final byte[] byteData = (byte[]) data;
+            for (int payloadIdx = 0; payloadIdx < byteData.length; ) {
+                final boolean isBinary = (byteData[payloadIdx] == 1);
+                final int lengthStartIdx = payloadIdx + 1;
+                int lengthEndIdx = lengthStartIdx;
+                while (byteData[lengthEndIdx] != -1) {
+                    lengthEndIdx++;
+                }
+
+                StringBuilder lengthString = new StringBuilder();
+                for (int l = lengthStartIdx; l < lengthEndIdx; l++) {
+                    char digit = (char) ('0' + byteData[l]);
+                    lengthString.append(digit);
+                }
+                final int length = Integer.parseInt(lengthString.toString());
+
+                byte[] bufferData = new byte[length];
+                System.arraycopy(byteData, lengthEndIdx + 1, bufferData, 0, bufferData.length);
+
+                Packet packet;
+                if(isBinary) {
+                    packet = decodePacket(bufferData);
+                } else {
+                    packet = decodePacket(new String(bufferData, StandardCharsets.UTF_8));
+                }
+                packets.add(packet);
+
+                payloadIdx = lengthEndIdx + length + 1;
+            }
+        }
+
+        for (int i = 0; i < packets.size(); i++) {
+            //noinspection unchecked
+            if(!callback.call(packets.get(i), i, packets.size())) {
+                return;
+            }
+        }
+    }
+
     private static String setLengthHeader(String message) {
         return message.length() + ":" + message;
     }

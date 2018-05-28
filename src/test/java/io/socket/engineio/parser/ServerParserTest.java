@@ -186,7 +186,7 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testDecodePayload_string() {
+    public void testDecodePacket_string() {
         final Packet<String> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO");
         ServerParser.encodePacket(packetOriginal, false, new Parser.EncodeCallback() {
             @Override
@@ -200,7 +200,7 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testDecodePayload_binary() {
+    public void testDecodePacket_binary() {
         final Packet<byte[]> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
         ServerParser.encodePacket(packetOriginal, true, new Parser.EncodeCallback() {
             @Override
@@ -214,7 +214,7 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testDecodePayload_base64() {
+    public void testDecodePacket_base64() {
         final Packet<byte[]> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
         ServerParser.encodePacket(packetOriginal, false, new Parser.EncodeCallback() {
             @Override
@@ -223,6 +223,160 @@ public final class ServerParserTest {
                 assertEquals(Packet.MESSAGE, packetDecoded.type);
                 assertEquals(byte[].class, packetDecoded.data.getClass());
                 assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
+            }
+        });
+    }
+
+    @Test
+    public void testDecodePayload_string() {
+        final Packet[] packets = new Packet[] {
+                new Packet<String>(Packet.MESSAGE),
+                new Packet<String>(Packet.MESSAGE)
+        };
+        packets[0].data = "Engine.IO";
+        packets[1].data = "Test.Data";
+        ServerParser.encodePayload(packets, false, new Parser.EncodeCallback() {
+            @Override
+            public void call(Object data) {
+                assertEquals(String.class, data.getClass());
+
+                ServerParser.decodePayload(data, new Parser.DecodePayloadCallback() {
+                    @Override
+                    public boolean call(Packet packet, int index, int total) {
+                        Packet originalPacket = packets[index];
+                        assertEquals(originalPacket.data.getClass(), packet.data.getClass());
+                        assertEquals(originalPacket.type, packet.type);
+                        assertEquals(originalPacket.data, packet.data);
+
+                        return true;
+                    }
+                });
+            }
+        });
+    }
+
+    @Test
+    public void testDecodePayload_binary() {
+        final Packet[] packets = new Packet[] {
+                new Packet<byte[]>(Packet.MESSAGE),
+                new Packet<byte[]>(Packet.MESSAGE)
+        };
+        packets[0].data = "Engine.IO".getBytes(StandardCharsets.UTF_8);
+        packets[1].data = "Test.Data".getBytes(StandardCharsets.UTF_8);
+        ServerParser.encodePayload(packets, true, new Parser.EncodeCallback() {
+            @SuppressWarnings("Duplicates")
+            @Override
+            public void call(Object data) {
+                assertEquals(byte[].class, data.getClass());
+
+                ServerParser.decodePayload(data, new Parser.DecodePayloadCallback() {
+                    @Override
+                    public boolean call(Packet packet, int index, int total) {
+                        Packet originalPacket = packets[index];
+                        assertEquals(originalPacket.data.getClass(), packet.data.getClass());
+                        assertEquals(originalPacket.type, packet.type);
+                        assertArrayEquals((byte[]) originalPacket.data, (byte[]) packet.data);
+
+                        return true;
+                    }
+                });
+            }
+        });
+    }
+
+    @Test
+    public void testDecodePayload_base64() {
+        final Packet[] packets = new Packet[] {
+                new Packet<byte[]>(Packet.MESSAGE),
+                new Packet<byte[]>(Packet.MESSAGE)
+        };
+        packets[0].data = "Engine.IO".getBytes(StandardCharsets.UTF_8);
+        packets[1].data = "Test.Data".getBytes(StandardCharsets.UTF_8);
+        ServerParser.encodePayload(packets, false, new Parser.EncodeCallback() {
+            @SuppressWarnings("Duplicates")
+            @Override
+            public void call(Object data) {
+                assertEquals(String.class, data.getClass());
+
+                ServerParser.decodePayload(data, new Parser.DecodePayloadCallback() {
+                    @Override
+                    public boolean call(Packet packet, int index, int total) {
+                        Packet originalPacket = packets[index];
+                        assertEquals(originalPacket.data.getClass(), packet.data.getClass());
+                        assertEquals(originalPacket.type, packet.type);
+                        assertArrayEquals((byte[]) originalPacket.data, (byte[]) packet.data);
+
+                        return true;
+                    }
+                });
+            }
+        });
+    }
+
+    @Test
+    public void testDecodePayload_mixed_binary() {
+        final Packet[] packets = new Packet[] {
+                new Packet<String>(Packet.MESSAGE),
+                new Packet<byte[]>(Packet.MESSAGE)
+        };
+        packets[0].data = "Engine.IO";
+        packets[1].data = "Test.Data".getBytes(StandardCharsets.UTF_8);
+        ServerParser.encodePayload(packets, true, new Parser.EncodeCallback() {
+            @SuppressWarnings("Duplicates")
+            @Override
+            public void call(Object data) {
+                assertEquals(byte[].class, data.getClass());
+
+                ServerParser.decodePayload(data, new Parser.DecodePayloadCallback() {
+                    @Override
+                    public boolean call(Packet packet, int index, int total) {
+                        Packet originalPacket = packets[index];
+                        assertEquals(originalPacket.data.getClass(), packet.data.getClass());
+                        assertEquals(originalPacket.type, packet.type);
+
+                        if (originalPacket.data instanceof byte[]) {
+                            assertArrayEquals((byte[]) originalPacket.data, (byte[]) packet.data);
+                        } else {
+                            assertEquals(originalPacket.data, packet.data);
+                        }
+
+                        return true;
+                    }
+                });
+            }
+        });
+    }
+
+    @Test
+    public void testDecodePayload_mixed_base64() {
+        final Packet[] packets = new Packet[] {
+                new Packet<String>(Packet.MESSAGE),
+                new Packet<byte[]>(Packet.MESSAGE)
+        };
+        packets[0].data = "Engine.IO";
+        packets[1].data = "Test.Data".getBytes(StandardCharsets.UTF_8);
+        ServerParser.encodePayload(packets, false, new Parser.EncodeCallback() {
+            @SuppressWarnings("Duplicates")
+            @Override
+            public void call(Object data) {
+                assertEquals(String.class, data.getClass());
+
+                ServerParser.decodePayload(data, new Parser.DecodePayloadCallback() {
+                    @Override
+                    public boolean call(Packet packet, int index, int total) {
+                        Packet originalPacket = packets[index];
+                        assertEquals(originalPacket.data.getClass(), packet.data.getClass());
+                        assertEquals(originalPacket.type, packet.type);
+
+                        if (originalPacket.data instanceof byte[]) {
+                            assertArrayEquals((byte[]) originalPacket.data, (byte[]) packet.data);
+                        } else {
+                            assertEquals(originalPacket.data, packet.data);
+                        }
+
+                        return true;
+                    }
+                });
             }
         });
     }
