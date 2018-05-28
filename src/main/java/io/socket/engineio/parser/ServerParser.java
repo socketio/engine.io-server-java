@@ -4,6 +4,7 @@ import io.socket.utf8.UTF8;
 import io.socket.utf8.UTF8Exception;
 
 import javax.xml.bind.DatatypeConverter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -117,52 +118,40 @@ public final class ServerParser {
         final ArrayList<byte[]> results = new ArrayList<>(packets.length);
 
         for (Packet packet : packets) {
-            encodeOneBinaryPacket(packet, new Parser.EncodeCallback<byte[]>() {
+            encodePacket(packet, true, true, new Parser.EncodeCallback() {
                 @Override
-                public void call(byte[] data) {
-                    results.add(data);
+                public void call(Object packet) {
+                    if (packet instanceof String) {
+                        String encodingLength = String.valueOf(((String) packet).length());
+                        byte[] sizeBuffer = new byte[encodingLength.length() + 2];
+
+                        sizeBuffer[0] = (byte)0; // is a string
+                        for (int i = 0; i < encodingLength.length(); i ++) {
+                            sizeBuffer[i + 1] = (byte)Character.getNumericValue(encodingLength.charAt(i));
+                        }
+                        sizeBuffer[sizeBuffer.length - 1] = (byte)255;
+                        results.add(Buffer.concat(new byte[][] {
+                                sizeBuffer,
+                                ((String)packet).getBytes(StandardCharsets.UTF_8)
+                        }));
+                    } else {
+                        String encodingLength = String.valueOf(((byte[])packet).length);
+                        byte[] sizeBuffer = new byte[encodingLength.length() + 2];
+                        sizeBuffer[0] = (byte)1; // is binary
+                        for (int i = 0; i < encodingLength.length(); i ++) {
+                            sizeBuffer[i + 1] = (byte)Character.getNumericValue(encodingLength.charAt(i));
+                        }
+                        sizeBuffer[sizeBuffer.length - 1] = (byte)255;
+                        results.add(Buffer.concat(new byte[][] {
+                                sizeBuffer,
+                                (byte[])packet
+                        }));
+                    }
                 }
             });
         }
 
         callback.call(Buffer.concat(results.toArray(new byte[results.size()][])));
-    }
-
-    private static void encodeOneBinaryPacket(Packet p, final Parser.EncodeCallback<byte[]> doneCallback) throws UTF8Exception {
-        encodePacket(p, true, true, new Parser.EncodeCallback() {
-            @Override
-            public void call(Object packet) {
-                if (packet instanceof String) {
-                    String encodingLength = String.valueOf(((String) packet).length());
-                    byte[] sizeBuffer = new byte[encodingLength.length() + 2];
-
-                    sizeBuffer[0] = (byte)0; // is a string
-                    for (int i = 0; i < encodingLength.length(); i ++) {
-                        sizeBuffer[i + 1] = (byte)Character.getNumericValue(encodingLength.charAt(i));
-                    }
-                    sizeBuffer[sizeBuffer.length - 1] = (byte)255;
-                    doneCallback.call(Buffer.concat(new byte[][] {sizeBuffer, stringToByteArray((String)packet)}));
-                } else {
-                    String encodingLength = String.valueOf(((byte[])packet).length);
-                    byte[] sizeBuffer = new byte[encodingLength.length() + 2];
-                    sizeBuffer[0] = (byte)1; // is binary
-                    for (int i = 0; i < encodingLength.length(); i ++) {
-                        sizeBuffer[i + 1] = (byte)Character.getNumericValue(encodingLength.charAt(i));
-                    }
-                    sizeBuffer[sizeBuffer.length - 1] = (byte)255;
-                    doneCallback.call(Buffer.concat(new byte[][] {sizeBuffer, (byte[])packet}));
-                }
-            }
-        });
-    }
-
-    private static byte[] stringToByteArray(String string) {
-        int len = string.length();
-        byte[] bytes = new byte[len];
-        for (int i = 0; i < len; i++) {
-            bytes[i] = (byte)Character.codePointAt(string, i);
-        }
-        return bytes;
     }
 
     private static String setLengthHeader(String message) {
