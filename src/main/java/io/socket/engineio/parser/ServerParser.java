@@ -1,8 +1,5 @@
 package io.socket.engineio.parser;
 
-import io.socket.utf8.UTF8;
-import io.socket.utf8.UTF8Exception;
-
 import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -33,14 +30,9 @@ public final class ServerParser {
 
     /*private static Packet<String> err = new Packet<>(Packet.ERROR, "parser error");*/
 
-    private static UTF8.Options utf8Options = new UTF8.Options();
-    static  {
-        utf8Options.strict = false;
-    }
-
     private ServerParser() {}
 
-    public static void encodePacket(Packet packet, boolean supportsBinary, boolean utf8encode, Parser.EncodeCallback callback) throws UTF8Exception {
+    public static void encodePacket(Packet packet, boolean supportsBinary, Parser.EncodeCallback callback) {
         if (packet.data instanceof byte[]) {
             @SuppressWarnings("unchecked")
             Packet<byte[]> packetToEncode = packet;
@@ -49,7 +41,7 @@ public final class ServerParser {
             String encoded = String.valueOf(packets.get(packet.type));
 
             if (null != packet.data) {
-                encoded += utf8encode ? UTF8.encode(String.valueOf(packet.data), utf8Options) : String.valueOf(packet.data);
+                encoded += String.valueOf(packet.data);
             }
 
             @SuppressWarnings("unchecked")
@@ -75,7 +67,7 @@ public final class ServerParser {
     }
 
     @SuppressWarnings("unchecked")
-    public static void encodePayload(Packet[] packets, boolean supportsBinary, Parser.EncodeCallback callback) throws UTF8Exception {
+    public static void encodePayload(Packet[] packets, boolean supportsBinary, Parser.EncodeCallback callback) {
         boolean isBinary = false;
         for (Packet packet : packets) {
             if (packet.data instanceof byte[]) {
@@ -98,7 +90,7 @@ public final class ServerParser {
         final StringBuilder result = new StringBuilder();
 
         for (Packet packet : packets) {
-            encodePacket(packet, false, false, new Parser.EncodeCallback() {
+            encodePacket(packet, false, new Parser.EncodeCallback() {
                 @Override
                 public void call(Object data) {
                     result.append(setLengthHeader((String) data));
@@ -109,7 +101,7 @@ public final class ServerParser {
         callback.call(result.toString());
     }
 
-    private static void encodePayloadAsBinary(Packet[] packets, Parser.EncodeCallback<byte[]> callback) throws UTF8Exception {
+    private static void encodePayloadAsBinary(Packet[] packets, Parser.EncodeCallback<byte[]> callback) {
         if (packets.length == 0) {
             callback.call(new byte[0]);
             return;
@@ -118,7 +110,7 @@ public final class ServerParser {
         final ArrayList<byte[]> results = new ArrayList<>(packets.length);
 
         for (Packet packet : packets) {
-            encodePacket(packet, true, true, new Parser.EncodeCallback() {
+            encodePacket(packet, true, new Parser.EncodeCallback() {
                 @Override
                 public void call(Object packet) {
                     if (packet instanceof String) {

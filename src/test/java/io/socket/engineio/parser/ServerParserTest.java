@@ -1,6 +1,5 @@
 package io.socket.engineio.parser;
 
-import io.socket.utf8.UTF8Exception;
 import org.json.JSONArray;
 import org.junit.Test;
 
@@ -26,11 +25,11 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testEncodePacket_string() throws UTF8Exception {
+    public void testEncodePacket_string() {
         final Packet<String> packet = new Packet<>(Packet.MESSAGE);
 
         packet.data = "Hello World";
-        ServerParser.encodePacket(packet, false, false, new Parser.EncodeCallback() {
+        ServerParser.encodePacket(packet, false, new Parser.EncodeCallback() {
             @Override
             public void call(Object data) {
                 String result = runScriptAndGetOutput("src/test/resources/testEncodePacket_string.js", packet.data, String.class);
@@ -39,7 +38,7 @@ public final class ServerParserTest {
         });
 
         packet.data = "Engine.IO";
-        ServerParser.encodePacket(packet, false, false, new Parser.EncodeCallback() {
+        ServerParser.encodePacket(packet, false, new Parser.EncodeCallback() {
             @Override
             public void call(Object data) {
                 String result = runScriptAndGetOutput("src/test/resources/testEncodePacket_string.js", packet.data, String.class);
@@ -49,11 +48,11 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testEncodePacket_binary() throws UTF8Exception {
+    public void testEncodePacket_binary() {
         final Packet<byte[]> packet = new Packet<>(Packet.MESSAGE);
 
         packet.data = new byte[] { 1, 2, 3, 4, 5 };
-        ServerParser.encodePacket(packet, true, false, new Parser.EncodeCallback() {
+        ServerParser.encodePacket(packet, true, new Parser.EncodeCallback() {
             @Override
             public void call(Object data) {
                 byte[] result = runScriptAndGetOutput("src/test/resources/testEncodePacket_binary.js", packet.data, byte[].class);
@@ -63,11 +62,11 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testEncodePacket_base64() throws UTF8Exception {
+    public void testEncodePacket_base64() {
         final Packet<byte[]> packet = new Packet<>(Packet.MESSAGE);
 
         packet.data = new byte[] { 1, 2, 3, 4, 5 };
-        ServerParser.encodePacket(packet, false, false, new Parser.EncodeCallback() {
+        ServerParser.encodePacket(packet, false, new Parser.EncodeCallback() {
             @Override
             public void call(Object data) {
                 String result = runScriptAndGetOutput("src/test/resources/testEncodePacket_base64.js", packet.data, String.class);
@@ -77,7 +76,7 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testEncodePayload_string_empty() throws UTF8Exception {
+    public void testEncodePayload_string_empty() {
         final Packet[] packets = new Packet[0];
         final JSONArray jsonArray = new JSONArray();
 
@@ -91,7 +90,7 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testEncodePayload_string() throws UTF8Exception {
+    public void testEncodePayload_string() {
         final String[] messages = new String[] {
                 "Hello World",
                 "Engine.IO"
@@ -116,7 +115,7 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testEncodePayload_binary_empty() throws UTF8Exception {
+    public void testEncodePayload_binary_empty() {
         final byte[][] messages = new byte[][] {
         };
         final Packet[] packets = new Packet[messages.length];
@@ -139,7 +138,7 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testEncodePayload_binary() throws UTF8Exception {
+    public void testEncodePayload_binary() {
         final byte[][] messages = new byte[][] {
                 {1, 2, 3, 4, 5}, {11, 12, 13, 14, 15}
         };
@@ -163,7 +162,7 @@ public final class ServerParserTest {
     }
 
     @Test
-    public void testEncodePayload_base64() throws UTF8Exception {
+    public void testEncodePayload_base64() {
         final byte[][] messages = new byte[][] {
                 {1, 2, 3, 4, 5}, {11, 12, 13, 14, 15}
         };
