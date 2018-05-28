@@ -21,14 +21,14 @@ public final class ServerParser {
         put(Packet.NOOP, 6);
     }};
 
-    /*private static final Map<Integer, String> packetsList = new HashMap<>();
+    private static final Map<Integer, String> packetsList = new HashMap<>();
     static {
         for (Map.Entry<String, Integer> entry : packets.entrySet()) {
             packetsList.put(entry.getValue(), entry.getKey());
         }
-    }*/
+    }
 
-    /*private static Packet<String> err = new Packet<>(Packet.ERROR, "parser error");*/
+    private static Packet<String> err = new Packet<>(Packet.ERROR, "parser error");
 
     private ServerParser() {}
 
@@ -144,6 +144,35 @@ public final class ServerParser {
         }
 
         callback.call(Buffer.concat(results.toArray(new byte[results.size()][])));
+    }
+
+    public static Packet decodePacket(Object data) {
+        if(data == null) {
+            return err;
+        }
+
+        if(data instanceof String) {
+            final String stringData = (String) data;
+            if(stringData.charAt(0) == 'b') {
+                Packet<byte[]> packet = new Packet<>(packetsList.get(
+                        Integer.parseInt(String.valueOf(stringData.charAt(1)))));
+                packet.data = DatatypeConverter.parseBase64Binary(stringData.substring(2));
+                return packet;
+            } else {
+                Packet<String> packet = new Packet<>(packetsList.get(
+                        Integer.parseInt(String.valueOf(stringData.charAt(0)))));
+                packet.data = stringData.substring(1);
+                return packet;
+            }
+        } else if(data instanceof byte[]) {
+            final byte[] byteData = (byte[]) data;
+            Packet<byte[]> packet = new Packet<>(packetsList.get((int) byteData[0]));
+            packet.data = new byte[byteData.length - 1];
+            System.arraycopy(byteData, 1, packet.data, 0, packet.data.length);
+            return packet;
+        } else {
+            throw new IllegalArgumentException("Invalid type for data: " + data.getClass().getSimpleName());
+        }
     }
 
     private static String setLengthHeader(String message) {

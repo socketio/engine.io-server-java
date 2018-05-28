@@ -185,6 +185,48 @@ public final class ServerParserTest {
         });
     }
 
+    @Test
+    public void testDecodePayload_string() {
+        final Packet<String> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO");
+        ServerParser.encodePacket(packetOriginal, false, new Parser.EncodeCallback() {
+            @Override
+            public void call(Object data) {
+                Packet packetDecoded = ServerParser.decodePacket(data);
+                assertEquals(Packet.MESSAGE, packetDecoded.type);
+                assertEquals(String.class, packetDecoded.data.getClass());
+                assertEquals(packetOriginal.data, packetDecoded.data);
+            }
+        });
+    }
+
+    @Test
+    public void testDecodePayload_binary() {
+        final Packet<byte[]> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
+        ServerParser.encodePacket(packetOriginal, true, new Parser.EncodeCallback() {
+            @Override
+            public void call(Object data) {
+                Packet packetDecoded = ServerParser.decodePacket(data);
+                assertEquals(Packet.MESSAGE, packetDecoded.type);
+                assertEquals(byte[].class, packetDecoded.data.getClass());
+                assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
+            }
+        });
+    }
+
+    @Test
+    public void testDecodePayload_base64() {
+        final Packet<byte[]> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
+        ServerParser.encodePacket(packetOriginal, false, new Parser.EncodeCallback() {
+            @Override
+            public void call(Object data) {
+                Packet packetDecoded = ServerParser.decodePacket(data);
+                assertEquals(Packet.MESSAGE, packetDecoded.type);
+                assertEquals(byte[].class, packetDecoded.data.getClass());
+                assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
+            }
+        });
+    }
+
     @SuppressWarnings("unchecked")
     private <T> T runScriptAndGetOutput(String script, Object input, Class<T> outputClass) {
         byte[] nodeInputBytes;
