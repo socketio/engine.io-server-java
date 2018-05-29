@@ -17,10 +17,9 @@ public final class EngineIoSocket extends Emitter {
     private final String mSid;
     private final EngineIoServer mServer;
     private final LinkedList<Packet> mWriteBuffer = new LinkedList<>();
+    private final Timer mPingTimer = new Timer();
 
-    private Timer mPingTimeout = null;
-    private TimerTask mPingTimeoutTask= null;
-
+    private TimerTask mPingTimeout = null;
     private Runnable mCleanupFunction = null;
     private ReadyState mReadyState;
     private Transport mTransport;
@@ -110,7 +109,7 @@ public final class EngineIoSocket extends Emitter {
 
         mTransport.close();
 
-        mPingTimeout.cancel();
+        mPingTimer.cancel();
     }
 
     private void onOpen() {
@@ -134,7 +133,7 @@ public final class EngineIoSocket extends Emitter {
     private void onClose(String reason, String description) {
         if(mReadyState != ReadyState.CLOSED) {
             mReadyState = ReadyState.CLOSED;
-            mPingTimeout.cancel();
+            mPingTimer.cancel();
 
             clearTransport();
             emit("close", reason, description);
@@ -194,13 +193,12 @@ public final class EngineIoSocket extends Emitter {
             mPingTimeout.cancel();
         }
 
-        mPingTimeout = new Timer();
-        mPingTimeoutTask = new TimerTask() {
+        mPingTimeout = new TimerTask() {
             @Override
             public void run() {
                 onClose("ping timeout", null);
             }
         };
-        mPingTimeout.schedule(mPingTimeoutTask, mServer.getPingInterval() + mServer.getPingTimeout());
+        mPingTimer.schedule(mPingTimeout, mServer.getPingInterval() + mServer.getPingTimeout());
     }
 }
