@@ -103,6 +103,11 @@ public final class Polling extends Transport {
     }
 
     @Override
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
     protected synchronized void doClose() {
         if(mWritable) {
             send(PACKET_CLOSE);

@@ -15,7 +15,7 @@ public final class EngineIoServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        EngineIoServer.getInstance().service(request, response);
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        EngineIoServer.getInstance().handleRequest(request, response);
     }
 }

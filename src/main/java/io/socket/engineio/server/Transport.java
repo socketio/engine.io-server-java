@@ -21,6 +21,7 @@ public abstract class Transport extends Emitter {
     public abstract void onRequest(HttpServletRequest request, HttpServletResponse response) throws IOException;
     public abstract void send(List<Packet> packets);
     public abstract boolean isWritable();
+    public abstract String getName();
 
     protected abstract void doClose();
 
