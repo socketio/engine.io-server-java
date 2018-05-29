@@ -10,8 +10,14 @@ import java.util.Map;
 
 public final class JettyWebSocketHandler extends EngineIoWebSocket implements WebSocketListener {
 
+    private final EngineIoServer mServer;
+
     private Session mSession;
     private Map<String, String> mQuery;
+
+    public JettyWebSocketHandler(EngineIoServer server) {
+        mServer = server;
+    }
 
     /* EngineIoWebSocket */
 
@@ -47,7 +53,7 @@ public final class JettyWebSocketHandler extends EngineIoWebSocket implements We
         mSession = session;
         mQuery = ParseQS.decode(session.getUpgradeRequest().getQueryString());
 
-        EngineIoServer.getInstance().handleWebSocket(this);
+        mServer.handleWebSocket(this);
     }
 
     @Override

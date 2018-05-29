@@ -17,20 +17,14 @@ import java.util.TreeMap;
 @SuppressWarnings("WeakerAccess")
 public final class EngineIoServer extends Emitter {
 
-    private static final EngineIoServer sInstance = new EngineIoServer();
-
     private final Map<String, EngineIoSocket> mClients = new TreeMap<>();
 
     private long mPingTimeout;
     private long mPingInterval;
 
-    private EngineIoServer() {
+    public EngineIoServer() {
         mPingTimeout = 5000;
         mPingInterval = 25000;
-    }
-
-    public static EngineIoServer getInstance() {
-        return sInstance;
     }
 
     public long getPingTimeout() {
@@ -116,7 +110,7 @@ public final class EngineIoServer extends Emitter {
         final String sid = Yeast.yeast();
 
         Transport transport = new Polling();
-        EngineIoSocket socket = new EngineIoSocket(sid, EngineIoServer.getInstance(), transport, request);
+        EngineIoSocket socket = new EngineIoSocket(sid, this, transport, request);
         transport.onRequest(request, response);
 
         mClients.put(sid, socket);
@@ -127,14 +121,14 @@ public final class EngineIoServer extends Emitter {
             }
         });
 
-        EngineIoServer.getInstance().emit("connection", socket);
+        emit("connection", socket);
     }
 
     private void handshakeWebSocket(EngineIoWebSocket webSocket) {
         final String sid = Yeast.yeast();
 
         Transport transport = new WebSocket(webSocket);
-        EngineIoSocket socket = new EngineIoSocket(sid, EngineIoServer.getInstance(), transport, null);
+        EngineIoSocket socket = new EngineIoSocket(sid, this, transport, null);
 
         mClients.put(sid, socket);
         socket.once("close", new Emitter.Listener() {
@@ -144,6 +138,6 @@ public final class EngineIoServer extends Emitter {
             }
         });
 
-        EngineIoServer.getInstance().emit("connection", socket);
+        emit("connection", socket);
     }
 }
