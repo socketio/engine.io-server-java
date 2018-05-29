@@ -58,12 +58,6 @@
             <version>7.0</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.websocket</groupId>
-            <artifactId>websocket-api</artifactId>
-            <version>9.4.10.v20180503</version>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -87,6 +81,12 @@
             <groupId>org.eclipse.jetty.websocket</groupId>
             <artifactId>websocket-server</artifactId>
             <version>9.4.10.v20180503</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.socket</groupId>
+            <artifactId>engine.io-jetty</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

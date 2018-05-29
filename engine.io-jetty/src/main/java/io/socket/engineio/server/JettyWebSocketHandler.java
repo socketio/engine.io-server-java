@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public final class JettyWebSocketListener extends EngineIoWebSocket implements WebSocketListener {
+public final class JettyWebSocketHandler extends EngineIoWebSocket implements WebSocketListener {
 
     private Session mSession;
     private Map<String, String> mQuery;
