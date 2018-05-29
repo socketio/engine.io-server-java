@@ -67,7 +67,7 @@ public final class Polling extends Transport {
         }
 
         @SuppressWarnings("unchecked")
-        final boolean supportsBinary = ((Map<String, String>) mRequest.getAttribute("query")).containsKey("b64");
+        final boolean supportsBinary = (!((Map<String, String>) mRequest.getAttribute("query")).containsKey("b64"));
 
         if(packets.size() == 0) {
             (new Exception()).printStackTrace();
