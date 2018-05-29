@@ -76,6 +76,7 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                    <encoding>UTF-8</encoding>
                     <compilerArgs>
                         <arg>-Xlint:unchecked</arg>
                     </compilerArgs>
