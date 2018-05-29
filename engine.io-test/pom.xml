@@ -14,12 +14,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.socket</groupId>
-            <artifactId>engine.io-java</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
@@ -45,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>io.socket</groupId>
-            <artifactId>engine.io</artifactId>
+            <artifactId>engine.io-java</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
