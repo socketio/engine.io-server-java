@@ -1,4 +1,5 @@
 # Engine.IO Java
+[![Build Status](https://travis-ci.org/socketio/engine.io-server-java.png?branch=master)](https://travis-ci.org/socketio/engine.io-server-java)
 
 This is the Engine.IO Server Library for Java ported from the [JavaScript server](https://github.com/socketio/engine.io).
 
