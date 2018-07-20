@@ -1,7 +1,17 @@
 language: java
-sudo: false
-install: mvn install -DskipTests=true -Dgpg.skip=true
-jdk:
-  - openjdk7
-  - oraclejdk8
 dist: trusty
+sudo: false
+
+matrix:
+  include:
+    - name: "Java 7 Tests"
+      jdk: openjdk7
+      env: COVERAGE=off
+    - name: "Java 8 Tests"
+      jdk: oraclejdk8
+      env: COVERAGE=on
+
+script: mvn test
+
+after_success:
+  - '[ "$COVERAGE" == "on" ] && mvn clean cobertura:cobertura && bash <(curl -s https://codecov.io/bash)'
