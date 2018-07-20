@@ -6,17 +6,12 @@ matrix:
   include:
     - name: "Java 7 Tests"
       jdk: openjdk7
-      env: TESTENV="test"
     - name: "Java 8 Tests"
       jdk: oraclejdk8
-      env: TESTENV="test"
     - name: "Coverage"
       jdk: oraclejdk8
-      env: TESTENV="cover"
-
-script:
-  - '[ "$TESTENV" == "test" ] && mvn clean test; true'
-  - '[ "$TESTENV" == "cover" ] && mvn clean cobertura:cobertura; true'
+      env: TESTENV=cover
+      script: mvn clean cobertura:cobertura
 
 after_success:
-  - '[ "$TESTENV" == "cover" ] && bash <(curl -s https://codecov.io/bash); true'
+  - '[ "$TESTENV" == "cover" ] && bash <(curl -s https://codecov.io/bash)'
