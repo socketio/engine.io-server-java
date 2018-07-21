@@ -11,6 +11,7 @@
 
     <artifactId>engine.io-test</artifactId>
     <packaging>pom</packaging>
+    <description>This module contains integration tests.</description>
 
     <dependencies>
         <dependency>
