@@ -101,7 +101,7 @@ public final class ServerParser {
         callback.call(result.toString());
     }
 
-    private static void encodePayloadAsBinary(Packet[] packets, Parser.EncodeCallback<byte[]> callback) {
+    public static void encodePayloadAsBinary(Packet[] packets, Parser.EncodeCallback<byte[]> callback) {
         if (packets.length == 0) {
             callback.call(new byte[0]);
             return;

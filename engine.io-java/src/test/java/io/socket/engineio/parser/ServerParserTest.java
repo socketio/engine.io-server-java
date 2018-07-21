@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Test {@link ServerParser} against reference JS implementation.
@@ -186,6 +187,30 @@ public final class ServerParserTest {
     }
 
     @Test
+    public void testEncodePayloadAsBinary_empty() {
+        ServerParser.encodePayloadAsBinary(new Packet[0], new Parser.EncodeCallback<byte[]>() {
+            @Override
+            public void call(byte[] data) {
+                assertArrayEquals(data, new byte[0]);
+            }
+        });
+    }
+
+    @Test
+    public void testDecodePacket_null() {
+        Packet packet = ServerParser.decodePacket(null);
+        assertNotNull(packet);
+        assertEquals(Packet.ERROR, packet.type);
+        assertEquals("parser error", packet.data);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDecodePacket_error() {
+        // Pass an int to get exception
+        ServerParser.decodePacket(0);
+    }
+
+    @Test
     public void testDecodePacket_string() {
         final Packet<String> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO");
         ServerParser.encodePacket(packetOriginal, false, new Parser.EncodeCallback() {
@@ -223,6 +248,16 @@ public final class ServerParserTest {
                 assertEquals(Packet.MESSAGE, packetDecoded.type);
                 assertEquals(byte[].class, packetDecoded.data.getClass());
                 assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
+            }
+        });
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDecodePayload_error() {
+        ServerParser.decodePayload("abcxyz", new Parser.DecodePayloadCallback() {
+            @Override
+            public boolean call(Packet packet, int index, int total) {
+                return false;
             }
         });
     }
@@ -375,6 +410,36 @@ public final class ServerParserTest {
                         }
 
                         return true;
+                    }
+                });
+            }
+        });
+    }
+
+    @Test
+    public void testDecodePayload_exit() {
+        final Packet[] packets = new Packet[] {
+                new Packet<String>(Packet.MESSAGE),
+                new Packet<String>(Packet.MESSAGE)
+        };
+        packets[0].data = "Engine.IO";
+        packets[1].data = "Test.Data";
+        ServerParser.encodePayload(packets, false, new Parser.EncodeCallback() {
+            @Override
+            public void call(Object data) {
+                assertEquals(String.class, data.getClass());
+
+                ServerParser.decodePayload(data, new Parser.DecodePayloadCallback() {
+                    @Override
+                    public boolean call(Packet packet, int index, int total) {
+                        assertEquals(0, index);
+
+                        Packet originalPacket = packets[index];
+                        assertEquals(originalPacket.data.getClass(), packet.data.getClass());
+                        assertEquals(originalPacket.type, packet.type);
+                        assertEquals(originalPacket.data, packet.data);
+
+                        return false;
                     }
                 });
             }
