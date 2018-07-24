@@ -39,6 +39,11 @@ public final class EngineIoServer extends Emitter {
         final Map<String, String> query = ParseQS.decode(request.getQueryString());
         request.setAttribute("query", query);
 
+        if (!query.containsKey("transport") || !query.get("transport").equals("polling")) {
+            sendErrorMessage(request, response, ServerErrors.UNKNOWN_TRANSPORT);
+            return;
+        }
+
         final String sid = query.containsKey("sid")? query.get("sid") : null;
         if (sid != null) {
             if(!mClients.containsKey(query.get("sid"))) {
@@ -93,15 +98,15 @@ public final class EngineIoServer extends Emitter {
             }
 
             JSONObject jsonObject = new JSONObject();
-            jsonObject.append("code", code.getCode());
-            jsonObject.append("message", code.getMessage());
+            jsonObject.put("code", code.getCode());
+            jsonObject.put("message", code.getMessage());
             response.getWriter().write(jsonObject.toString());
         } else {
             response.setStatus(403);
 
             JSONObject jsonObject = new JSONObject();
-            jsonObject.append("code", ServerErrors.FORBIDDEN.getCode());
-            jsonObject.append("message", ServerErrors.FORBIDDEN.getMessage());
+            jsonObject.put("code", ServerErrors.FORBIDDEN.getCode());
+            jsonObject.put("message", ServerErrors.FORBIDDEN.getMessage());
             response.getWriter().write(jsonObject.toString());
         }
     }

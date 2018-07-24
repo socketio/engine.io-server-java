@@ -38,6 +38,7 @@ public final class EngineIoSocket extends Emitter {
         onOpen();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void send(Packet packet) {
         sendPacket(packet);
     }
