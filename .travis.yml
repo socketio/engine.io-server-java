@@ -4,8 +4,6 @@ sudo: false
 
 matrix:
   include:
-    - name: "Java 7 Tests"
-      jdk: openjdk7
     - name: "Java 8 Tests"
       jdk: oraclejdk8
     - name: "Coverage"
