@@ -10,14 +10,14 @@ import static org.junit.Assert.assertEquals;
  * Test server against JS client.
  */
 @SuppressWarnings("Duplicates")
-public final class ServerTest {
+public final class ServerPollingTest {
 
     @Test
     public void connectTest() throws Exception {
         ServerWrapper serverWrapper = new ServerWrapper();
         try {
             serverWrapper.startServer();
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServer_connect.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerPolling_connect.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -43,7 +43,7 @@ public final class ServerTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServer_echo_string.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerPolling_echo_string.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -69,7 +69,7 @@ public final class ServerTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServer_echo_binary.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerPolling_echo_binary.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -95,7 +95,7 @@ public final class ServerTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServer_echo_base64.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerPolling_echo_base64.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -110,7 +110,7 @@ public final class ServerTest {
                 @Override
                 public void call(Object... args) {
                     final EngineIoSocket socket = (EngineIoSocket) args[0];
-                    final String echoMessage = ServerTest.class.getSimpleName() + System.currentTimeMillis();
+                    final String echoMessage = ServerPollingTest.class.getSimpleName() + System.currentTimeMillis();
                     socket.on("message", new Emitter.Listener() {
                         @Override
                         public void call(Object... args) {
@@ -124,7 +124,7 @@ public final class ServerTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServer_reverseEcho.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerPolling_reverseEcho.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }

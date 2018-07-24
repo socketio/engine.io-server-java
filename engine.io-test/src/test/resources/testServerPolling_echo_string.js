@@ -1,21 +1,17 @@
 var engine = require('engine.io-client');
-var helpers = require('./helpers');
 
-var returnError = function (err) {
+var returnError = function () {
     process.exit(1);
 };
 
 var port = process.env.PORT || 3000;
 socket = engine('http://127.0.0.1:' + port, {
-    upgrade: false,
-    forceBase64: true
+    transports: ['polling']
 });
 socket.on('open', function () {
-    var echoMessage = helpers.toArrayBuffer([1, 2, 3, 4, 5, 6, 7, 8]);
+    var echoMessage = "Hello World";
     socket.on('message', function (message) {
-        message = helpers.toArrayBuffer(message);
-
-        if(helpers.compareArrayBuffer(message, echoMessage)) {
+        if(message === echoMessage) {
             process.exit(0);
         } else {
             returnError();

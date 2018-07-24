@@ -7,7 +7,7 @@ var returnError = function (err) {
 
 var port = process.env.PORT || 3000;
 socket = engine('http://127.0.0.1:' + port, {
-    upgrade: false
+    transports: ['polling']
 });
 socket.on("message", function (message) {
     socket.sendPacket("message", message);

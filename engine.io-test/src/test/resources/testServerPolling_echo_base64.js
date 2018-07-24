@@ -7,7 +7,8 @@ var returnError = function (err) {
 
 var port = process.env.PORT || 3000;
 socket = engine('http://127.0.0.1:' + port, {
-    upgrade: false
+    transports: ['polling'],
+    forceBase64: true
 });
 socket.on('open', function () {
     var echoMessage = helpers.toArrayBuffer([1, 2, 3, 4, 5, 6, 7, 8]);

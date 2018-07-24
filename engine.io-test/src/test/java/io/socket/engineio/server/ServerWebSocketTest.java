@@ -110,7 +110,7 @@ public final class ServerWebSocketTest {
                 @Override
                 public void call(Object... args) {
                     final EngineIoSocket socket = (EngineIoSocket) args[0];
-                    final String echoMessage = ServerTest.class.getSimpleName() + System.currentTimeMillis();
+                    final String echoMessage = ServerPollingTest.class.getSimpleName() + System.currentTimeMillis();
                     socket.on("message", new Emitter.Listener() {
                         @Override
                         public void call(Object... args) {
