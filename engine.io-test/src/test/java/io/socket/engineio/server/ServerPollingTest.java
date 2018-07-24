@@ -17,7 +17,7 @@ public final class ServerPollingTest {
         ServerWrapper serverWrapper = new ServerWrapper();
         try {
             serverWrapper.startServer();
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerPolling_connect.js", serverWrapper.getPort()));
+            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerPolling_connect.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -43,7 +43,7 @@ public final class ServerPollingTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerPolling_echo_string.js", serverWrapper.getPort()));
+            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerPolling_echo_string.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -69,7 +69,7 @@ public final class ServerPollingTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerPolling_echo_binary.js", serverWrapper.getPort()));
+            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerPolling_echo_binary.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -95,7 +95,7 @@ public final class ServerPollingTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerPolling_echo_base64.js", serverWrapper.getPort()));
+            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerPolling_echo_base64.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -124,7 +124,7 @@ public final class ServerPollingTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerPolling_reverseEcho.js", serverWrapper.getPort()));
+            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerPolling_reverseEcho.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }

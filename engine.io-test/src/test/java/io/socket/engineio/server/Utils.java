@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-final class TestUtils {
+final class Utils {
 
-    private TestUtils() {
+    private Utils() {
     }
 
     static int executeScriptForResult(String script, int port) throws IOException {
