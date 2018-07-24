@@ -10,14 +10,14 @@ import static org.junit.Assert.assertEquals;
  * Test server against JS client.
  */
 @SuppressWarnings("Duplicates")
-public final class ServerTest {
+public final class ServerWebSocketTest {
 
     @Test
     public void connectTest() throws Exception {
         ServerWrapper serverWrapper = new ServerWrapper();
         try {
             serverWrapper.startServer();
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServer_connect.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerWebSocket_connect.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -43,7 +43,7 @@ public final class ServerTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServer_echo_string.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerWebSocket_echo_string.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -69,7 +69,7 @@ public final class ServerTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServer_echo_binary.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerWebSocket_echo_binary.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -95,7 +95,7 @@ public final class ServerTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServer_echo_base64.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerWebSocket_echo_base64.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -124,7 +124,7 @@ public final class ServerTest {
                 }
             });
 
-            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServer_reverseEcho.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testServerWebSocket_reverseEcho.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }

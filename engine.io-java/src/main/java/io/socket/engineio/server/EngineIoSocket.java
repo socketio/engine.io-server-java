@@ -251,6 +251,8 @@ public final class EngineIoSocket extends Emitter {
             synchronized (mWriteBuffer) {
                 mWriteBuffer.add(packet);
             }
+
+            flush();
         }
     }
 
