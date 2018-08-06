@@ -25,7 +25,7 @@ public abstract class Transport extends Emitter {
 
     protected abstract void doClose();
 
-    void close() {
+    public void close() {
         if(mReadyState != ReadyState.CLOSED && mReadyState != ReadyState.CLOSING) {
             mReadyState = ReadyState.CLOSING;
             doClose();

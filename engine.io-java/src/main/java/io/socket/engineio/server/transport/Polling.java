@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -19,12 +20,12 @@ public final class Polling extends Transport {
 
     public static final String NAME = "polling";
 
-    private static final ArrayList<Packet> PACKET_CLOSE = new ArrayList<Packet>() {{
+    private static final List<Packet> PACKET_CLOSE = Collections.unmodifiableList(new ArrayList<Packet>() {{
         add(new Packet<String>(Packet.CLOSE));
-    }};
-    private static final ArrayList<Packet> PACKET_NOOP = new ArrayList<Packet>() {{
+    }});
+    private static final List<Packet> PACKET_NOOP = Collections.unmodifiableList(new ArrayList<Packet>() {{
         add(new Packet<String>(Packet.NOOP));
-    }};
+    }});
 
     private HttpServletRequest mRequest;
     private HttpServletResponse mResponse;
@@ -70,8 +71,7 @@ public final class Polling extends Transport {
         final boolean supportsBinary = (!((Map<String, String>) mRequest.getAttribute("query")).containsKey("b64"));
 
         if(packets.size() == 0) {
-            (new Exception()).printStackTrace();
-            System.exit(0);
+            throw new IllegalArgumentException("No packets to send.");
         }
         ServerParser.encodePayload(packets.toArray(new Packet[0]), supportsBinary, new Parser.EncodeCallback() {
             @Override
@@ -110,7 +110,7 @@ public final class Polling extends Transport {
     @Override
     protected synchronized void doClose() {
         if(mWritable) {
-            send(PACKET_CLOSE);
+            send(new ArrayList<>(PACKET_CLOSE));
             onClose();
         } else {
             mShouldClose = true;
@@ -136,7 +136,7 @@ public final class Polling extends Transport {
     @Override
     protected void onClose() {
         if(mWritable) {
-            send(PACKET_NOOP);
+            send(new ArrayList<>(PACKET_NOOP));
         }
         super.onClose();
     }
@@ -147,7 +147,7 @@ public final class Polling extends Transport {
         emit("drain");
 
         if(mWritable) {
-            send(PACKET_NOOP);
+            send(new ArrayList<>(PACKET_NOOP));
         }
     }
 
