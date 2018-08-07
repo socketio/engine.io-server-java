@@ -28,14 +28,11 @@ public final class EngineIoSocket extends Emitter {
     private Transport mTransport;
     private boolean mUpgrading = false;
 
-    EngineIoSocket(String sid, EngineIoServer server, Transport transport, @SuppressWarnings("unused") HttpServletRequest initialRequest) {
+    EngineIoSocket(String sid, EngineIoServer server) {
         mSid = sid;
         mServer = server;
 
         mReadyState = ReadyState.OPENING;
-
-        setTransport(transport);
-        onOpen();
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -58,6 +55,11 @@ public final class EngineIoSocket extends Emitter {
                 closeTransport();
             }
         }
+    }
+
+    void init(Transport transport, @SuppressWarnings("unused") HttpServletRequest initialRequest) {
+        setTransport(transport);
+        onOpen();
     }
 
     void onRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
