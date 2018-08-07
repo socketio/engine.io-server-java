@@ -86,6 +86,8 @@
                             <value>./src/test/resources/logging.properties</value>
                         </property>
                     </systemProperties>
+                    <parallel>both</parallel>
+                    <useUnlimitedThreads>true</useUnlimitedThreads>
                 </configuration>
             </plugin>
             <!--<plugin>
