@@ -4,7 +4,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -17,6 +16,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
     private final ArrayList<Cookie> mCookieList = new ArrayList<>();
 
     private int mStatus = HttpServletResponse.SC_OK;
+    private PrintWriter mPrintWriter = null;
 
     @Override
     public void addCookie(Cookie cookie) {
@@ -58,37 +58,30 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void sendRedirect(String s) {
-
     }
 
     @Override
     public void setDateHeader(String s, long l) {
-
     }
 
     @Override
     public void addDateHeader(String s, long l) {
-
     }
 
     @Override
     public void setHeader(String s, String s1) {
-
     }
 
     @Override
     public void addHeader(String s, String s1) {
-
     }
 
     @Override
     public void setIntHeader(String s, int i) {
-
     }
 
     @Override
     public void addIntHeader(String s, int i) {
-
     }
 
     @Override
@@ -138,32 +131,30 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public PrintWriter getWriter() {
-        return new PrintWriter(mServletOutputStreamWrapper);
+        if (mPrintWriter == null) {
+            mPrintWriter = new PrintWriter(mServletOutputStreamWrapper, true);
+        }
+        return mPrintWriter;
     }
 
     @Override
     public void setCharacterEncoding(String s) {
-
     }
 
     @Override
     public void setContentLength(int i) {
-
     }
 
     @Override
     public void setContentLengthLong(long l) {
-
     }
 
     @Override
     public void setContentType(String s) {
-
     }
 
     @Override
     public void setBufferSize(int i) {
-
     }
 
     @Override
@@ -172,7 +163,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
     }
 
     @Override
-    public void flushBuffer() throws IOException {
+    public void flushBuffer() {
 
     }
 
@@ -206,6 +197,12 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
     }
 
     public ByteArrayOutputStream getByteOutputStream() {
-        return mServletOutputStreamWrapper.getByteOutputStream();
+        return mServletOutputStreamWrapper.getByteStream();
+    }
+
+    public synchronized void flushWriterIfNecessary() {
+        if (mPrintWriter != null) {
+            mPrintWriter.flush();
+        }
     }
 }

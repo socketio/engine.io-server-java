@@ -41,7 +41,7 @@ public final class ServletOutputStreamWrapper extends ServletOutputStream {
     public void close() {
     }
 
-    public ByteArrayOutputStream getByteOutputStream() {
+    ByteArrayOutputStream getByteStream() {
         return mByteOutputStream;
     }
 }
