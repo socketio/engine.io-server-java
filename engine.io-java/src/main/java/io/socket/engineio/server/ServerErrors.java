@@ -1,6 +1,6 @@
 package io.socket.engineio.server;
 
-public enum ServerErrors {
+enum ServerErrors {
     UNKNOWN_TRANSPORT(0, "Transport unknown"),
     UNKNOWN_SID(1, "Session ID unknown"),
     BAD_HANDSHAKE_METHOD(2, "Bad handshake method"),

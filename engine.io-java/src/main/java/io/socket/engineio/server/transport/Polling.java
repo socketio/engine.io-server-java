@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Polling transport.
+ */
 public final class Polling extends Transport {
 
     public static final String NAME = "polling";

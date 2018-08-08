@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+/**
+ * Adapter for Jetty WebSocket implementation.
+ */
 public final class JettyWebSocketHandler extends EngineIoWebSocket implements WebSocketListener {
 
     private final EngineIoServer mServer;
@@ -15,6 +18,7 @@ public final class JettyWebSocketHandler extends EngineIoWebSocket implements We
     private Session mSession;
     private Map<String, String> mQuery;
 
+    @SuppressWarnings("WeakerAccess")
     public JettyWebSocketHandler(EngineIoServer server) {
         mServer = server;
     }

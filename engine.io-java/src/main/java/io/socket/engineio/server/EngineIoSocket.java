@@ -15,6 +15,12 @@ import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * An engine.io socket.
+ *
+ * Objects of this class represents connections to remote clients
+ * one per object.
+ */
 public final class EngineIoSocket extends Emitter {
 
     private final String mSid;
@@ -35,11 +41,20 @@ public final class EngineIoSocket extends Emitter {
         mReadyState = ReadyState.OPENING;
     }
 
+    /**
+     * Send a packet to the remote client.
+     * Queuing of packets in case of polling transport are handled internally.
+     *
+     * @param packet The packet to send.
+     */
     @SuppressWarnings("WeakerAccess")
     public void send(Packet packet) {
         sendPacket(packet);
     }
 
+    /**
+     * Close this socket.
+     */
     public void close() {
         if(mReadyState == ReadyState.OPEN) {
             mReadyState = ReadyState.CLOSING;
@@ -57,20 +72,44 @@ public final class EngineIoSocket extends Emitter {
         }
     }
 
+    /**
+     * Called after instance creation to initialize transport.
+     *
+     * @param transport The opened transport.
+     * @param initialRequest The initial HTTP request the caused the connection.
+     */
     void init(Transport transport, @SuppressWarnings("unused") HttpServletRequest initialRequest) {
         setTransport(transport);
         onOpen();
     }
 
+    /**
+     * Handle an HTTP request.
+     *
+     * @param request The HTTP request object.
+     * @param response The HTTP response object.
+     * @throws IOException On IO error.
+     */
     void onRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         mTransport.onRequest(request, response);
     }
 
+    /**
+     * Checks whether the socket can be upgraded to another transport.
+     *
+     * @param transport The transport to upgrade to.
+     * @return Boolean value indicating if upgrade is possible.
+     */
     @SuppressWarnings("SameParameterValue")
     boolean canUpgrade(String transport) {
         return (!mUpgrading && mTransport.getName().equals(Polling.NAME) && transport.equals(WebSocket.NAME));
     }
 
+    /**
+     * Perform upgrade to the specified transport.
+     *
+     * @param transport The transport to upgrade to.
+     */
     void upgrade(final Transport transport) {
         mUpgrading = true;
 
@@ -134,6 +173,11 @@ public final class EngineIoSocket extends Emitter {
         });
     }
 
+    /**
+     * Get the name of the current transport.
+     *
+     * @return Name of current transport.
+     */
     String getCurrentTransportName() {
         return mTransport.getName();
     }

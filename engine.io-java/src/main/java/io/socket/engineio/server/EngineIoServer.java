@@ -14,6 +14,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * The engine.io server.
+ *
+ * This class is responsible for handling all HTTP and WebSocket requests.
+ */
 @SuppressWarnings("WeakerAccess")
 public final class EngineIoServer extends Emitter {
 
@@ -22,20 +27,42 @@ public final class EngineIoServer extends Emitter {
     private long mPingTimeout;
     private long mPingInterval;
 
+    /**
+     * Create instance of server with default options.
+     */
     public EngineIoServer() {
         mPingTimeout = 5000;
         mPingInterval = 25000;
     }
 
+    /**
+     * Get configured ping timeout.
+     *
+     * @return Ping timeout value in milliseconds.
+     */
     public long getPingTimeout() {
         return mPingTimeout;
     }
 
+    /**
+     * Get configured ping interval.
+     *
+     * @return Ping timeout value in milliseconds.
+     */
     public long getPingInterval() {
         return mPingInterval;
     }
 
-    void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    /**
+     * Handle an HTTP request.
+     *
+     * This method handles polling transport connections.
+     *
+     * @param request The HTTP request object.
+     * @param response The HTTP response object.
+     * @throws IOException On IO error.
+     */
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final Map<String, String> query = ParseQS.decode(request.getQueryString());
         request.setAttribute("query", query);
 
@@ -63,7 +90,14 @@ public final class EngineIoServer extends Emitter {
         }
     }
 
-    void handleWebSocket(EngineIoWebSocket webSocket) {
+    /**
+     * Handle a WebSocket request.
+     *
+     * This method handles websocket transport connections.
+     *
+     * @param webSocket The WebSocket connection object.
+     */
+    public void handleWebSocket(EngineIoWebSocket webSocket) {
         final Map<String, String> query = webSocket.getQuery();
         final String sid = query.containsKey("sid")? query.get("sid") : null;
 

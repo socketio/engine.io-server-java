@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * WebSocket transport.
+ */
 public final class WebSocket extends Transport {
 
     public static final String NAME = "websocket";

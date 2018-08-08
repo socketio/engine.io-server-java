@@ -6,9 +6,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("WeakerAccess")
+/**
+ * Handles parsing of engine.io packets and payloads.
+ */
+@SuppressWarnings({"unchecked"})
 public final class ServerParser {
 
+    @SuppressWarnings("WeakerAccess")
     public static final int PROTOCOL = Parser.PROTOCOL;
 
     private static final Map<String, Integer> packets = new HashMap<String, Integer>() {{
@@ -32,11 +36,16 @@ public final class ServerParser {
 
     private ServerParser() {}
 
+    /**
+     * Encode a packet for transfer over transport.
+     *
+     * @param packet The packet to encode.
+     * @param supportsBinary Whether the transport supports binary encoding.
+     * @param callback The callback to be called with the encoded data.
+     */
     public static void encodePacket(Packet packet, boolean supportsBinary, Parser.EncodeCallback callback) {
         if (packet.data instanceof byte[]) {
-            @SuppressWarnings("unchecked")
-            Packet<byte[]> packetToEncode = packet;
-            encodeByteArray(packetToEncode, supportsBinary, callback);
+            encodeByteArray(packet, supportsBinary, callback);
         } else {
             String encoded = String.valueOf(packets.get(packet.type));
 
@@ -44,29 +53,17 @@ public final class ServerParser {
                 encoded += String.valueOf(packet.data);
             }
 
-            @SuppressWarnings("unchecked")
-            Parser.EncodeCallback<String> tempCallback = callback;
-            tempCallback.call(encoded);
+            ((Parser.EncodeCallback<String>) callback).call(encoded);
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static void encodeByteArray(Packet<byte[]> packet, boolean supportsBinary, Parser.EncodeCallback callback) {
-        if (supportsBinary) {
-            byte[] data = packet.data;
-            byte[] resultArray = new byte[1 + data.length];
-            resultArray[0] = packets.get(packet.type).byteValue();
-            System.arraycopy(data, 0, resultArray, 1, data.length);
-            callback.call(resultArray);
-        } else {
-            String resultBuilder = "b" +
-                    packets.get(packet.type).byteValue() +
-                    DatatypeConverter.printBase64Binary(packet.data);
-            callback.call(resultBuilder);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
+    /**
+     * Encode an array of packets into a payload for transfer over transport.
+     *
+     * @param packets Array of packets to encode.
+     * @param supportsBinary Whether the transport supports binary encoding.
+     * @param callback The callback to be called with the encoded data.
+     */
     public static void encodePayload(Packet[] packets, boolean supportsBinary, Parser.EncodeCallback callback) {
         boolean isBinary = false;
         for (Packet packet : packets) {
@@ -101,6 +98,12 @@ public final class ServerParser {
         callback.call(result.toString());
     }
 
+    /**
+     * Encode an array of packets into a binary payload for transfer over transport.
+     *
+     * @param packets Array of packets to encode.
+     * @param callback The callback to be called with the encoded data.
+     */
     public static void encodePayloadAsBinary(Packet[] packets, Parser.EncodeCallback<byte[]> callback) {
         if (packets.length == 0) {
             callback.call(new byte[0]);
@@ -146,6 +149,12 @@ public final class ServerParser {
         callback.call(Buffer.concat(results.toArray(new byte[results.size()][])));
     }
 
+    /**
+     * Decode a packet received from transport.
+     *
+     * @param data Data received from transport.
+     * @return Packet decoded from data.
+     */
     public static Packet decodePacket(Object data) {
         if(data == null) {
             return err;
@@ -175,6 +184,12 @@ public final class ServerParser {
         }
     }
 
+    /**
+     * Decode payload received from transport.
+     *
+     * @param data Data received from transport.
+     * @param callback The callback to be called with each decoded packet in payload.
+     */
     public static void decodePayload(Object data, Parser.DecodePayloadCallback callback) {
         assert callback != null;
 
@@ -229,10 +244,24 @@ public final class ServerParser {
         }
 
         for (int i = 0; i < packets.size(); i++) {
-            //noinspection unchecked
             if(!callback.call(packets.get(i), i, packets.size())) {
                 return;
             }
+        }
+    }
+
+    private static void encodeByteArray(Packet<byte[]> packet, boolean supportsBinary, Parser.EncodeCallback callback) {
+        if (supportsBinary) {
+            byte[] data = packet.data;
+            byte[] resultArray = new byte[1 + data.length];
+            resultArray[0] = packets.get(packet.type).byteValue();
+            System.arraycopy(data, 0, resultArray, 1, data.length);
+            callback.call(resultArray);
+        } else {
+            String resultBuilder = "b" +
+                    packets.get(packet.type).byteValue() +
+                    DatatypeConverter.printBase64Binary(packet.data);
+            callback.call(resultBuilder);
         }
     }
 
