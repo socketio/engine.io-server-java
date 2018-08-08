@@ -11,6 +11,7 @@
 
     <artifactId>engine.io-jetty</artifactId>
     <packaging>jar</packaging>
+    <description>Jetty WebSocket adapter module.</description>
 
     <dependencies>
         <dependency>

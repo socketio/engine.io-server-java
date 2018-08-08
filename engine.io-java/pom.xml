@@ -11,6 +11,7 @@
 
     <artifactId>engine.io-java</artifactId>
     <packaging>jar</packaging>
+    <description>The main engine.io server module.</description>
 
     <dependencies>
         <dependency>
