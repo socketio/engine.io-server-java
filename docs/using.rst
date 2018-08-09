@@ -13,15 +13,11 @@ Example servlet class::
     @WebServlet("/engine.io/*")
     public class EngineIoServlet extends HttpServlet {
 
-        private static final EngineIoServer ENGINE_IO_SERVER = new EngineIoServer();
-
-        public static EngineIoServer getEngineIoServer() {
-            return ENGINE_IO_SERVER;
-        }
+        private final EngineIoServer mEngineIoServer = new EngineIoServer();
 
         @Override
         protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-            ENGINE_IO_SERVER.handleRequest(request, response);
+            mEngineIoServer.handleRequest(request, response);
         }
     }
 
@@ -36,7 +32,6 @@ new connections.
 
 Example::
 
-    EngineIoServer server = EngineIoServlet.getEngineIoServer();
     server.on("connection", new Emitter.Listener() {
         @Override
         public void call(Object... args) {
