@@ -2,14 +2,30 @@ language: java
 dist: trusty
 sudo: false
 
+env:
+  global:
+    - secure: VRPA9iYt/qXZU2VGlP0AKN0IcfOWtM8N2z4/mBbCaM6GAff6SYTRlfvjtUStvNgfJAig5T81fnYAyObT/3HyaDEYjyxWnaAqWaNJ4vHG/S2T9ajlVPg3udviQPXHQZOQ0co2+NUzwpJhuv5LLQYuMvwNszIiXWHSbOlDA1wLTsfJzvS7sSeLzDbi5fBffjwg6n1RQUsXEHbRokrHNFRX2ovxeXlONRTTMVaRq/rnJx8HFkHaj/6fdC2wOXE342RC+N/LbdzLVRzNzFNC1gSgRXU2NBhaKLXV4/xRucLJ+mHm/xeFZTmoeFAyHpUQEPPxEu/ogV/7aSxvqYX+N+6g0SkZn+JzKDSf/L7qnv8BKmlc04Mo6OncLVTtJgZYgUZtbVloRhnl5Xo0SdzonzYNQGZHvcCg5y0tljYe3Z5JXmE/dSwYl+LeoY7B2ImMFI0MPvjr83EnbSRRLoDZBiY0jFtrwB8hsIQ/QSVHLABCmlOWiQnOhIcZ1BqhBNUFKbXgDEBZnNSB78wW4ZjlPXFzWYYuVfJOnel+UugoJ49KmrT7W3BQOh+sUICJd8tDYakQR2ysYS9OY9985yRnYinJddFma4e6yKbcD5j6MU71/FwXvcu5ncjpxpAUOSlnDryTm3mp42lTikM1ojD/MNyi4de8Sr9zgDMTe+0LjsayYxU=
+
+addons:
+  apt:
+    update: true
+
 matrix:
   include:
     - name: "Java 8 Tests"
       jdk: oraclejdk8
     - name: "Coverage"
       jdk: oraclejdk8
-      env: TESTENV=cover
+      env: TESTENV=cover FYI="this also builds documentation for tags"
       script: mvn clean cobertura:cobertura
+      addons:
+        apt:
+          packages:
+            - python3
+            - python3-pip
+            - python-virtualenv
+            - make
 
 after_success:
-  - '[ "$TESTENV" == "cover" ] && bash <(curl -s https://codecov.io/bash)'
+  - '[[ "$TESTENV" == "cover" ]] && bash <(curl -s https://codecov.io/bash)'
+  - '[[ "$TESTENV" == "cover" ]] && [[ -n "$TRAVIS_TAG" ]] && ./deploy-docs.sh'
