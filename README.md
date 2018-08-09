@@ -5,6 +5,9 @@ This is the Engine.IO Server Library for Java ported from the [JavaScript server
 
 See also: [Engine.IO-client Java](https://github.com/socketio/engine.io-client-java)
 
+## Documentation
+Complete documentation can be found [here](https://socketio.github.io/engine.io-server-java/).
+
 ## Installation
 This section will be updated when artifact is available on Maven Central.
 
