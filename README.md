@@ -45,14 +45,14 @@ server.on("connection", new Emitter.Listener() {
     @Override
     public void call(Object... args) {
         EngineIoSocket socket = (EngineIoSocket) args[0];
-        // Do something with socket
+        // Do something with socket like store it somewhere
     }
 });
 ```
 
-Listen for packets as follows:
+Listen for raw packets received as follows:
 ```java
-EngineIoSocket socket;
+EngineIoSocket socket;  // socket received in "connection" event
 
 socket.on("packet", new Emitter.Listener() {
     @Override
@@ -63,14 +63,15 @@ socket.on("packet", new Emitter.Listener() {
 });
 ```
 
-Listen for message as follows:
+Listen for messages from the remote client as follows:
 ```java
-EngineIoSocket socket;
+EngineIoSocket socket;  // socket received in "connection" event
 
 socket.on("message", new Emitter.Listener() {
     @Override
     public void call(Object... args) {
         Object message = args[0];
+        // message can be either String or byte[]
         // Do something with message.
     }
 });
@@ -78,7 +79,7 @@ socket.on("message", new Emitter.Listener() {
 
 Send a packet to client as follows:
 ```java
-EngineIoSocket socket;
+EngineIoSocket socket;  // socket received in "connection" event
 
 socket.send(new Packet<>(Packet.MESSAGE, "foo"));
 ```
