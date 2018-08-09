@@ -1,6 +1,6 @@
-=====
-Using
-=====
+===============
+Getting Started
+===============
 
 Create a servlet for handling incoming HTTP connections and call
 ``EngineIoServer`` class's ``handleRequest`` method on receiving an HTTP

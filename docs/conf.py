@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'Engine.IO'
+project = u'Engine.IO Java Server'
 copyright = u'2018, Trinopoty Biswas'
 author = u'Trinopoty Biswas'
 
