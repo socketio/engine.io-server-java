@@ -167,15 +167,11 @@ request.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@WebServlet</span><span class="p">(</span><span class="s2">&quot;/engine.io/*&quot;</span><span class="p">)</span>
 <span class="n">public</span> <span class="k">class</span> <span class="nc">EngineIoServlet</span> <span class="n">extends</span> <span class="n">HttpServlet</span> <span class="p">{</span>
 
-    <span class="n">private</span> <span class="n">static</span> <span class="n">final</span> <span class="n">EngineIoServer</span> <span class="n">ENGINE_IO_SERVER</span> <span class="o">=</span> <span class="n">new</span> <span class="n">EngineIoServer</span><span class="p">();</span>
-
-    <span class="n">public</span> <span class="n">static</span> <span class="n">EngineIoServer</span> <span class="n">getEngineIoServer</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="n">ENGINE_IO_SERVER</span><span class="p">;</span>
-    <span class="p">}</span>
+    <span class="n">private</span> <span class="n">final</span> <span class="n">EngineIoServer</span> <span class="n">mEngineIoServer</span> <span class="o">=</span> <span class="n">new</span> <span class="n">EngineIoServer</span><span class="p">();</span>
 
     <span class="nd">@Override</span>
     <span class="n">protected</span> <span class="n">void</span> <span class="n">service</span><span class="p">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">,</span> <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="p">)</span> <span class="n">throws</span> <span class="n">IOException</span> <span class="p">{</span>
-        <span class="n">ENGINE_IO_SERVER</span><span class="o">.</span><span class="n">handleRequest</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">);</span>
+        <span class="n">mEngineIoServer</span><span class="o">.</span><span class="n">handleRequest</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -188,8 +184,7 @@ the method <code class="docutils literal notranslate"><span class="pre">service<
 <p>Attach a listener to the <code class="docutils literal notranslate"><span class="pre">connection</span></code> event of <code class="docutils literal notranslate"><span class="pre">EngineIoServer</span></code> to listen for
 new connections.</p>
 <p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EngineIoServer</span> <span class="n">server</span> <span class="o">=</span> <span class="n">EngineIoServlet</span><span class="o">.</span><span class="n">getEngineIoServer</span><span class="p">();</span>
-<span class="n">server</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;connection&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">Emitter</span><span class="o">.</span><span class="n">Listener</span><span class="p">()</span> <span class="p">{</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">server</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;connection&quot;</span><span class="p">,</span> <span class="n">new</span> <span class="n">Emitter</span><span class="o">.</span><span class="n">Listener</span><span class="p">()</span> <span class="p">{</span>
     <span class="nd">@Override</span>
     <span class="n">public</span> <span class="n">void</span> <span class="n">call</span><span class="p">(</span><span class="n">Object</span><span class="o">...</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">EngineIoSocket</span> <span class="n">socket</span> <span class="o">=</span> <span class="p">(</span><span class="n">EngineIoSocket</span><span class="p">)</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
