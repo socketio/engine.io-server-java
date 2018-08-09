@@ -1,0 +1,400 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API &mdash; Engine.IO  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Using" href="using.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Engine.IO
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="using.html">Using</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#engineioserver">EngineIoServer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#methods">Methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#handlerequest">handleRequest</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#handlewebsocket">handleWebSocket</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#events">Events</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#connection">connection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#engineiosocket">EngineIoSocket</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#send">send</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#close">close</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Events</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#open">open</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">close</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#packet">packet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#heartbeat">heartbeat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#message">message</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data">data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flush">flush</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#drain">drain</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sending-data">Sending Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#receiving-data">Receiving Data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Engine.IO</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="table-of-contents">
+<p class="topic-title first">Table of Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#engineioserver" id="id4">EngineIoServer</a><ul>
+<li><a class="reference internal" href="#methods" id="id5">Methods</a><ul>
+<li><a class="reference internal" href="#handlerequest" id="id6">handleRequest</a></li>
+<li><a class="reference internal" href="#handlewebsocket" id="id7">handleWebSocket</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#events" id="id8">Events</a><ul>
+<li><a class="reference internal" href="#connection" id="id9">connection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#engineiosocket" id="id10">EngineIoSocket</a><ul>
+<li><a class="reference internal" href="#id1" id="id11">Methods</a><ul>
+<li><a class="reference internal" href="#send" id="id12">send</a></li>
+<li><a class="reference internal" href="#close" id="id13">close</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id2" id="id14">Events</a><ul>
+<li><a class="reference internal" href="#open" id="id15">open</a></li>
+<li><a class="reference internal" href="#id3" id="id16">close</a></li>
+<li><a class="reference internal" href="#packet" id="id17">packet</a></li>
+<li><a class="reference internal" href="#heartbeat" id="id18">heartbeat</a></li>
+<li><a class="reference internal" href="#message" id="id19">message</a></li>
+<li><a class="reference internal" href="#data" id="id20">data</a></li>
+<li><a class="reference internal" href="#flush" id="id21">flush</a></li>
+<li><a class="reference internal" href="#drain" id="id22">drain</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sending-data" id="id23">Sending Data</a></li>
+<li><a class="reference internal" href="#receiving-data" id="id24">Receiving Data</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="engineioserver">
+<h2><a class="toc-backref" href="#id4">EngineIoServer</a><a class="headerlink" href="#engineioserver" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">EngineIoServer</span></code> class contains the logic for accepting and handling
+connections from the client.</p>
+<div class="section" id="methods">
+<h3><a class="toc-backref" href="#id5">Methods</a><a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="handlerequest">
+<h4><a class="toc-backref" href="#id6">handleRequest</a><a class="headerlink" href="#handlerequest" title="Permalink to this headline">¶</a></h4>
+<p>Call this method to handle an incoming HTTP request.</p>
+</div>
+<div class="section" id="handlewebsocket">
+<h4><a class="toc-backref" href="#id7">handleWebSocket</a><a class="headerlink" href="#handlewebsocket" title="Permalink to this headline">¶</a></h4>
+<p>Call this method to handle an incoming WebSocket request.</p>
+</div>
+</div>
+<div class="section" id="events">
+<h3><a class="toc-backref" href="#id8">Events</a><a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">EngineIoServer</span></code> emits the following events:</p>
+<div class="section" id="connection">
+<h4><a class="toc-backref" href="#id9">connection</a><a class="headerlink" href="#connection" title="Permalink to this headline">¶</a></h4>
+<p>This event is emitted when a new client successfully connects to the server.</p>
+<p><strong>Arguments</strong></p>
+<ol class="arabic simple" start="0">
+<li><code class="docutils literal notranslate"><span class="pre">EngineIoSocket</span></code> object</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="engineiosocket">
+<h2><a class="toc-backref" href="#id10">EngineIoSocket</a><a class="headerlink" href="#engineiosocket" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">EngineIoSocket</span></code> class represents one connection to a remote client.</p>
+<div class="section" id="id1">
+<h3><a class="toc-backref" href="#id11">Methods</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="send">
+<h4><a class="toc-backref" href="#id12">send</a><a class="headerlink" href="#send" title="Permalink to this headline">¶</a></h4>
+<p>Call this method on a connected <code class="docutils literal notranslate"><span class="pre">EngineIoSocket</span></code> instance to queue a packet for sending to
+remote client.</p>
+</div>
+<div class="section" id="close">
+<h4><a class="toc-backref" href="#id13">close</a><a class="headerlink" href="#close" title="Permalink to this headline">¶</a></h4>
+<p>Call this method to close the connection with the remote socket.</p>
+</div>
+</div>
+<div class="section" id="id2">
+<h3><a class="toc-backref" href="#id14">Events</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">EngineIoSocket</span></code> emits the following events:</p>
+<div class="section" id="open">
+<h4><a class="toc-backref" href="#id15">open</a><a class="headerlink" href="#open" title="Permalink to this headline">¶</a></h4>
+<p>This event is emitted when a connection is established.</p>
+<p><strong>Note</strong> This event cannot be trapped as it occurs before the “connection” event of <code class="docutils literal notranslate"><span class="pre">EngineIoServer</span></code>.</p>
+</div>
+<div class="section" id="id3">
+<h4><a class="toc-backref" href="#id16">close</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p>This event is emitted when the socket is closed either by the server or the client.</p>
+<p><strong>Arguments</strong></p>
+<ol class="arabic simple" start="0">
+<li><code class="docutils literal notranslate"><span class="pre">String</span></code> indicating reason for close</li>
+<li><code class="docutils literal notranslate"><span class="pre">String</span></code> indicating description of reason or <code class="docutils literal notranslate"><span class="pre">null</span></code></li>
+</ol>
+</div>
+<div class="section" id="packet">
+<h4><a class="toc-backref" href="#id17">packet</a><a class="headerlink" href="#packet" title="Permalink to this headline">¶</a></h4>
+<p>This event is emitted when a packet is received from the remote client.</p>
+<p><strong>Arguments</strong></p>
+<ol class="arabic simple" start="0">
+<li><code class="docutils literal notranslate"><span class="pre">Packet</span></code> object</li>
+</ol>
+</div>
+<div class="section" id="heartbeat">
+<h4><a class="toc-backref" href="#id18">heartbeat</a><a class="headerlink" href="#heartbeat" title="Permalink to this headline">¶</a></h4>
+<p>This event is emitted when a <em>ping</em> packet is received from the remote client.</p>
+</div>
+<div class="section" id="message">
+<h4><a class="toc-backref" href="#id19">message</a><a class="headerlink" href="#message" title="Permalink to this headline">¶</a></h4>
+<p>This event is emitted when a <em>message</em> packet is received from the remote client.</p>
+<p><strong>Arguments</strong></p>
+<ol class="arabic simple" start="0">
+<li><code class="docutils literal notranslate"><span class="pre">String</span></code> or <code class="docutils literal notranslate"><span class="pre">byte[]</span></code> object sent by the remote client</li>
+</ol>
+</div>
+<div class="section" id="data">
+<h4><a class="toc-backref" href="#id20">data</a><a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h4>
+<p>Same as <code class="docutils literal notranslate"><span class="pre">message</span></code> event.</p>
+</div>
+<div class="section" id="flush">
+<h4><a class="toc-backref" href="#id21">flush</a><a class="headerlink" href="#flush" title="Permalink to this headline">¶</a></h4>
+<p>This event is raised just before sending packets to the remote client.</p>
+<p><strong>Arguments</strong></p>
+<ol class="arabic simple" start="0">
+<li><code class="docutils literal notranslate"><span class="pre">Object[]</span></code> of <code class="docutils literal notranslate"><span class="pre">Packet</span></code> being sent to the client</li>
+</ol>
+</div>
+<div class="section" id="drain">
+<h4><a class="toc-backref" href="#id22">drain</a><a class="headerlink" href="#drain" title="Permalink to this headline">¶</a></h4>
+<p>This event is raised after queued packets have been sent to the remote client.</p>
+</div>
+</div>
+<div class="section" id="sending-data">
+<h3><a class="toc-backref" href="#id23">Sending Data</a><a class="headerlink" href="#sending-data" title="Permalink to this headline">¶</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">send</span></code> method on <code class="docutils literal notranslate"><span class="pre">EngineIoSocket</span></code> to send packets to the remote client.
+Queuing of packets in case of polling transport are handled internally by <code class="docutils literal notranslate"><span class="pre">EngineIoSocket</span></code>.</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EngineIoSocket</span> <span class="n">socket</span><span class="p">;</span>  <span class="o">//</span> <span class="n">connected</span> <span class="n">socket</span>
+<span class="n">socket</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">new</span> <span class="n">Packet</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">Packet</span><span class="o">.</span><span class="n">MESSAGE</span><span class="p">,</span> <span class="s2">&quot;foo&quot;</span><span class="p">));</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="receiving-data">
+<h3><a class="toc-backref" href="#id24">Receiving Data</a><a class="headerlink" href="#receiving-data" title="Permalink to this headline">¶</a></h3>
+<p>Listen on either the <em>message</em> or <em>data</em> event to receive data from the remote client.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="using.html" class="btn btn-neutral" title="Using" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Trinopoty Biswas.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
