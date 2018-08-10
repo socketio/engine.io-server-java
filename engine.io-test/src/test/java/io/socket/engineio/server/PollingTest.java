@@ -9,14 +9,14 @@ import static org.junit.Assert.assertEquals;
  * Test server against JS client.
  */
 @SuppressWarnings("Duplicates")
-public final class ServerWebSocketTest {
+public final class PollingTest {
 
     @Test
     public void connectTest() throws Exception {
         ServerWrapper serverWrapper = new ServerWrapper();
         try {
             serverWrapper.startServer();
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerWebSocket_connect.js", serverWrapper.getPort()));
+            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testPolling_connect.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -36,7 +36,7 @@ public final class ServerWebSocketTest {
                 });
             });
 
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerWebSocket_echo_string.js", serverWrapper.getPort()));
+            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testPolling_echo_string.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -56,7 +56,7 @@ public final class ServerWebSocketTest {
                 });
             });
 
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerWebSocket_echo_binary.js", serverWrapper.getPort()));
+            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testPolling_echo_binary.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -76,7 +76,7 @@ public final class ServerWebSocketTest {
                 });
             });
 
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerWebSocket_echo_base64.js", serverWrapper.getPort()));
+            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testPolling_echo_base64.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -89,7 +89,7 @@ public final class ServerWebSocketTest {
             serverWrapper.startServer();
             serverWrapper.getEngineIoServer().on("connection", args -> {
                 final EngineIoSocket socket = (EngineIoSocket) args[0];
-                final String echoMessage = ServerPollingTest.class.getSimpleName() + System.currentTimeMillis();
+                final String echoMessage = PollingTest.class.getSimpleName() + System.currentTimeMillis();
                 socket.on("message", args1 -> assertEquals(echoMessage, args1[0]));
 
                 Packet packet = new Packet(Packet.MESSAGE);
@@ -97,7 +97,7 @@ public final class ServerWebSocketTest {
                 socket.send(packet);
             });
 
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerWebSocket_reverseEcho.js", serverWrapper.getPort()));
+            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testPolling_reverseEcho.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
