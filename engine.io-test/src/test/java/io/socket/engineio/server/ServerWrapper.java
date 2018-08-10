@@ -7,9 +7,6 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -31,6 +28,9 @@ final class ServerWrapper {
         mServer = new Server(mPort);
         mEngineIoServer = new EngineIoServer();
 
+        System.setProperty("org.eclipse.jetty.util.log.class", "org.eclipse.jetty.util.log.StdErrLog");
+        System.setProperty("org.eclipse.jetty.LEVEL", "OFF");
+
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setContextPath("/");
 
@@ -43,12 +43,9 @@ final class ServerWrapper {
 
         try {
             WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(servletContextHandler);
-            webSocketUpgradeFilter.addMapping(new ServletPathSpec("/engine.io/*"), new WebSocketCreator() {
-                @Override
-                public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest, ServletUpgradeResponse servletUpgradeResponse) {
-                    return new JettyWebSocketHandler(mEngineIoServer);
-                }
-            });
+            webSocketUpgradeFilter.addMapping(
+                    new ServletPathSpec("/engine.io/*"),
+                    (servletUpgradeRequest, servletUpgradeResponse) -> new JettyWebSocketHandler(mEngineIoServer));
         } catch (ServletException ex) {
             ex.printStackTrace();
         }
