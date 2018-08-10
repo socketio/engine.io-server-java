@@ -151,6 +151,8 @@ public final class EngineIoSocket extends Emitter {
                     setTransport(transport);
                     emit("upgrade", transport);
                     flush();
+
+                    resetPingTimeout();
                 } else {
                     cleanup.run();
                     transport.close();
@@ -231,8 +233,6 @@ public final class EngineIoSocket extends Emitter {
         }
 
         mTransport.close();
-
-        mPingTimer.cancel();
     }
 
     private void onOpen() {
