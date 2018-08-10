@@ -2,16 +2,21 @@
 
 # This script builds the documentation and pushes it to github
 
-AUTHOR="Documentation Builder"
 GH_REPO_REF="github.com/$TRAVIS_REPO_SLUG"
 
 set -e
 
-cd docs
+JAVADOC_DIR=$(pwd)/target/site/apidocs
+
+# Build the javadocs
+mvn clean javadoc:aggregate
 
 # Activate virtualenv
 virtualenv -p python3 venv
 . venv/bin/activate
+
+cd docs
+rm -rf ./_build
 
 # Install dependencies
 pip install -r requirements.txt
@@ -35,6 +40,11 @@ rm -rf *
 
 # Copy docs from build to repo
 cp -r ../html/* ./
+
+# Copy javadocs
+rm -rf ./javadocs
+mv "$JAVADOC_DIR" ./javadocs
+
 echo "" > .nojekyll
 
 if [[ -f "index.html" ]]; then
