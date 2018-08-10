@@ -1,6 +1,5 @@
 package io.socket.engineio.server;
 
-import io.socket.emitter.Emitter;
 import io.socket.engineio.parser.Packet;
 import org.junit.Test;
 
@@ -28,19 +27,13 @@ public final class ServerPollingTest {
         final ServerWrapper serverWrapper = new ServerWrapper();
         try {
             serverWrapper.startServer();
-            serverWrapper.getEngineIoServer().on("connection", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    final EngineIoSocket socket = (EngineIoSocket) args[0];
-                    socket.on("message", new Emitter.Listener() {
-                        @Override
-                        public void call(Object... args) {
-                            Packet packet = new Packet(Packet.MESSAGE);
-                            packet.data = args[0];
-                            socket.send(packet);
-                        }
-                    });
-                }
+            serverWrapper.getEngineIoServer().on("connection", args -> {
+                final EngineIoSocket socket = (EngineIoSocket) args[0];
+                socket.on("message", args1 -> {
+                    Packet packet = new Packet(Packet.MESSAGE);
+                    packet.data = args1[0];
+                    socket.send(packet);
+                });
             });
 
             assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerPolling_echo_string.js", serverWrapper.getPort()));
@@ -54,19 +47,13 @@ public final class ServerPollingTest {
         ServerWrapper serverWrapper = new ServerWrapper();
         try {
             serverWrapper.startServer();
-            serverWrapper.getEngineIoServer().on("connection", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    final EngineIoSocket socket = (EngineIoSocket) args[0];
-                    socket.on("message", new Emitter.Listener() {
-                        @Override
-                        public void call(Object... args) {
-                            Packet packet = new Packet(Packet.MESSAGE);
-                            packet.data = args[0];
-                            socket.send(packet);
-                        }
-                    });
-                }
+            serverWrapper.getEngineIoServer().on("connection", args -> {
+                final EngineIoSocket socket = (EngineIoSocket) args[0];
+                socket.on("message", args1 -> {
+                    Packet packet = new Packet(Packet.MESSAGE);
+                    packet.data = args1[0];
+                    socket.send(packet);
+                });
             });
 
             assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerPolling_echo_binary.js", serverWrapper.getPort()));
@@ -80,19 +67,13 @@ public final class ServerPollingTest {
         ServerWrapper serverWrapper = new ServerWrapper();
         try {
             serverWrapper.startServer();
-            serverWrapper.getEngineIoServer().on("connection", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    final EngineIoSocket socket = (EngineIoSocket) args[0];
-                    socket.on("message", new Emitter.Listener() {
-                        @Override
-                        public void call(Object... args) {
-                            Packet packet = new Packet(Packet.MESSAGE);
-                            packet.data = args[0];
-                            socket.send(packet);
-                        }
-                    });
-                }
+            serverWrapper.getEngineIoServer().on("connection", args -> {
+                final EngineIoSocket socket = (EngineIoSocket) args[0];
+                socket.on("message", args1 -> {
+                    Packet packet = new Packet(Packet.MESSAGE);
+                    packet.data = args1[0];
+                    socket.send(packet);
+                });
             });
 
             assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerPolling_echo_base64.js", serverWrapper.getPort()));
@@ -106,22 +87,14 @@ public final class ServerPollingTest {
         final ServerWrapper serverWrapper = new ServerWrapper();
         try {
             serverWrapper.startServer();
-            serverWrapper.getEngineIoServer().on("connection", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    final EngineIoSocket socket = (EngineIoSocket) args[0];
-                    final String echoMessage = ServerPollingTest.class.getSimpleName() + System.currentTimeMillis();
-                    socket.on("message", new Emitter.Listener() {
-                        @Override
-                        public void call(Object... args) {
-                            assertEquals(echoMessage, args[0]);
-                        }
-                    });
+            serverWrapper.getEngineIoServer().on("connection", args -> {
+                final EngineIoSocket socket = (EngineIoSocket) args[0];
+                final String echoMessage = ServerPollingTest.class.getSimpleName() + System.currentTimeMillis();
+                socket.on("message", args1 -> assertEquals(echoMessage, args1[0]));
 
-                    Packet packet = new Packet(Packet.MESSAGE);
-                    packet.data = echoMessage;
-                    socket.send(packet);
-                }
+                Packet packet = new Packet(Packet.MESSAGE);
+                packet.data = echoMessage;
+                socket.send(packet);
             });
 
             assertEquals(0, Utils.executeScriptForResult("src/test/resources/testServerPolling_reverseEcho.js", serverWrapper.getPort()));
