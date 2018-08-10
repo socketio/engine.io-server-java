@@ -356,4 +356,218 @@ public final class EngineIoSocketTest {
         Mockito.verify(transport, Mockito.times(1))
                 .send(Mockito.<Packet>anyList());
     }
+
+    @Test
+    public void testUpgrade_probe() {
+        final Transport transport1 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return Polling.NAME;
+            }
+        }).when(transport1).getName();
+
+        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        socket.init(transport1, null);
+
+        final Transport transport2 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return WebSocket.NAME;
+            }
+        }).when(transport2).getName();
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                final List<Packet> packetList = invocationOnMock.getArgument(0);
+
+                Assert.assertEquals(1, packetList.size());
+
+                final Packet packet = packetList.get(0);
+                Assert.assertEquals(Packet.PONG, packet.type);
+                Assert.assertEquals("probe", packet.data);
+
+                return null;
+            }
+        }).when(transport2).send(Mockito.<Packet>anyList());
+
+        final Emitter.Listener upgradingListener = Mockito.mock(Emitter.Listener.class);
+        socket.on("upgrading", upgradingListener);
+
+        socket.upgrade(transport2);
+        Mockito.verify(transport2, Mockito.times(1))
+                .on(Mockito.eq("packet"), Mockito.any(Emitter.Listener.class));
+
+        transport2.emit("packet", new Packet<>(Packet.PING, "probe"));
+        Mockito.verify(transport2, Mockito.times(1))
+                .send(Mockito.<Packet>anyList());
+        Mockito.verify(upgradingListener, Mockito.times(1))
+                .call(Mockito.eq(transport2));
+    }
+
+    @Test
+    public void testUpgrade_upgrade() {
+        final Transport transport1 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return Polling.NAME;
+            }
+        }).when(transport1).getName();
+
+        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        socket.init(transport1, null);
+
+        final Transport transport2 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return WebSocket.NAME;
+            }
+        }).when(transport2).getName();
+
+        final Emitter.Listener upgradingListener = Mockito.mock(Emitter.Listener.class);
+        socket.on("upgrading", upgradingListener);
+
+        final Emitter.Listener upgradeListener = Mockito.mock(Emitter.Listener.class);
+        socket.on("upgrade", upgradeListener);
+
+        socket.upgrade(transport2);
+        Mockito.verify(transport2, Mockito.times(1))
+                .on(Mockito.eq("packet"), Mockito.any(Emitter.Listener.class));
+
+        transport2.emit("packet", new Packet<>(Packet.PING, "probe"));
+
+        Mockito.verify(upgradingListener, Mockito.times(1))
+                .call(Mockito.eq(transport2));
+
+        transport2.emit("packet", new Packet<>(Packet.UPGRADE));
+
+        Mockito.verify(transport1, Mockito.times(1))
+                .close();
+        Mockito.verify(upgradeListener, Mockito.times(1))
+                .call(Mockito.eq(transport2));
+    }
+
+    @Test
+    public void testUpgrade_invalid_handshake() {
+        final Transport transport1 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return Polling.NAME;
+            }
+        }).when(transport1).getName();
+
+        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        socket.init(transport1, null);
+
+        final Transport transport2 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return WebSocket.NAME;
+            }
+        }).when(transport2).getName();
+
+        socket.upgrade(transport2);
+        Mockito.verify(transport2, Mockito.times(1))
+                .on(Mockito.eq("packet"), Mockito.any(Emitter.Listener.class));
+
+        transport2.emit("packet", new Packet<>(Packet.MESSAGE, "foo"));
+
+        Mockito.verify(transport2, Mockito.times(1))
+                .close();
+    }
+
+    @Test
+    public void testUpgrade_close() {
+        final Transport transport1 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return Polling.NAME;
+            }
+        }).when(transport1).getName();
+
+        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        socket.init(transport1, null);
+
+        final Transport transport2 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return WebSocket.NAME;
+            }
+        }).when(transport2).getName();
+
+        socket.upgrade(transport2);
+        Mockito.verify(transport2, Mockito.times(1))
+                .on(Mockito.eq("packet"), Mockito.any(Emitter.Listener.class));
+
+        transport2.emit("close", "foo");
+        Mockito.verify(transport2, Mockito.times(1))
+                .close();
+    }
+
+    @Test
+    public void testUpgrade_error() {
+        final Transport transport1 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return Polling.NAME;
+            }
+        }).when(transport1).getName();
+
+        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        socket.init(transport1, null);
+
+        final Transport transport2 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return WebSocket.NAME;
+            }
+        }).when(transport2).getName();
+
+        socket.upgrade(transport2);
+        Mockito.verify(transport2, Mockito.times(1))
+                .on(Mockito.eq("packet"), Mockito.any(Emitter.Listener.class));
+
+        transport2.emit("error", "foo");
+        Mockito.verify(transport2, Mockito.times(1))
+                .close();
+    }
+
+    @Test
+    public void testUpgrade_socketClose() {
+        final Transport transport1 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return Polling.NAME;
+            }
+        }).when(transport1).getName();
+
+        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        socket.init(transport1, null);
+
+        final Transport transport2 = Mockito.spy(new StubTransport());
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return WebSocket.NAME;
+            }
+        }).when(transport2).getName();
+
+        socket.upgrade(transport2);
+        Mockito.verify(transport2, Mockito.times(1))
+                .on(Mockito.eq("packet"), Mockito.any(Emitter.Listener.class));
+
+        socket.emit("close", "transport close", null);
+        Mockito.verify(transport2, Mockito.times(1))
+                .close();
+    }
 }

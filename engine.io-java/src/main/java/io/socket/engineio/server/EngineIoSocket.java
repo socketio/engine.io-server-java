@@ -135,7 +135,7 @@ public final class EngineIoSocket extends Emitter {
         transport.on("packet", new Listener() {
             @Override
             public void call(Object... args) {
-                Packet packet = (Packet) args[0];
+                final Packet packet = (Packet) args[0];
                 if(packet.type.equals(Packet.PING) && (packet.data != null) && packet.data.equals("probe")) {
                     final Packet<String> replyPacket = new Packet<>(Packet.PONG);
                     replyPacket.data = "probe";
