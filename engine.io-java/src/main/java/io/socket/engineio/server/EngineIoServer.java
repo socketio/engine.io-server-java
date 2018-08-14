@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -24,15 +25,22 @@ public final class EngineIoServer extends Emitter {
 
     private final Map<String, EngineIoSocket> mClients = new TreeMap<>();
 
-    private long mPingTimeout;
-    private long mPingInterval;
+    private final EngineIoServerOptions mOptions;
 
     /**
      * Create instance of server with default options.
      */
     public EngineIoServer() {
-        mPingTimeout = 5000;
-        mPingInterval = 25000;
+        this(EngineIoServerOptions.DEFAULT);
+    }
+
+    /**
+     * Create instance of server with specified options.
+     *
+     * @param options Server options.
+     */
+    public EngineIoServer(EngineIoServerOptions options) {
+        mOptions = options;
     }
 
     /**
@@ -41,7 +49,7 @@ public final class EngineIoServer extends Emitter {
      * @return Ping timeout value in milliseconds.
      */
     public long getPingTimeout() {
-        return mPingTimeout;
+        return mOptions.getPingTimeout();
     }
 
     /**
@@ -50,7 +58,7 @@ public final class EngineIoServer extends Emitter {
      * @return Ping timeout value in milliseconds.
      */
     public long getPingInterval() {
-        return mPingInterval;
+        return mOptions.getPingInterval();
     }
 
     /**
@@ -123,12 +131,26 @@ public final class EngineIoServer extends Emitter {
         if(code != null) {
             response.setStatus(400);
 
+            /*
+            * Send cors headers if:
+            * 1. 'Origin' header is present in request
+            * 2. All origins are allowed (mOptions.getAllowedCorsOrigins() == EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL)
+            * 3. Specified origin is allowed (Arrays.binarySearch(mOptions.getAllowedCorsOrigins(), origin) >= 0)
+            * */
             final String origin = request.getHeader("Origin");
-            if(origin != null) {
+            boolean sendCors = (origin != null) &&
+                    ((mOptions.getAllowedCorsOrigins() == EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL) ||
+                            (Arrays.binarySearch(mOptions.getAllowedCorsOrigins(), origin) >= 0));
+            if (sendCors) {
+                if(origin != null) {
+                    response.addHeader("Access-Control-Allow-Origin", origin);
+                } else {
+                    response.addHeader("Access-Control-Allow-Origin", "*");
+                }
+
                 response.addHeader("Access-Control-Allow-Credentials", "true");
-                response.addHeader("Access-Control-Allow-Origin", origin);
-            } else {
-                response.addHeader("Access-Control-Allow-Origin", "*");
+                response.addHeader("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+                response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
             }
 
             JSONObject jsonObject = new JSONObject();

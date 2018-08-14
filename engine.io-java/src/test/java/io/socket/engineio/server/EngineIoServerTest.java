@@ -52,6 +52,15 @@ public final class EngineIoServerTest {
     }
 
     @Test
+    public void testOptions() {
+        EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
+                .setPingInterval(1500)
+                .setPingTimeout(1500));
+        assertEquals(1500, server.getPingInterval());
+        assertEquals(1500, server.getPingTimeout());
+    }
+
+    @Test
     public void testHandleRequest_unknown_transport() throws IOException {
         final EngineIoServer server = new EngineIoServer();
 

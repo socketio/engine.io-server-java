@@ -219,7 +219,9 @@ public final class EngineIoSocketTest {
     @Test
     public void testPingTimeout() throws InterruptedException {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoServer server = new EngineIoServer();
+        final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
+                .setPingInterval(1500)
+                .setPingTimeout(3000));
         final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), server);
         socket.init(transport, null);
 
