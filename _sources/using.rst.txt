@@ -76,7 +76,8 @@ this is different for each server (*viz.* Tomcat, Jetty).
 Jetty server
 ------------
 
-For Jetty server, the following code can be used to listen for WebSocket connections::
+For Jetty server, add the :ref:`install-jetty-ws-adapter` dependency.
+Then add the following code can be used to listen for WebSocket connections::
 
     ServletContextHandler servletContextHandler;    // The jetty servlet context handler
 
