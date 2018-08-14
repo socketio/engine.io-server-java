@@ -9,13 +9,27 @@ See also: [Engine.IO-client Java](https://github.com/socketio/engine.io-client-j
 Complete documentation can be found [here](https://socketio.github.io/engine.io-server-java/).
 
 ## Installation
-This section will be updated when artifact is available on Maven Central.
+The latest artifact is available on Maven Central.
 
 ### Maven
-This section will be updated when artifact is available on Maven Central.
+Add the following dependency to your `pom.xml`.
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>io.socket</groupId>
+    <artifactId>engine.io-server</artifactId>
+    <version>1.0.0</version>
+  </dependency>
+</dependencies>
+```
 
 ### Gradle
-This section will be updated when artifact is available on Maven Central.
+Add it as a gradle dependency in `build.gradle`.
+
+```groovy
+compile ('io.socket:engine.io-server:1.0.0')
+```
 
 #### Engine.IO Protocol 1.x suppport
 
@@ -83,20 +97,8 @@ EngineIoSocket socket;  // socket received in "connection" event
 socket.send(new Packet<>(Packet.MESSAGE, "foo"));
 ```
 
-### Jetty specific
-To handle WebSocket connections in jetty, add the `engine.io-jetty` module.
-Then, add the `JettyWebSocketHandler` to the servlet context as follows:
-```java
-ServletContextHandler servletContextHandler;
-
-WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(servletContextHandler);
-webSocketUpgradeFilter.addMapping(new ServletPathSpec("/engine.io/*"), new WebSocketCreator() {
-    @Override
-    public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest, ServletUpgradeResponse servletUpgradeResponse) {
-        return new JettyWebSocketHandler(EngineIoServlet.getEngineIoServer());
-    }
-});
-```
+### WebSockets
+Please see the complete documentation on handling WebSockets [here](https://socketio.github.io/engine.io-server-java/using.html#websocket-connections).
 
 ## Features
 This library supports all of the features the JS server does, including events, options and upgrading transport.

@@ -10,6 +10,7 @@ Welcome to Engine.IO Java Server's documentation!
    :maxdepth: 1
    :caption: Contents:
 
+   install
    using
    api
    javadocs/index
