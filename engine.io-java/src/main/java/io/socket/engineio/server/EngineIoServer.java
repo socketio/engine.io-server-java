@@ -142,12 +142,7 @@ public final class EngineIoServer extends Emitter {
                     ((mOptions.getAllowedCorsOrigins() == EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL) ||
                             (Arrays.binarySearch(mOptions.getAllowedCorsOrigins(), origin) >= 0));
             if (sendCors) {
-                if(origin != null) {
-                    response.addHeader("Access-Control-Allow-Origin", origin);
-                } else {
-                    response.addHeader("Access-Control-Allow-Origin", "*");
-                }
-
+                response.addHeader("Access-Control-Allow-Origin", origin);
                 response.addHeader("Access-Control-Allow-Credentials", "true");
                 response.addHeader("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
                 response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");

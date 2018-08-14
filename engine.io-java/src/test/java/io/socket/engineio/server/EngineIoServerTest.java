@@ -184,6 +184,158 @@ public final class EngineIoServerTest {
                 .call(Mockito.any(EngineIoSocket.class));
     }
 
+    @Test
+    public void testCors_all() throws IOException {
+        final String origin = "http://www.example.com";
+        final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
+                .setAllowedCorsOrigins(EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL));
+
+        final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                HashMap<String, String> queryMap = new HashMap<>();
+                queryMap.put("transport", "polling");
+
+                return ParseQS.encode(queryMap);
+            }
+        }).when(request).getQueryString();
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return "POST";
+            }
+        }).when(request).getMethod();
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return origin;
+            }
+        }).when(request).getHeader(Mockito.eq("Origin"));
+
+        final HttpServletResponseImpl response = Mockito.spy(new HttpServletResponseImpl());
+
+        server.handleRequest(request, response);
+
+        Mockito.verify(response, Mockito.times(1))
+                .addHeader(Mockito.eq("Access-Control-Allow-Origin"), Mockito.eq(origin));
+    }
+
+    @Test
+    public void testCors_none() throws IOException {
+        final String origin = "http://www.example.com";
+        final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
+                .setAllowedCorsOrigins(EngineIoServerOptions.ALLOWED_CORS_ORIGIN_NONE));
+
+        final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                HashMap<String, String> queryMap = new HashMap<>();
+                queryMap.put("transport", "polling");
+
+                return ParseQS.encode(queryMap);
+            }
+        }).when(request).getQueryString();
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return "POST";
+            }
+        }).when(request).getMethod();
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return origin;
+            }
+        }).when(request).getHeader(Mockito.eq("Origin"));
+
+        final HttpServletResponseImpl response = Mockito.spy(new HttpServletResponseImpl());
+
+        server.handleRequest(request, response);
+
+        Mockito.verify(response, Mockito.times(0))
+                .addHeader(Mockito.eq("Access-Control-Allow-Origin"), Mockito.eq(origin));
+    }
+
+    @Test
+    public void testCors_some1() throws IOException {
+        final String origin = "http://www.example.com";
+        final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
+                .setAllowedCorsOrigins(new String[] {
+                        origin
+                }));
+
+        final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                HashMap<String, String> queryMap = new HashMap<>();
+                queryMap.put("transport", "polling");
+
+                return ParseQS.encode(queryMap);
+            }
+        }).when(request).getQueryString();
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return "POST";
+            }
+        }).when(request).getMethod();
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return origin;
+            }
+        }).when(request).getHeader(Mockito.eq("Origin"));
+
+        final HttpServletResponseImpl response = Mockito.spy(new HttpServletResponseImpl());
+
+        server.handleRequest(request, response);
+
+        Mockito.verify(response, Mockito.times(1))
+                .addHeader(Mockito.eq("Access-Control-Allow-Origin"), Mockito.eq(origin));
+    }
+
+    @Test
+    public void testCors_some2() throws IOException {
+        final String origin = "http://www.example.com";
+        final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
+                .setAllowedCorsOrigins(new String[] {
+                        origin
+                }));
+
+        final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                HashMap<String, String> queryMap = new HashMap<>();
+                queryMap.put("transport", "polling");
+
+                return ParseQS.encode(queryMap);
+            }
+        }).when(request).getQueryString();
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return "POST";
+            }
+        }).when(request).getMethod();
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                return "http://www.example.org";
+            }
+        }).when(request).getHeader(Mockito.eq("Origin"));
+
+        final HttpServletResponseImpl response = Mockito.spy(new HttpServletResponseImpl());
+
+        server.handleRequest(request, response);
+
+        Mockito.verify(response, Mockito.times(0))
+                .addHeader(Mockito.eq("Access-Control-Allow-Origin"), Mockito.eq(origin));
+    }
+
     private HttpServletRequest getConnectRequest(final Map<String, String> query) {
         final HashMap<String, Object> attributes = new HashMap<>();
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
