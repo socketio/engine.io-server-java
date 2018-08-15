@@ -18,4 +18,4 @@ socket.on('upgrade', function () {
     socket.send(echoMessage);
 });
 socket.on('error', returnError);
-setTimeout(returnError, 1000);
+setTimeout(returnError, 3000);
