@@ -1,5 +1,5 @@
 package io.socket.engineio.server;
 
-enum ReadyState {
+public enum ReadyState {
     OPENING, OPEN, CLOSING, CLOSED
 }

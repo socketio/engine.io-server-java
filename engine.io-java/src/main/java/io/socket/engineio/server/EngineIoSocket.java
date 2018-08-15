@@ -42,6 +42,26 @@ public final class EngineIoSocket extends Emitter {
     }
 
     /**
+     * Gets the sid of this socket.
+     *
+     * @return String sid value.
+     */
+    @SuppressWarnings("WeakerAccess")
+    public String getId() {
+        return mSid;
+    }
+
+    /**
+     * Gets the ready state of this socket.
+     *
+     * @return Socket ready state.
+     */
+    @SuppressWarnings("WeakerAccess")
+    public ReadyState getReadyState() {
+        return mReadyState;
+    }
+
+    /**
      * Send a packet to the remote client.
      * Queuing of packets in case of polling transport are handled internally.
      *

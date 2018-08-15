@@ -5,6 +5,7 @@ import io.socket.engineio.parser.Packet;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
 import io.socket.yeast.Yeast;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -48,6 +49,21 @@ public final class EngineIoSocketTest {
     public void testInit() {
         final Transport transport = Mockito.spy(new StubTransport());
         final EngineIoSocket socket = Mockito.spy(new EngineIoSocket(Yeast.yeast(), new EngineIoServer()));
+
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                final List<Packet> packetList = invocationOnMock.getArgument(0);
+                for (Packet packet : packetList) {
+                    if (packet.type.equals(Packet.OPEN)) {
+                        final JSONObject jsonObject = new JSONObject((String) packet.data);
+                        Assert.assertTrue(jsonObject.has("sid"));
+                        Assert.assertEquals(socket.getId(), jsonObject.getString("sid"));
+                    }
+                }
+                return null;
+            }
+        }).when(transport).send(Mockito.<Packet>anyList());
 
         socket.init(transport, null);
 
@@ -158,8 +174,12 @@ public final class EngineIoSocketTest {
 
         socket.close();
 
+        Assert.assertEquals(ReadyState.CLOSING, socket.getReadyState());
         Mockito.verify(transport, Mockito.times(1))
                 .close();
+
+        transport.emit("close");
+        Assert.assertEquals(ReadyState.CLOSED, socket.getReadyState());
     }
 
     @Test
@@ -180,6 +200,7 @@ public final class EngineIoSocketTest {
         socket.send(packet);
         socket.close();
 
+        Assert.assertEquals(ReadyState.CLOSING, socket.getReadyState());
         Mockito.verify(transport, Mockito.times(1))
                 .send(Mockito.<Packet>anyList());
 
@@ -192,11 +213,15 @@ public final class EngineIoSocketTest {
 
         transport.emit("drain");
 
+        Assert.assertEquals(ReadyState.CLOSING, socket.getReadyState());
         // init() + send()
         Mockito.verify(transport, Mockito.times(2))
                 .send(Mockito.<Packet>anyList());
         Mockito.verify(transport, Mockito.times(1))
                 .close();
+
+        transport.emit("close");
+        Assert.assertEquals(ReadyState.CLOSED, socket.getReadyState());
     }
 
     @Test
