@@ -36,11 +36,22 @@ public final class EngineIoServer extends Emitter {
 
     /**
      * Create instance of server with specified options.
+     * The options instance is locked to prevent further modifications.
      *
      * @param options Server options.
      */
     public EngineIoServer(EngineIoServerOptions options) {
         mOptions = options;
+        mOptions.lock();
+    }
+
+    /**
+     * Gets the configured options for this server instance.
+     *
+     * @return Options for this server instance.
+     */
+    public EngineIoServerOptions getOptions() {
+        return mOptions;
     }
 
     /**
@@ -48,6 +59,7 @@ public final class EngineIoServer extends Emitter {
      *
      * @return Ping timeout value in milliseconds.
      */
+    @Deprecated
     public long getPingTimeout() {
         return mOptions.getPingTimeout();
     }
@@ -57,6 +69,7 @@ public final class EngineIoServer extends Emitter {
      *
      * @return Ping timeout value in milliseconds.
      */
+    @Deprecated
     public long getPingInterval() {
         return mOptions.getPingInterval();
     }

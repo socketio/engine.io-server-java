@@ -1,5 +1,7 @@
 package io.socket.engineio.server;
 
+import io.socket.engineio.parser.Packet;
+
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -40,6 +42,7 @@ public final class EngineIoServerOptions {
     private long mPingInterval;
     private long mPingTimeout;
     private String[] mAllowedCorsOrigins;
+    private Packet mInitialPacket;
 
     private EngineIoServerOptions() {
         mIsLocked = false;
@@ -55,7 +58,8 @@ public final class EngineIoServerOptions {
         return (new EngineIoServerOptions())
                 .setPingInterval(DEFAULT.getPingInterval())
                 .setPingTimeout(DEFAULT.getPingTimeout())
-                .setAllowedCorsOrigins(DEFAULT.getAllowedCorsOrigins());
+                .setAllowedCorsOrigins(DEFAULT.getAllowedCorsOrigins())
+                .setInitialPacket(null);
     }
 
     /**
@@ -144,6 +148,45 @@ public final class EngineIoServerOptions {
             });
         }
 
+        return this;
+    }
+
+    /**
+     * Gets the initial packet option.
+     *
+     * @return Initial packet.
+     */
+    public Packet getInitialPacket() {
+        return mInitialPacket;
+    }
+
+    /**
+     * Sets the initial packet.
+     *
+     * @param initialPacket The initial packet to send on client connection.
+     * @return Instance for chaining.
+     * @throws IllegalStateException If instance is locked.
+     * @throws IllegalArgumentException If initialPacket.type is not message or data is null.
+     */
+    public EngineIoServerOptions setInitialPacket(Packet initialPacket) throws IllegalStateException, IllegalArgumentException {
+        if (mIsLocked) {
+            throw new IllegalStateException("Initial packet cannot be set. Instance is locked.");
+        }
+
+        if (initialPacket != null) {
+            if ((initialPacket.type == null) || !initialPacket.type.equals(Packet.MESSAGE)) {
+                throw new IllegalArgumentException("Initial packet must be a message packet.");
+            }
+            if (initialPacket.data == null) {
+                throw new IllegalArgumentException("Initial packet data must not be null.");
+            }
+        }
+
+        mInitialPacket = null;
+        if (initialPacket != null) {
+            mInitialPacket = new Packet(initialPacket.type);
+            mInitialPacket.data = initialPacket.data;
+        }
         return this;
     }
 

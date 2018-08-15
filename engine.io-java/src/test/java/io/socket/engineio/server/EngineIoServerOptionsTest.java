@@ -1,5 +1,6 @@
 package io.socket.engineio.server;
 
+import io.socket.engineio.parser.Packet;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,6 +24,11 @@ public final class EngineIoServerOptionsTest {
         EngineIoServerOptions.DEFAULT.setAllowedCorsOrigins(EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testDefaultLocked4() {
+        EngineIoServerOptions.DEFAULT.setInitialPacket(null);
+    }
+
     @Test
     public void testSetAllowedCorsOrigins() {
         EngineIoServerOptions options = EngineIoServerOptions.newFromDefault();
@@ -43,6 +49,16 @@ public final class EngineIoServerOptionsTest {
         });
 
         Assert.assertArrayEquals(origins, options.getAllowedCorsOrigins());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetInitialPacket_error1() {
+        EngineIoServerOptions.newFromDefault().setInitialPacket(new Packet(Packet.PING));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetInitialPacket_error2() {
+        EngineIoServerOptions.newFromDefault().setInitialPacket(new Packet(Packet.MESSAGE));
     }
 
     @Test(expected = IllegalStateException.class)

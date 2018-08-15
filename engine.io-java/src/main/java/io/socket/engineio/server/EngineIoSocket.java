@@ -264,13 +264,17 @@ public final class EngineIoSocket extends Emitter {
         JSONObject handshakePacket = new JSONObject();
         handshakePacket.put("sid", mSid);
         handshakePacket.put("upgrades", upgrades);
-        handshakePacket.put("pingInterval", mServer.getPingInterval());
-        handshakePacket.put("pingTimeout", mServer.getPingTimeout());
+        handshakePacket.put("pingInterval", mServer.getOptions().getPingInterval());
+        handshakePacket.put("pingTimeout", mServer.getOptions().getPingTimeout());
 
         Packet<String> openPacket = new Packet<>(Packet.OPEN);
         openPacket.data = handshakePacket.toString();
 
         sendPacket(openPacket);
+
+        if (mServer.getOptions().getInitialPacket() != null) {
+            sendPacket(mServer.getOptions().getInitialPacket());
+        }
 
         emit("open");
         resetPingTimeout();
@@ -347,6 +351,7 @@ public final class EngineIoSocket extends Emitter {
                 onClose("ping timeout", null);
             }
         };
-        mPingTimer.schedule(mPingTimeout, mServer.getPingInterval() + mServer.getPingTimeout());
+        mPingTimer.schedule(mPingTimeout,
+                mServer.getOptions().getPingInterval() + mServer.getOptions().getPingTimeout());
     }
 }

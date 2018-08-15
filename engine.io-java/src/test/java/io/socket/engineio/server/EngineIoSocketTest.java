@@ -79,6 +79,34 @@ public final class EngineIoSocketTest {
     }
 
     @Test
+    public void testInit_initialPacket() {
+        final Packet initialPacket = new Packet<>(Packet.MESSAGE, "Initial Message");
+        final EngineIoServerOptions options = EngineIoServerOptions.newFromDefault()
+                .setInitialPacket(initialPacket);
+
+        final Transport transport = Mockito.spy(new StubTransport());
+        final EngineIoSocket socket = Mockito.spy(new EngineIoSocket(Yeast.yeast(), new EngineIoServer(options)));
+
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                final List<Packet> packetList = invocationOnMock.getArgument(0);
+                for (Packet packet : packetList) {
+                    if (packet.type.equals(Packet.MESSAGE)) {
+                        Assert.assertEquals(initialPacket.data, packet.data);
+                    }
+                }
+                return null;
+            }
+        }).when(transport).send(Mockito.<Packet>anyList());
+
+        socket.init(transport, null);
+
+        Mockito.verify(transport, Mockito.times(2))
+                .send(Mockito.<Packet>anyList());
+    }
+
+    @Test
     public void testOnRequest() throws IOException {
         final Transport transport = Mockito.spy(new StubTransport());
         final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
@@ -255,7 +283,7 @@ public final class EngineIoSocketTest {
 
         socket.send(new Packet(Packet.NOOP));
 
-        Thread.sleep(server.getPingInterval() + server.getPingTimeout() + 500);
+        Thread.sleep(server.getOptions().getPingInterval() + server.getOptions().getPingTimeout() + 500);
 
         Mockito.verify(closeListener, Mockito.times(1))
                 .call(Mockito.eq("ping timeout"), Mockito.isNull());
