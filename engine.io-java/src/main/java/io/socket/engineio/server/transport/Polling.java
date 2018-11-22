@@ -158,9 +158,10 @@ public final class Polling extends Transport {
         final boolean isBinary = request.getContentType().equals("application/octet-stream");
 
         try(final ServletInputStream inputStream = request.getInputStream()) {
-            byte[] mReadBuffer = new byte[request.getContentLength()];
+            final byte[] mReadBuffer = new byte[request.getContentLength()];
+
             //noinspection ResultOfMethodCallIgnored
-            inputStream.read(mReadBuffer, 0, inputStream.available());
+            inputStream.read(mReadBuffer, 0, mReadBuffer.length);
 
             onData((isBinary)? mReadBuffer : (new String(mReadBuffer, StandardCharsets.UTF_8)));
         }
