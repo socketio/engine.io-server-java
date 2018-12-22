@@ -113,24 +113,24 @@ public final class EngineIoServerOptions {
     }
 
     /**
-     * Gets the allowed cors origins option.
+     * Gets the allowed CORS origins option.
      *
-     * @return Array of strings containing allowed cors origins.
+     * @return Array of strings containing allowed CORS origins.
      */
     public String[] getAllowedCorsOrigins() {
         return mAllowedCorsOrigins;
     }
 
     /**
-     * Sets the allowed cord origins option.
+     * Sets the allowed CORS origins option.
      *
-     * @param allowedCorsOrigins Array of strings containing allowed cors origins.
+     * @param allowedCorsOrigins Array of strings containing allowed CORS origins.
      * @return Instance for chaining.
      * @throws IllegalStateException If instance is locked.
      */
     public EngineIoServerOptions setAllowedCorsOrigins(String[] allowedCorsOrigins) throws IllegalStateException {
         if (mIsLocked) {
-            throw new IllegalStateException("Allowed cors origins cannot be set. Instance is locked.");
+            throw new IllegalStateException("Allowed CORS origins cannot be set. Instance is locked.");
         }
 
         mAllowedCorsOrigins = null;
