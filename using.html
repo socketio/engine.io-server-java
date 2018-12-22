@@ -88,6 +88,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#sending-message-to-client">Sending message to client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#websocket-connections">WebSocket connections</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#jetty-server">Jetty server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tomcat-server">Tomcat server</a></li>
 </ul>
 </li>
 </ul>
@@ -223,12 +224,12 @@ messages from client.</p>
 <div class="section" id="websocket-connections">
 <h2>WebSocket connections<a class="headerlink" href="#websocket-connections" title="Permalink to this headline">¶</a></h2>
 <p>Handling WebSocket connections involves creating an instance of <code class="docutils literal notranslate"><span class="pre">EngineIoWebSocket</span></code> and
-passing it to a call to <code class="docutils literal notranslate"><span class="pre">handleWebSocket</span></code> method of <code class="docutils literal notranslate"><span class="pre">EngineIoServer</span></code>. The process to do
+passing it in a call to <code class="docutils literal notranslate"><span class="pre">handleWebSocket</span></code> method of <code class="docutils literal notranslate"><span class="pre">EngineIoServer</span></code>. The process to do
 this is different for each server (<em>viz.</em> Tomcat, Jetty).</p>
 <div class="section" id="jetty-server">
 <h3>Jetty server<a class="headerlink" href="#jetty-server" title="Permalink to this headline">¶</a></h3>
 <p>For Jetty server, add the <a class="reference internal" href="install.html#install-jetty-ws-adapter"><span class="std std-ref">Jetty WebSocket Adapter</span></a> dependency.
-Then add the following code can be used to listen for WebSocket connections:</p>
+Then, the following code can be used to listen for WebSocket connections:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ServletContextHandler</span> <span class="n">servletContextHandler</span><span class="p">;</span>    <span class="o">//</span> <span class="n">The</span> <span class="n">jetty</span> <span class="n">servlet</span> <span class="n">context</span> <span class="n">handler</span>
 
 <span class="n">WebSocketUpgradeFilter</span> <span class="n">webSocketUpgradeFilter</span> <span class="o">=</span> <span class="n">WebSocketUpgradeFilter</span><span class="o">.</span><span class="n">configureContext</span><span class="p">(</span><span class="n">servletContextHandler</span><span class="p">);</span>
@@ -238,6 +239,115 @@ Then add the following code can be used to listen for WebSocket connections:</p>
         <span class="k">return</span> <span class="n">new</span> <span class="n">JettyWebSocketHandler</span><span class="p">(</span><span class="n">EngineIoServlet</span><span class="o">.</span><span class="n">getEngineIoServer</span><span class="p">());</span>
     <span class="p">}</span>
 <span class="p">});</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tomcat-server">
+<h3>Tomcat server<a class="headerlink" href="#tomcat-server" title="Permalink to this headline">¶</a></h3>
+<p>For Tomcat server, add an endpoint like the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">public</span> <span class="n">final</span> <span class="k">class</span> <span class="nc">EngineIoEndpoint</span> <span class="n">extends</span> <span class="n">Endpoint</span> <span class="p">{</span>
+
+    <span class="n">private</span> <span class="n">Session</span> <span class="n">mSession</span><span class="p">;</span>
+    <span class="n">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">mQuery</span><span class="p">;</span>
+    <span class="n">private</span> <span class="n">EngineIoWebSocket</span> <span class="n">mEngineIoWebSocket</span><span class="p">;</span>
+
+    <span class="n">private</span> <span class="n">EngineIoServer</span> <span class="n">mEngineIoServer</span><span class="p">;</span> <span class="o">//</span> <span class="n">The</span> <span class="n">engine</span><span class="o">.</span><span class="n">io</span> <span class="n">server</span> <span class="n">instance</span>
+
+    <span class="nd">@Override</span>
+    <span class="n">public</span> <span class="n">void</span> <span class="n">onOpen</span><span class="p">(</span><span class="n">Session</span> <span class="n">session</span><span class="p">,</span> <span class="n">EndpointConfig</span> <span class="n">endpointConfig</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">mSession</span> <span class="o">=</span> <span class="n">session</span><span class="p">;</span>
+        <span class="n">mQuery</span> <span class="o">=</span> <span class="n">ParseQS</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">getQueryString</span><span class="p">());</span>
+
+        <span class="n">mEngineIoWebSocket</span> <span class="o">=</span> <span class="n">new</span> <span class="n">EngineIoWebSocketImpl</span><span class="p">();</span>
+
+        <span class="o">/*</span>
+         <span class="o">*</span> <span class="n">These</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">converted</span> <span class="n">to</span> <span class="k">lambda</span> <span class="n">because</span> <span class="n">of</span> <span class="n">runtime</span> <span class="nb">type</span> <span class="n">inference</span>
+         <span class="o">*</span> <span class="n">by</span> <span class="n">server</span><span class="o">.</span>
+         <span class="o">*/</span>
+        <span class="n">mSession</span><span class="o">.</span><span class="n">addMessageHandler</span><span class="p">(</span><span class="n">new</span> <span class="n">MessageHandler</span><span class="o">.</span><span class="n">Whole</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nd">@Override</span>
+            <span class="n">public</span> <span class="n">void</span> <span class="n">onMessage</span><span class="p">(</span><span class="n">String</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">mEngineIoWebSocket</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;message&quot;</span><span class="p">,</span> <span class="n">message</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+        <span class="n">mSession</span><span class="o">.</span><span class="n">addMessageHandler</span><span class="p">(</span><span class="n">new</span> <span class="n">MessageHandler</span><span class="o">.</span><span class="n">Whole</span><span class="o">&lt;</span><span class="n">byte</span><span class="p">[]</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nd">@Override</span>
+            <span class="n">public</span> <span class="n">void</span> <span class="n">onMessage</span><span class="p">(</span><span class="n">byte</span><span class="p">[]</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">mEngineIoWebSocket</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;message&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">Object</span><span class="p">)</span><span class="n">message</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+
+        <span class="n">mEngineIoServer</span><span class="o">.</span><span class="n">handleWebSocket</span><span class="p">(</span><span class="n">mEngineIoWebSocket</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="n">public</span> <span class="n">void</span> <span class="n">onClose</span><span class="p">(</span><span class="n">Session</span> <span class="n">session</span><span class="p">,</span> <span class="n">CloseReason</span> <span class="n">closeReason</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nb">super</span><span class="o">.</span><span class="n">onClose</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">closeReason</span><span class="p">);</span>
+
+        <span class="n">mEngineIoWebSocket</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;close&quot;</span><span class="p">);</span>
+        <span class="n">mSession</span> <span class="o">=</span> <span class="n">null</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="n">public</span> <span class="n">void</span> <span class="n">onError</span><span class="p">(</span><span class="n">Session</span> <span class="n">session</span><span class="p">,</span> <span class="n">Throwable</span> <span class="n">thr</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nb">super</span><span class="o">.</span><span class="n">onError</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">thr</span><span class="p">);</span>
+
+        <span class="n">mEngineIoWebSocket</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown error&quot;</span><span class="p">,</span> <span class="n">thr</span><span class="o">.</span><span class="n">getMessage</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="n">private</span> <span class="k">class</span> <span class="nc">EngineIoWebSocketImpl</span> <span class="n">extends</span> <span class="n">EngineIoWebSocket</span> <span class="p">{</span>
+
+        <span class="n">private</span> <span class="n">RemoteEndpoint</span><span class="o">.</span><span class="n">Basic</span> <span class="n">mBasic</span><span class="p">;</span>
+
+        <span class="n">EngineIoWebSocketImpl</span><span class="p">()</span> <span class="p">{</span>
+            <span class="n">mBasic</span> <span class="o">=</span> <span class="n">mSession</span><span class="o">.</span><span class="n">getBasicRemote</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="n">public</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">getQuery</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">mQuery</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="n">public</span> <span class="n">void</span> <span class="n">write</span><span class="p">(</span><span class="n">String</span> <span class="n">message</span><span class="p">)</span> <span class="n">throws</span> <span class="n">IOException</span> <span class="p">{</span>
+            <span class="n">mBasic</span><span class="o">.</span><span class="n">sendText</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="n">public</span> <span class="n">void</span> <span class="n">write</span><span class="p">(</span><span class="n">byte</span><span class="p">[]</span> <span class="n">message</span><span class="p">)</span> <span class="n">throws</span> <span class="n">IOException</span> <span class="p">{</span>
+            <span class="n">mBasic</span><span class="o">.</span><span class="n">sendBinary</span><span class="p">(</span><span class="n">ByteBuffer</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">message</span><span class="p">));</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="n">public</span> <span class="n">void</span> <span class="n">close</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="n">mSession</span><span class="o">.</span><span class="n">close</span><span class="p">();</span>
+            <span class="p">}</span> <span class="n">catch</span> <span class="p">(</span><span class="n">IOException</span> <span class="n">ignore</span><span class="p">)</span> <span class="p">{</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The endpoint can be registered by annotation or a <code class="docutils literal notranslate"><span class="pre">ServerApplicationConfig</span></code>
+class like the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>public final class ApplicationServerConfig implements ServerApplicationConfig {
+
+    @Override
+    public Set&lt;ServerEndpointConfig&gt; getEndpointConfigs(Set&lt;Class&lt;? extends Endpoint&gt;&gt; endpointClasses) {
+        final HashSet&lt;ServerEndpointConfig&gt; result = new HashSet&lt;&gt;();
+        result.add(ServerEndpointConfig.Builder
+                .create(EngineIoEndpoint.class, &quot;/engine.io/&quot;)
+                .build());
+
+        return result;
+    }
+
+    @Override
+    public Set&lt;Class&lt;?&gt;&gt; getAnnotatedEndpointClasses(Set&lt;Class&lt;?&gt;&gt; scanned) {
+        return null;
+    }
+}
 </pre></div>
 </div>
 </div>

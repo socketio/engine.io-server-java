@@ -70,14 +70,14 @@ WebSocket connections
 =====================
 
 Handling WebSocket connections involves creating an instance of ``EngineIoWebSocket`` and
-passing it to a call to ``handleWebSocket`` method of ``EngineIoServer``. The process to do
+passing it in a call to ``handleWebSocket`` method of ``EngineIoServer``. The process to do
 this is different for each server (*viz.* Tomcat, Jetty).
 
 Jetty server
 ------------
 
 For Jetty server, add the :ref:`install-jetty-ws-adapter` dependency.
-Then add the following code can be used to listen for WebSocket connections::
+Then, the following code can be used to listen for WebSocket connections::
 
     ServletContextHandler servletContextHandler;    // The jetty servlet context handler
 
@@ -88,3 +88,113 @@ Then add the following code can be used to listen for WebSocket connections::
             return new JettyWebSocketHandler(EngineIoServlet.getEngineIoServer());
         }
     });
+
+Tomcat server
+-------------
+
+For Tomcat server, add an endpoint like the following::
+
+    public final class EngineIoEndpoint extends Endpoint {
+
+        private Session mSession;
+        private Map<String, String> mQuery;
+        private EngineIoWebSocket mEngineIoWebSocket;
+        
+        private EngineIoServer mEngineIoServer; // The engine.io server instance
+
+        @Override
+        public void onOpen(Session session, EndpointConfig endpointConfig) {
+            mSession = session;
+            mQuery = ParseQS.decode(session.getQueryString());
+
+            mEngineIoWebSocket = new EngineIoWebSocketImpl();
+
+            /*
+             * These cannot be converted to lambda because of runtime type inference
+             * by server.
+             */
+            mSession.addMessageHandler(new MessageHandler.Whole<String>() {
+                @Override
+                public void onMessage(String message) {
+                    mEngineIoWebSocket.emit("message", message);
+                }
+            });
+            mSession.addMessageHandler(new MessageHandler.Whole<byte[]>() {
+                @Override
+                public void onMessage(byte[] message) {
+                    mEngineIoWebSocket.emit("message", (Object)message);
+                }
+            });
+
+            mEngineIoServer.handleWebSocket(mEngineIoWebSocket);
+        }
+
+        @Override
+        public void onClose(Session session, CloseReason closeReason) {
+            super.onClose(session, closeReason);
+
+            mEngineIoWebSocket.emit("close");
+            mSession = null;
+        }
+
+        @Override
+        public void onError(Session session, Throwable thr) {
+            super.onError(session, thr);
+
+            mEngineIoWebSocket.emit("error", "unknown error", thr.getMessage());
+        }
+        
+        private class EngineIoWebSocketImpl extends EngineIoWebSocket {
+
+            private RemoteEndpoint.Basic mBasic;
+
+            EngineIoWebSocketImpl() {
+                mBasic = mSession.getBasicRemote();
+            }
+
+            @Override
+            public Map<String, String> getQuery() {
+                return mQuery;
+            }
+
+            @Override
+            public void write(String message) throws IOException {
+                mBasic.sendText(message);
+            }
+
+            @Override
+            public void write(byte[] message) throws IOException {
+                mBasic.sendBinary(ByteBuffer.wrap(message));
+            }
+
+            @Override
+            public void close() {
+                try {
+                    mSession.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
+    }
+
+The endpoint can be registered by annotation or a ``ServerApplicationConfig``
+class like the following::
+
+    public final class ApplicationServerConfig implements ServerApplicationConfig {
+
+        @Override
+        public Set<ServerEndpointConfig> getEndpointConfigs(Set<Class<? extends Endpoint>> endpointClasses) {
+            final HashSet<ServerEndpointConfig> result = new HashSet<>();
+            result.add(ServerEndpointConfig.Builder
+                    .create(EngineIoEndpoint.class, "/engine.io/")
+                    .build());
+
+            return result;
+        }
+
+        @Override
+        public Set<Class<?>> getAnnotatedEndpointClasses(Set<Class<?>> scanned) {
+            return null;
+        }
+    }
+
