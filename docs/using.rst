@@ -73,26 +73,10 @@ Handling WebSocket connections involves creating an instance of ``EngineIoWebSoc
 passing it in a call to ``handleWebSocket`` method of ``EngineIoServer``. The process to do
 this is different for each server (*viz.* Tomcat, Jetty).
 
-Jetty server
-------------
+Generic server
+--------------
 
-For Jetty server, add the :ref:`install-jetty-ws-adapter` dependency.
-Then, the following code can be used to listen for WebSocket connections::
-
-    ServletContextHandler servletContextHandler;    // The jetty servlet context handler
-
-    WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(servletContextHandler);
-    webSocketUpgradeFilter.addMapping(new ServletPathSpec("/engine.io/*"), new WebSocketCreator() {
-        @Override
-        public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest, ServletUpgradeResponse servletUpgradeResponse) {
-            return new JettyWebSocketHandler(EngineIoServlet.getEngineIoServer());
-        }
-    });
-
-Tomcat server
--------------
-
-For Tomcat server, add an endpoint like the following::
+Add an endpoint like the following::
 
     public final class EngineIoEndpoint extends Endpoint {
 
@@ -197,4 +181,20 @@ class like the following::
             return null;
         }
     }
+
+Jetty server
+------------
+
+For Jetty server, add the :ref:`install-jetty-ws-adapter` dependency.
+Then, the following code can be used to listen for WebSocket connections::
+
+    ServletContextHandler servletContextHandler;    // The jetty servlet context handler
+
+    WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(servletContextHandler);
+    webSocketUpgradeFilter.addMapping(new ServletPathSpec("/engine.io/*"), new WebSocketCreator() {
+        @Override
+        public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest, ServletUpgradeResponse servletUpgradeResponse) {
+            return new JettyWebSocketHandler(EngineIoServlet.getEngineIoServer());
+        }
+    });
 
