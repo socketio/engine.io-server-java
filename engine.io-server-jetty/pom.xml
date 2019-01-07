@@ -14,10 +14,6 @@
     <name>engine.io-server-jetty</name>
     <description>Jetty WebSocket adapter module.</description>
 
-    <properties>
-        <maven.deploy.skip>false</maven.deploy.skip>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.socket</groupId>

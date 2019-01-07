@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.socket</groupId>
-    <artifactId>engine.io-server-pom</artifactId>
+    <artifactId>engine.io-server-bom</artifactId>
     <version>1.1.1</version>
     <packaging>pom</packaging>
     <name>engine.io</name>
@@ -16,12 +16,9 @@
         <module>engine.io-server</module>
         <module>engine.io-server-jetty</module>
         <module>engine.io-server-test</module>
-
-        <module>engine.io-server-bom</module>
     </modules>
 
     <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
         <github.global.server>github</github.global.server>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -63,6 +60,21 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.socket</groupId>
+                <artifactId>engine.io-server</artifactId>
+                <version>1.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>io.socket</groupId>
+                <artifactId>engine.io-server-jetty</artifactId>
+                <version>1.1.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <profiles>
         <profile>
