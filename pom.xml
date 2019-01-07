@@ -16,6 +16,8 @@
         <module>engine.io-server</module>
         <module>engine.io-server-jetty</module>
         <module>engine.io-server-test</module>
+
+        <module>engine.io-server-bom</module>
     </modules>
 
     <properties>

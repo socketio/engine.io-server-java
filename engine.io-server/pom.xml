@@ -11,7 +11,7 @@
 
     <artifactId>engine.io-server</artifactId>
     <packaging>jar</packaging>
-    <name>engine.io-java</name>
+    <name>engine.io-server</name>
     <description>Engine.IO server library for Java</description>
 
     <properties>
