@@ -13,12 +13,13 @@
     <url>https://github.com/socketio/engine.io-server-java</url>
 
     <modules>
-        <module>engine.io-java</module>
-        <module>engine.io-jetty</module>
-        <module>engine.io-test</module>
+        <module>engine.io-server</module>
+        <module>engine.io-server-jetty</module>
+        <module>engine.io-server-test</module>
     </modules>
 
     <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
         <github.global.server>github</github.global.server>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

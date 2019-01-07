@@ -9,11 +9,40 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>engine.io-server-test</artifactId>
+    <artifactId>engine.io-server</artifactId>
     <packaging>jar</packaging>
-    <description>This module contains integration tests.</description>
+    <name>engine.io-java</name>
+    <description>Engine.IO server library for Java</description>
+
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>io.socket</groupId>
+            <artifactId>engine.io-client</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180130</version>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>7.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -21,33 +50,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>9.4.14.v20181114</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.19.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>9.4.10.v20180503</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.websocket</groupId>
-            <artifactId>websocket-server</artifactId>
-            <version>9.4.10.v20180503</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.socket</groupId>
-            <artifactId>engine.io-server</artifactId>
-            <version>1.1.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.socket</groupId>
-            <artifactId>engine.io-server-jetty</artifactId>
-            <version>1.1.1</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>2.19.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -59,8 +70,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.5.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <encoding>UTF-8</encoding>
                     <compilerArgs>
                         <arg>-Xlint:unchecked</arg>
@@ -71,11 +82,43 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <id>Jar Package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -111,6 +154,8 @@
                             <value>./src/test/resources/logging.properties</value>
                         </property>
                     </systemProperties>
+                    <parallel>both</parallel>
+                    <useUnlimitedThreads>true</useUnlimitedThreads>
                 </configuration>
             </plugin>
         </plugins>
