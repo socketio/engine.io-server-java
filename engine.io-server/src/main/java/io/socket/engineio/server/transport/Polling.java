@@ -1,7 +1,6 @@
 package io.socket.engineio.server.transport;
 
 import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.Parser;
 import io.socket.engineio.parser.ServerParser;
 import io.socket.engineio.server.Transport;
 
@@ -76,22 +75,19 @@ public final class Polling extends Transport {
         if(packets.size() == 0) {
             throw new IllegalArgumentException("No packets to send.");
         }
-        ServerParser.encodePayload(packets.toArray(new Packet[0]), supportsBinary, new Parser.EncodeCallback() {
-            @Override
-            public void call(Object data) {
-                final String contentType = (data instanceof String)? "text/plain; charset=UTF-8" : "application/octet-stream";
-                final int contentLength = (data instanceof String)? ((String) data).length() : ((byte[]) data).length;
+        ServerParser.encodePayload(packets.toArray(new Packet[0]), supportsBinary, data -> {
+            final String contentType = (data instanceof String)? "text/plain; charset=UTF-8" : "application/octet-stream";
+            final int contentLength = (data instanceof String)? ((String) data).length() : ((byte[]) data).length;
 
-                mResponse.setContentType(contentType);
-                mResponse.setContentLength(contentLength);
+            mResponse.setContentType(contentType);
+            mResponse.setContentLength(contentLength);
 
-                try (OutputStream outputStream = mResponse.getOutputStream()) {
-                    // TODO: Support JSONP
-                    byte[] writeBytes = (data instanceof String)? ((String) data).getBytes(StandardCharsets.UTF_8) : ((byte[]) data);
-                    outputStream.write(writeBytes);
-                } catch (IOException ex) {
-                    onError("write failure", ex.getMessage());
-                }
+            try (OutputStream outputStream = mResponse.getOutputStream()) {
+                // TODO: Support JSONP
+                byte[] writeBytes = (data instanceof String)? ((String) data).getBytes(StandardCharsets.UTF_8) : ((byte[]) data);
+                outputStream.write(writeBytes);
+            } catch (IOException ex) {
+                onError("write failure", ex.getMessage());
             }
         });
 
@@ -122,16 +118,13 @@ public final class Polling extends Transport {
 
     @Override
     protected void onData(Object data) {
-        ServerParser.decodePayload(data, new Parser.DecodePayloadCallback() {
-            @Override
-            public boolean call(Packet packet, int index, int total) {
-                if(packet.type.equals(Packet.CLOSE)) {
-                    onClose();
-                    return false;
-                } else {
-                    onPacket(packet);
-                    return true;
-                }
+        ServerParser.decodePayload(data, (packet, index, total) -> {
+            if(packet.type.equals(Packet.CLOSE)) {
+                onClose();
+                return false;
+            } else {
+                onPacket(packet);
+                return true;
             }
         });
     }

@@ -92,7 +92,7 @@ public final class EngineIoServer extends Emitter {
             return;
         }
 
-        final String sid = query.containsKey("sid")? query.get("sid") : null;
+        final String sid = query.getOrDefault("sid", null);
         if (sid != null) {
             if(!mClients.containsKey(query.get("sid"))) {
                 sendErrorMessage(request, response, ServerErrors.UNKNOWN_SID);
@@ -120,7 +120,7 @@ public final class EngineIoServer extends Emitter {
      */
     public void handleWebSocket(EngineIoWebSocket webSocket) {
         final Map<String, String> query = webSocket.getQuery();
-        final String sid = query.containsKey("sid")? query.get("sid") : null;
+        final String sid = query.getOrDefault("sid", null);
 
         if(sid != null) {
             EngineIoSocket socket = mClients.get(sid);
@@ -184,12 +184,7 @@ public final class EngineIoServer extends Emitter {
         transport.onRequest(request, response);
 
         mClients.put(sid, socket);
-        socket.once("close", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                mClients.remove(sid);
-            }
-        });
+        socket.once("close", args -> mClients.remove(sid));
 
         emit("connection", socket);
     }
@@ -202,12 +197,7 @@ public final class EngineIoServer extends Emitter {
         socket.init(transport, null);
 
         mClients.put(sid, socket);
-        socket.once("close", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                mClients.remove(sid);
-            }
-        });
+        socket.once("close", args -> mClients.remove(sid));
 
         emit("connection", socket);
     }

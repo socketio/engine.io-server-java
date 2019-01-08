@@ -67,7 +67,6 @@ public final class EngineIoSocket extends Emitter {
      *
      * @param packet The packet to send.
      */
-    @SuppressWarnings("WeakerAccess")
     public void send(Packet packet) {
         sendPacket(packet);
     }
@@ -80,12 +79,7 @@ public final class EngineIoSocket extends Emitter {
             mReadyState = ReadyState.CLOSING;
 
             if(mWriteBuffer.size() > 0) {
-                mTransport.on("drain", new Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        closeTransport();
-                    }
-                });
+                mTransport.on("drain", args -> closeTransport());
             } else {
                 closeTransport();
             }
@@ -133,66 +127,47 @@ public final class EngineIoSocket extends Emitter {
     void upgrade(final Transport transport) {
         mUpgrading = true;
 
-        final Runnable cleanup = new Runnable() {
-            @Override
-            public void run() {
-                mUpgrading = false;
-                transport.off("packet");
-                transport.off("close");
-                transport.off("error");
-                off("close");
-            }
+        final Runnable cleanup = () -> {
+            mUpgrading = false;
+            transport.off("packet");
+            transport.off("close");
+            transport.off("error");
+            off("close");
         };
 
-        final Listener onError = new Listener() {
-            @Override
-            public void call(Object... args) {
+        final Listener onError = args -> {
+            cleanup.run();
+            transport.close();
+        };
+
+        transport.on("packet", args -> {
+            final Packet packet = (Packet) args[0];
+            if(packet.type.equals(Packet.PING) && (packet.data != null) && packet.data.equals("probe")) {
+                final Packet<String> replyPacket = new Packet<>(Packet.PONG);
+                replyPacket.data = "probe";
+
+                transport.send(new ArrayList<Packet>() {{
+                    add(replyPacket);
+                }});
+
+                emit("upgrading", transport);
+            } else if(packet.type.equals(Packet.UPGRADE) && (mReadyState != ReadyState.CLOSED) && (mReadyState != ReadyState.CLOSING)) {
+                cleanup.run();
+                clearTransport();
+                setTransport(transport);
+                emit("upgrade", transport);
+                flush();
+
+                resetPingTimeout();
+            } else {
                 cleanup.run();
                 transport.close();
             }
-        };
-
-        transport.on("packet", new Listener() {
-            @Override
-            public void call(Object... args) {
-                final Packet packet = (Packet) args[0];
-                if(packet.type.equals(Packet.PING) && (packet.data != null) && packet.data.equals("probe")) {
-                    final Packet<String> replyPacket = new Packet<>(Packet.PONG);
-                    replyPacket.data = "probe";
-
-                    transport.send(new ArrayList<Packet>() {{
-                        add(replyPacket);
-                    }});
-
-                    emit("upgrading", transport);
-                } else if(packet.type.equals(Packet.UPGRADE) && (mReadyState != ReadyState.CLOSED) && (mReadyState != ReadyState.CLOSING)) {
-                    cleanup.run();
-                    clearTransport();
-                    setTransport(transport);
-                    emit("upgrade", transport);
-                    flush();
-
-                    resetPingTimeout();
-                } else {
-                    cleanup.run();
-                    transport.close();
-                }
-            }
         });
-        transport.once("close", new Listener() {
-            @Override
-            public void call(Object... args) {
-                onError.call("transport closed");
-            }
-        });
+        transport.once("close", args -> onError.call("transport closed"));
         transport.once("error", onError);
 
-        once("close", new Listener() {
-            @Override
-            public void call(Object... args) {
-                onError.call("socket closed");
-            }
-        });
+        once("close", args -> onError.call("socket closed"));
     }
 
     /**
@@ -206,40 +181,19 @@ public final class EngineIoSocket extends Emitter {
 
     private void setTransport(final Transport transport) {
         mTransport = transport;
-        transport.once("error", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                onError();
-            }
+        transport.once("error", args -> onError());
+        transport.once("close", args -> {
+            String description = (args.length > 0)? ((String) args[0]) : null;
+            onClose("transport close", description);
         });
-        transport.once("close", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                String description = (args.length > 0)? ((String) args[0]) : null;
-                onClose("transport close", description);
-            }
-        });
-        transport.on("packet", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                onPacket((Packet) args[0]);
-            }
-        });
-        transport.on("drain", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                flush();
-            }
-        });
+        transport.on("packet", args -> onPacket((Packet) args[0]));
+        transport.on("drain", args -> flush());
 
-        mCleanupFunction = new Runnable() {
-            @Override
-            public void run() {
-                transport.off("error");
-                transport.off("close");
-                transport.off("packet");
-                transport.off("drain");
-            }
+        mCleanupFunction = () -> {
+            transport.off("error");
+            transport.off("close");
+            transport.off("packet");
+            transport.off("drain");
         };
     }
 

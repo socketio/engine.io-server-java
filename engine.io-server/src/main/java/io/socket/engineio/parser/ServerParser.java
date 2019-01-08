@@ -1,8 +1,8 @@
 package io.socket.engineio.parser;
 
-import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -87,12 +87,7 @@ public final class ServerParser {
         final StringBuilder result = new StringBuilder();
 
         for (Packet packet : packets) {
-            encodePacket(packet, false, new Parser.EncodeCallback() {
-                @Override
-                public void call(Object data) {
-                    result.append(setLengthHeader((String) data));
-                }
-            });
+            encodePacket(packet, false, data -> result.append(setLengthHeader((String) data)));
         }
 
         callback.call(result.toString());
@@ -104,6 +99,7 @@ public final class ServerParser {
      * @param packets Array of packets to encode.
      * @param callback The callback to be called with the encoded data.
      */
+    @SuppressWarnings("Duplicates")
     public static void encodePayloadAsBinary(Packet[] packets, Parser.EncodeCallback<byte[]> callback) {
         if (packets.length == 0) {
             callback.call(new byte[0]);
@@ -113,35 +109,33 @@ public final class ServerParser {
         final ArrayList<byte[]> results = new ArrayList<>(packets.length);
 
         for (Packet packet : packets) {
-            encodePacket(packet, true, new Parser.EncodeCallback() {
-                @Override
-                public void call(Object packet) {
-                    if (packet instanceof String) {
-                        String encodingLength = String.valueOf(((String) packet).length());
-                        byte[] sizeBuffer = new byte[encodingLength.length() + 2];
+            encodePacket(packet, true, packet1 -> {
+                if (packet1 instanceof String) {
+                    String encodingLength = String.valueOf(((String) packet1).length());
+                    byte[] sizeBuffer = new byte[encodingLength.length() + 2];
 
-                        sizeBuffer[0] = (byte)0; // is a string
-                        for (int i = 0; i < encodingLength.length(); i ++) {
-                            sizeBuffer[i + 1] = (byte)Character.getNumericValue(encodingLength.charAt(i));
-                        }
-                        sizeBuffer[sizeBuffer.length - 1] = (byte)255;
-                        results.add(Buffer.concat(new byte[][] {
-                                sizeBuffer,
-                                ((String)packet).getBytes(StandardCharsets.UTF_8)
-                        }));
-                    } else {
-                        String encodingLength = String.valueOf(((byte[])packet).length);
-                        byte[] sizeBuffer = new byte[encodingLength.length() + 2];
-                        sizeBuffer[0] = (byte)1; // is binary
-                        for (int i = 0; i < encodingLength.length(); i ++) {
-                            sizeBuffer[i + 1] = (byte)Character.getNumericValue(encodingLength.charAt(i));
-                        }
-                        sizeBuffer[sizeBuffer.length - 1] = (byte)255;
-                        results.add(Buffer.concat(new byte[][] {
-                                sizeBuffer,
-                                (byte[])packet
-                        }));
+                    sizeBuffer[0] = (byte)0; // is a string
+                    for (int i = 0; i < encodingLength.length(); i ++) {
+                        sizeBuffer[i + 1] = (byte)Character.getNumericValue(encodingLength.charAt(i));
                     }
+                    sizeBuffer[sizeBuffer.length - 1] = (byte)255;
+                    results.add(Buffer.concat(new byte[][] {
+                            sizeBuffer,
+                            ((String) packet1).getBytes(StandardCharsets.UTF_8)
+                    }));
+                } else {
+                    String encodingLength = String.valueOf(((byte[]) packet1).length);
+                    byte[] sizeBuffer = new byte[encodingLength.length() + 2];
+
+                    sizeBuffer[0] = (byte)1; // is binary
+                    for (int i = 0; i < encodingLength.length(); i ++) {
+                        sizeBuffer[i + 1] = (byte)Character.getNumericValue(encodingLength.charAt(i));
+                    }
+                    sizeBuffer[sizeBuffer.length - 1] = (byte)255;
+                    results.add(Buffer.concat(new byte[][] {
+                            sizeBuffer,
+                            (byte[]) packet1
+                    }));
                 }
             });
         }
@@ -165,7 +159,7 @@ public final class ServerParser {
             if(stringData.charAt(0) == 'b') {
                 Packet<byte[]> packet = new Packet<>(packetsList.get(
                         Integer.parseInt(String.valueOf(stringData.charAt(1)))));
-                packet.data = DatatypeConverter.parseBase64Binary(stringData.substring(2));
+                packet.data = Base64.getDecoder().decode(stringData.substring(2));
                 return packet;
             } else {
                 Packet<String> packet = new Packet<>(packetsList.get(
@@ -260,7 +254,7 @@ public final class ServerParser {
         } else {
             String resultBuilder = "b" +
                     packets.get(packet.type).byteValue() +
-                    DatatypeConverter.printBase64Binary(packet.data);
+                    Base64.getEncoder().encodeToString(packet.data);
             callback.call(resultBuilder);
         }
     }

@@ -140,12 +140,7 @@ public final class EngineIoServerOptions {
             System.arraycopy(allowedCorsOrigins, 0, mAllowedCorsOrigins, 0, allowedCorsOrigins.length);
 
             // Sort the array for faster search on request
-            Arrays.sort(mAllowedCorsOrigins, new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    return o1.compareTo(o2);
-                }
-            });
+            Arrays.sort(mAllowedCorsOrigins, Comparator.naturalOrder());
         }
 
         return this;
