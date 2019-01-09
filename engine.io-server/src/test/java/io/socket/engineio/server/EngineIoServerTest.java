@@ -3,7 +3,7 @@ package io.socket.engineio.server;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.parseqs.ParseQS;
-import io.socket.yeast.Yeast;
+import io.socket.yeast.ServerYeast;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -132,7 +132,7 @@ public final class EngineIoServerTest {
             public Object answer(InvocationOnMock invocationOnMock) {
                 HashMap<String, String> queryMap = new HashMap<>();
                 queryMap.put("transport", "polling");
-                queryMap.put("sid", Yeast.yeast());
+                queryMap.put("sid", ServerYeast.yeast());
 
                 return ParseQS.encode(queryMap);
             }

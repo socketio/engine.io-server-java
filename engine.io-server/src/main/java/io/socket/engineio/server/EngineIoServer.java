@@ -3,8 +3,8 @@ package io.socket.engineio.server;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
+import io.socket.yeast.ServerYeast;
 import io.socket.parseqs.ParseQS;
-import io.socket.yeast.Yeast;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -176,7 +176,7 @@ public final class EngineIoServer extends Emitter {
     }
 
     private void handshakePolling(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        final String sid = Yeast.yeast();
+        final String sid = ServerYeast.yeast();
 
         final Transport transport = new Polling();
         final EngineIoSocket socket = new EngineIoSocket(sid, this);
@@ -190,7 +190,7 @@ public final class EngineIoServer extends Emitter {
     }
 
     private void handshakeWebSocket(EngineIoWebSocket webSocket) {
-        final String sid = Yeast.yeast();
+        final String sid = ServerYeast.yeast();
 
         final Transport transport = new WebSocket(webSocket);
         final EngineIoSocket socket = new EngineIoSocket(sid, this);

@@ -4,7 +4,7 @@ import io.socket.emitter.Emitter;
 import io.socket.engineio.parser.Packet;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
-import io.socket.yeast.Yeast;
+import io.socket.yeast.ServerYeast;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testInit() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = Mockito.spy(new EngineIoSocket(Yeast.yeast(), new EngineIoServer()));
+        final EngineIoSocket socket = Mockito.spy(new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer()));
 
         Mockito.doAnswer(new Answer() {
             @Override
@@ -85,7 +85,7 @@ public final class EngineIoSocketTest {
                 .setInitialPacket(initialPacket);
 
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = Mockito.spy(new EngineIoSocket(Yeast.yeast(), new EngineIoServer(options)));
+        final EngineIoSocket socket = Mockito.spy(new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer(options)));
 
         Mockito.doAnswer(new Answer() {
             @Override
@@ -109,7 +109,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testOnRequest() throws IOException {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
@@ -125,7 +125,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testSend() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         final Packet<String> packet = new Packet<>(Packet.MESSAGE, "TestMessage");
@@ -152,7 +152,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testSend_delayed() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         Mockito.doAnswer(new Answer() {
@@ -197,7 +197,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testClose_withoutData() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         socket.close();
@@ -213,7 +213,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testClose_withData() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         Mockito.doAnswer(new Answer() {
@@ -256,7 +256,7 @@ public final class EngineIoSocketTest {
     public void testCanUpgrade() {
         final Transport transport = Mockito.spy(new StubTransport());
         final EngineIoServer server = new EngineIoServer();
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), server);
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), server);
         socket.init(transport, null);
 
         Mockito.doAnswer(new Answer() {
@@ -275,7 +275,7 @@ public final class EngineIoSocketTest {
         final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
                 .setPingInterval(1500)
                 .setPingTimeout(3000));
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), server);
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), server);
         socket.init(transport, null);
 
         final Emitter.Listener closeListener = Mockito.mock(Emitter.Listener.class);
@@ -292,7 +292,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testTransportClose() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         final Emitter.Listener closeListener = Mockito.mock(Emitter.Listener.class);
@@ -309,7 +309,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testTransportError() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         final Emitter.Listener closeListener = Mockito.mock(Emitter.Listener.class);
@@ -326,7 +326,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testTransportPacket() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         final Packet<String> packet = new Packet<>(Packet.NOOP);
@@ -342,7 +342,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testTransportPacket_message() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         final String packetData = "TestMessage";
@@ -367,7 +367,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testTransportPacket_ping() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         final Packet<String> packet = new Packet<>(Packet.PING);
@@ -396,7 +396,7 @@ public final class EngineIoSocketTest {
     @Test
     public void testTransportPacket_error() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport, null);
 
         final Packet<String> packet = new Packet<>(Packet.ERROR);
@@ -422,7 +422,7 @@ public final class EngineIoSocketTest {
             }
         }).when(transport1).getName();
 
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport1, null);
 
         final Transport transport2 = Mockito.spy(new StubTransport());
@@ -471,7 +471,7 @@ public final class EngineIoSocketTest {
             }
         }).when(transport1).getName();
 
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport1, null);
 
         final Transport transport2 = Mockito.spy(new StubTransport());
@@ -515,7 +515,7 @@ public final class EngineIoSocketTest {
             }
         }).when(transport1).getName();
 
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport1, null);
 
         final Transport transport2 = Mockito.spy(new StubTransport());
@@ -546,7 +546,7 @@ public final class EngineIoSocketTest {
             }
         }).when(transport1).getName();
 
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport1, null);
 
         final Transport transport2 = Mockito.spy(new StubTransport());
@@ -576,7 +576,7 @@ public final class EngineIoSocketTest {
             }
         }).when(transport1).getName();
 
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport1, null);
 
         final Transport transport2 = Mockito.spy(new StubTransport());
@@ -606,7 +606,7 @@ public final class EngineIoSocketTest {
             }
         }).when(transport1).getName();
 
-        final EngineIoSocket socket = new EngineIoSocket(Yeast.yeast(), new EngineIoServer());
+        final EngineIoSocket socket = new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer());
         socket.init(transport1, null);
 
         final Transport transport2 = Mockito.spy(new StubTransport());
