@@ -7,8 +7,6 @@ import io.socket.yeast.ServerYeast;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -26,7 +24,7 @@ public final class EngineIoServerTest {
         private final Map<String, String> mQuery;
 
         WebSocketConnectionStub() {
-            this(new HashMap<String, String>());
+            this(new HashMap<>());
         }
 
         WebSocketConnectionStub(Map<String, String> query) {
@@ -56,8 +54,8 @@ public final class EngineIoServerTest {
         EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
                 .setPingInterval(1500)
                 .setPingTimeout(1500));
-        assertEquals(1500, server.getPingInterval());
-        assertEquals(1500, server.getPingTimeout());
+        assertEquals(1500, server.getOptions().getPingInterval());
+        assertEquals(1500, server.getOptions().getPingTimeout());
     }
 
     @Test
@@ -65,14 +63,11 @@ public final class EngineIoServerTest {
         final EngineIoServer server = new EngineIoServer();
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                HashMap<String, String> queryMap = new HashMap<>();
-                queryMap.put("transport", "invalid");
+        Mockito.doAnswer(invocationOnMock -> {
+            HashMap<String, String> queryMap = new HashMap<>();
+            queryMap.put("transport", "invalid");
 
-                return ParseQS.encode(queryMap);
-            }
+            return ParseQS.encode(queryMap);
         }).when(request).getQueryString();
 
         final HttpServletResponseImpl response = new HttpServletResponseImpl();
@@ -93,21 +88,13 @@ public final class EngineIoServerTest {
         final EngineIoServer server = new EngineIoServer();
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                HashMap<String, String> queryMap = new HashMap<>();
-                queryMap.put("transport", "polling");
+        Mockito.doAnswer(invocationOnMock -> {
+            HashMap<String, String> queryMap = new HashMap<>();
+            queryMap.put("transport", "polling");
 
-                return ParseQS.encode(queryMap);
-            }
+            return ParseQS.encode(queryMap);
         }).when(request).getQueryString();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return "POST";
-            }
-        }).when(request).getMethod();
+        Mockito.doAnswer(invocationOnMock -> "POST").when(request).getMethod();
 
         final HttpServletResponseImpl response = new HttpServletResponseImpl();
 
@@ -127,15 +114,12 @@ public final class EngineIoServerTest {
         final EngineIoServer server = new EngineIoServer();
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                HashMap<String, String> queryMap = new HashMap<>();
-                queryMap.put("transport", "polling");
-                queryMap.put("sid", ServerYeast.yeast());
+        Mockito.doAnswer(invocationOnMock -> {
+            HashMap<String, String> queryMap = new HashMap<>();
+            queryMap.put("transport", "polling");
+            queryMap.put("sid", ServerYeast.yeast());
 
-                return ParseQS.encode(queryMap);
-            }
+            return ParseQS.encode(queryMap);
         }).when(request).getQueryString();
 
         final HttpServletResponseImpl response = new HttpServletResponseImpl();
@@ -191,27 +175,14 @@ public final class EngineIoServerTest {
                 .setAllowedCorsOrigins(EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                HashMap<String, String> queryMap = new HashMap<>();
-                queryMap.put("transport", "polling");
+        Mockito.doAnswer(invocationOnMock -> {
+            HashMap<String, String> queryMap = new HashMap<>();
+            queryMap.put("transport", "polling");
 
-                return ParseQS.encode(queryMap);
-            }
+            return ParseQS.encode(queryMap);
         }).when(request).getQueryString();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return "POST";
-            }
-        }).when(request).getMethod();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return origin;
-            }
-        }).when(request).getHeader(Mockito.eq("Origin"));
+        Mockito.doAnswer(invocationOnMock -> "POST").when(request).getMethod();
+        Mockito.doAnswer(invocationOnMock -> origin).when(request).getHeader(Mockito.eq("Origin"));
 
         final HttpServletResponseImpl response = Mockito.spy(new HttpServletResponseImpl());
 
@@ -228,27 +199,14 @@ public final class EngineIoServerTest {
                 .setAllowedCorsOrigins(EngineIoServerOptions.ALLOWED_CORS_ORIGIN_NONE));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                HashMap<String, String> queryMap = new HashMap<>();
-                queryMap.put("transport", "polling");
+        Mockito.doAnswer(invocationOnMock -> {
+            HashMap<String, String> queryMap = new HashMap<>();
+            queryMap.put("transport", "polling");
 
-                return ParseQS.encode(queryMap);
-            }
+            return ParseQS.encode(queryMap);
         }).when(request).getQueryString();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return "POST";
-            }
-        }).when(request).getMethod();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return origin;
-            }
-        }).when(request).getHeader(Mockito.eq("Origin"));
+        Mockito.doAnswer(invocationOnMock -> "POST").when(request).getMethod();
+        Mockito.doAnswer(invocationOnMock -> origin).when(request).getHeader(Mockito.eq("Origin"));
 
         final HttpServletResponseImpl response = Mockito.spy(new HttpServletResponseImpl());
 
@@ -267,27 +225,14 @@ public final class EngineIoServerTest {
                 }));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                HashMap<String, String> queryMap = new HashMap<>();
-                queryMap.put("transport", "polling");
+        Mockito.doAnswer(invocationOnMock -> {
+            HashMap<String, String> queryMap = new HashMap<>();
+            queryMap.put("transport", "polling");
 
-                return ParseQS.encode(queryMap);
-            }
+            return ParseQS.encode(queryMap);
         }).when(request).getQueryString();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return "POST";
-            }
-        }).when(request).getMethod();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return origin;
-            }
-        }).when(request).getHeader(Mockito.eq("Origin"));
+        Mockito.doAnswer(invocationOnMock -> "POST").when(request).getMethod();
+        Mockito.doAnswer(invocationOnMock -> origin).when(request).getHeader(Mockito.eq("Origin"));
 
         final HttpServletResponseImpl response = Mockito.spy(new HttpServletResponseImpl());
 
@@ -306,27 +251,14 @@ public final class EngineIoServerTest {
                 }));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                HashMap<String, String> queryMap = new HashMap<>();
-                queryMap.put("transport", "polling");
+        Mockito.doAnswer(invocationOnMock -> {
+            HashMap<String, String> queryMap = new HashMap<>();
+            queryMap.put("transport", "polling");
 
-                return ParseQS.encode(queryMap);
-            }
+            return ParseQS.encode(queryMap);
         }).when(request).getQueryString();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return "POST";
-            }
-        }).when(request).getMethod();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return "http://www.example.org";
-            }
-        }).when(request).getHeader(Mockito.eq("Origin"));
+        Mockito.doAnswer(invocationOnMock -> "POST").when(request).getMethod();
+        Mockito.doAnswer(invocationOnMock -> "http://www.example.org").when(request).getHeader(Mockito.eq("Origin"));
 
         final HttpServletResponseImpl response = Mockito.spy(new HttpServletResponseImpl());
 
@@ -336,37 +268,19 @@ public final class EngineIoServerTest {
                 .addHeader(Mockito.eq("Access-Control-Allow-Origin"), Mockito.eq(origin));
     }
 
+    @SuppressWarnings("SuspiciousMethodCalls")
     private HttpServletRequest getConnectRequest(final Map<String, String> query) {
         final HashMap<String, Object> attributes = new HashMap<>();
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return ParseQS.encode(query);
-            }
-        }).when(request).getQueryString();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return "GET";
-            }
-        }).when(request).getMethod();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                final String name = invocationOnMock.getArgument(0);
-                final Object value = invocationOnMock.getArgument(1);
-                attributes.put(name, value);
-                return null;
-            }
+        Mockito.doAnswer(invocationOnMock -> ParseQS.encode(query)).when(request).getQueryString();
+        Mockito.doAnswer(invocationOnMock -> "GET").when(request).getMethod();
+        Mockito.doAnswer(invocationOnMock -> {
+            final String name = invocationOnMock.getArgument(0);
+            final Object value = invocationOnMock.getArgument(1);
+            attributes.put(name, value);
+            return null;
         }).when(request).setAttribute(Mockito.anyString(), Mockito.any());
-        Mockito.doAnswer(new Answer() {
-            @SuppressWarnings("SuspiciousMethodCalls")
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                return attributes.get(invocationOnMock.getArgument(0));
-            }
-        }).when(request).getAttribute(Mockito.anyString());
+        Mockito.doAnswer(invocationOnMock -> attributes.get(invocationOnMock.getArgument(0))).when(request).getAttribute(Mockito.anyString());
         return request;
     }
 }

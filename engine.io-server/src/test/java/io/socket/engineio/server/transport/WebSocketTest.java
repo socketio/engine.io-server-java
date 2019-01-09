@@ -2,7 +2,6 @@ package io.socket.engineio.server.transport;
 
 import io.socket.emitter.Emitter;
 import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.Parser;
 import io.socket.engineio.parser.ServerParser;
 import io.socket.engineio.server.EngineIoWebSocket;
 import org.junit.Test;
@@ -86,16 +85,13 @@ public final class WebSocketTest {
             add(packet);
         }});
 
-        Mockito.verify(webSocket, Mockito.times(1)).send(Mockito.<Packet>anyList());
+        Mockito.verify(webSocket, Mockito.times(1)).send(Mockito.anyList());
 
-        ServerParser.encodePacket(packet, true, new Parser.EncodeCallback() {
-            @Override
-            public void call(Object data) {
-                try {
-                    Mockito.verify(webSocketConnection, Mockito.times(1))
-                            .write(Mockito.eq((String) data));
-                } catch (IOException ignore) {
-                }
+        ServerParser.encodePacket(packet, true, data -> {
+            try {
+                Mockito.verify(webSocketConnection, Mockito.times(1))
+                        .write(Mockito.eq((String) data));
+            } catch (IOException ignore) {
             }
         });
     }
@@ -112,16 +108,13 @@ public final class WebSocketTest {
             add(packet);
         }});
 
-        Mockito.verify(webSocket, Mockito.times(1)).send(Mockito.<Packet>anyList());
+        Mockito.verify(webSocket, Mockito.times(1)).send(Mockito.anyList());
 
-        ServerParser.encodePacket(packet, true, new Parser.EncodeCallback() {
-            @Override
-            public void call(Object data) {
-                try {
-                    Mockito.verify(webSocketConnection, Mockito.times(1))
-                            .write(Mockito.eq((byte[]) data));
-                } catch (IOException ignore) {
-                }
+        ServerParser.encodePacket(packet, true, data -> {
+            try {
+                Mockito.verify(webSocketConnection, Mockito.times(1))
+                        .write(Mockito.eq((byte[]) data));
+            } catch (IOException ignore) {
             }
         });
     }
@@ -133,11 +126,7 @@ public final class WebSocketTest {
         final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
 
         Mockito.doThrow(new IOException()).when(webSocketConnection).write(Mockito.anyString());
-        webSocket.on("error", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-            }
-        });
+        webSocket.on("error", args -> { });
 
         final String stringData = "Test string";
         final Packet packet = new Packet(Packet.MESSAGE, stringData);
@@ -146,7 +135,7 @@ public final class WebSocketTest {
         }});
 
         Mockito.verify(webSocket, Mockito.times(1))
-                .send(Mockito.<Packet>anyList());
+                .send(Mockito.anyList());
         Mockito.verify(webSocket, Mockito.times(1))
                 .emit(Mockito.eq("error"), Mockito.eq("write error"), Mockito.isNull());
     }
@@ -156,11 +145,7 @@ public final class WebSocketTest {
         final EngineIoWebSocket webSocketConnection = new EngineIoWebSocketStub();
         final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
 
-        final Emitter.Listener closeListener = Mockito.spy(new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-            }
-        });
+        final Emitter.Listener closeListener = Mockito.spy(Emitter.Listener.class);
         webSocket.on("close", closeListener);
         webSocketConnection.emit("close");
 
@@ -173,11 +158,7 @@ public final class WebSocketTest {
         final EngineIoWebSocket webSocketConnection = Mockito.spy(new EngineIoWebSocketStub());
         final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
 
-        final Emitter.Listener errorListener = Mockito.spy(new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-            }
-        });
+        final Emitter.Listener errorListener = Mockito.spy(Emitter.Listener.class);
         webSocket.on("error", errorListener);
         webSocketConnection.emit("error", "test", null);
 
@@ -191,24 +172,21 @@ public final class WebSocketTest {
         final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
 
         final Packet<String> packet = new Packet<>(Packet.MESSAGE, "Test Message");
-        final Emitter.Listener packetListener = Mockito.spy(new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                final Packet argPacket = (Packet) args[0];
-                assertEquals(packet.type, argPacket.type);
-                assertEquals(packet.data, argPacket.data);
-            }
-        });
+        final Emitter.Listener packetListener = Mockito.spy(Emitter.Listener.class);
+        Mockito.doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            final Packet argPacket = (Packet) args[0];
+            assertEquals(packet.type, argPacket.type);
+            assertEquals(packet.data, argPacket.data);
+            return null;
+        }).when(packetListener).call(Mockito.any());
         webSocket.on("packet", packetListener);
 
-        ServerParser.encodePacket(packet, true, new Parser.EncodeCallback() {
-            @Override
-            public void call(Object data) {
-                webSocketConnection.emit("message", data);
+        ServerParser.encodePacket(packet, true, data -> {
+            webSocketConnection.emit("message", data);
 
-                Mockito.verify(packetListener, Mockito.times(1))
-                        .call(Mockito.any(Packet.class));
-            }
+            Mockito.verify(packetListener, Mockito.times(1))
+                    .call(Mockito.any(Packet.class));
         });
     }
 }

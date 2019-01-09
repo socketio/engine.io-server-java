@@ -5,22 +5,21 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Locale;
 
 public final class HttpServletResponseImpl implements HttpServletResponse {
 
     private final ServletOutputStreamWrapper mServletOutputStreamWrapper = new ServletOutputStreamWrapper();
-    private final ArrayList<Cookie> mCookieList = new ArrayList<>();
 
     private int mStatus = HttpServletResponse.SC_OK;
     private PrintWriter mPrintWriter = null;
 
     @Override
     public void addCookie(Cookie cookie) {
-        mCookieList.add(cookie);
     }
 
     @Override
@@ -30,22 +29,38 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public String encodeURL(String s) {
-        return URLEncoder.encode(s);
+        try {
+            return URLEncoder.encode(s, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException ignore) {
+            return null;
+        }
     }
 
     @Override
     public String encodeRedirectURL(String s) {
-        return URLEncoder.encode(s);
+        try {
+            return URLEncoder.encode(s, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException ignore) {
+            return null;
+        }
     }
 
     @Override
     public String encodeUrl(String s) {
-        return URLEncoder.encode(s);
+        try {
+            return URLEncoder.encode(s, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException ignore) {
+            return null;
+        }
     }
 
     @Override
     public String encodeRedirectUrl(String s) {
-        return URLEncoder.encode(s);
+        try {
+            return URLEncoder.encode(s, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException ignore) {
+            return null;
+        }
     }
 
     @Override
@@ -192,15 +207,11 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         return null;
     }
 
-    public ArrayList<Cookie> getCookieList() {
-        return mCookieList;
-    }
-
     public ByteArrayOutputStream getByteOutputStream() {
         return mServletOutputStreamWrapper.getByteStream();
     }
 
-    public synchronized void flushWriterIfNecessary() {
+    synchronized void flushWriterIfNecessary() {
         if (mPrintWriter != null) {
             mPrintWriter.flush();
         }

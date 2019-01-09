@@ -1,8 +1,6 @@
 package io.socket.engineio.server;
 
-import io.socket.emitter.Emitter;
 import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.Parser;
 import io.socket.engineio.parser.ServerParser;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -85,7 +83,6 @@ public final class TransportTest {
         assertEquals(ReadyState.OPEN, transport.getState());
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void testClose_open() {
         final TestTransport transport = Mockito.spy(new TestTransport());
@@ -95,7 +92,6 @@ public final class TransportTest {
         assertEquals(ReadyState.CLOSING, transport.getState());
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void testClose_closed() {
         final TestTransport transport = Mockito.spy(new TestTransport());
@@ -110,11 +106,7 @@ public final class TransportTest {
     public void testOnError() {
         final TestTransport transport = Mockito.spy(new TestTransport());
 
-        transport.on("error", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-            }
-        });
+        transport.on("error", args -> { });
         transport.onError("test", null);
         Mockito.verify(transport, Mockito.times(1)).emit("error", "test", null);
     }
@@ -135,14 +127,11 @@ public final class TransportTest {
         final TestTransport transport = Mockito.spy(new TestTransport());
 
         final Packet testPacket = new Packet(Packet.MESSAGE, "test");
-        ServerParser.encodePacket(testPacket, false, new Parser.EncodeCallback() {
-            @Override
-            public void call(Object data) {
-                String packetData = (String) data;
+        ServerParser.encodePacket(testPacket, false, data -> {
+            String packetData = (String) data;
 
-                transport.onData(packetData);
-                Mockito.verify(transport, Mockito.times(1)).onPacket(Mockito.any(Packet.class));
-            }
+            transport.onData(packetData);
+            Mockito.verify(transport, Mockito.times(1)).onPacket(Mockito.any(Packet.class));
         });
     }
 

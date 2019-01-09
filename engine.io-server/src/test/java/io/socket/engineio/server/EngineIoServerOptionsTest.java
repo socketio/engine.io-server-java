@@ -41,12 +41,7 @@ public final class EngineIoServerOptionsTest {
         };
         options.setAllowedCorsOrigins(origins);
 
-        Arrays.sort(origins, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return o1.compareTo(o2);
-            }
-        });
+        Arrays.sort(origins, String::compareTo);
 
         Assert.assertArrayEquals(origins, options.getAllowedCorsOrigins());
     }
