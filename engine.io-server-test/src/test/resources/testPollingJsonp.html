@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Polling Test - JSONP</title>
+
+    <script type="text/javascript" src="node_modules/engine.io-client/engine.io.js"></script>
+    <script type="text/javascript">
+        window.setResult = function (result) {
+            window.location = "http://www.example.com/?result=" + result;
+        };
+    </script>
+</head>
+<body>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package io.socket.engineio.server;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.http.pathmap.ServletPathSpec;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -14,7 +15,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicInteger;
 
 final class ServerWrapper {
@@ -43,6 +48,26 @@ final class ServerWrapper {
                 mEngineIoServer.handleRequest(request, response);
             }
         }), "/engine.io/*");
+        servletContextHandler.addServlet(new ServletHolder(new HttpServlet() {
+            @Override
+            protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+                final String path = request.getPathInfo();
+                final File file = new File("src/test/resources", path);
+                if (file.exists()) {
+                    response.setContentType(Files.probeContentType(file.toPath()));
+
+                    try (FileInputStream fis = new FileInputStream(file)) {
+                        IOUtils.copy(fis, response.getOutputStream());
+                    }
+                } else {
+                    response.setStatus(404);
+                    try (PrintWriter writer = response.getWriter()) {
+                        writer.print("Not Found");
+                        writer.flush();
+                    }
+                }
+            }
+        }), "/*");
 
         try {
             WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(servletContextHandler);

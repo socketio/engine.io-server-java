@@ -3,6 +3,9 @@ package io.socket.engineio.server.transport;
 import io.socket.engineio.parser.Packet;
 import io.socket.engineio.parser.ServerParser;
 import io.socket.engineio.server.Transport;
+import io.socket.parseqs.ParseQS;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -69,23 +72,41 @@ public final class Polling extends Transport {
             packets.add(new Packet(Packet.CLOSE));
         }
 
-        @SuppressWarnings("unchecked")
-        final boolean supportsBinary = (!((Map<String, String>) mRequest.getAttribute("query")).containsKey("b64"));
+        //noinspection unchecked
+        final Map<String, String> query = (Map<String, String>) mRequest.getAttribute("query");
+
+        final boolean supportsBinary = !query.containsKey("b64");
+        final boolean jsonp = query.containsKey("j");
 
         if(packets.size() == 0) {
             throw new IllegalArgumentException("No packets to send.");
         }
         ServerParser.encodePayload(packets.toArray(new Packet[0]), supportsBinary, data -> {
-            final String contentType = (data instanceof String)? "text/plain; charset=UTF-8" : "application/octet-stream";
-            final int contentLength = (data instanceof String)? ((String) data).length() : ((byte[]) data).length;
+            final String contentType;
+            final byte[] contentBytes;
+
+            if (jsonp) {
+                final String jsonpIndex = query.get("j").replaceAll("[^0-9]", "");
+                final String jsonContentString = (data instanceof String)?
+                        JSONObject.quote((String)data) :
+                        JSONObject.valueToString(new JSONArray(data));
+                final String jsContentString = jsonContentString
+                        .replace("\u2028", "\\u2028")
+                        .replace("\u2029", "\\u2029");
+                final String contentString = "___eio[" + jsonpIndex + "](" + jsContentString + ")";
+
+                contentType = "text/javascript; charset=UTF-8";
+                contentBytes = contentString.getBytes(StandardCharsets.UTF_8);
+            } else {
+                contentType = (data instanceof String)? "text/plain; charset=UTF-8" : "application/octet-stream";
+                contentBytes = (data instanceof String)? ((String)data).getBytes(StandardCharsets.UTF_8) : ((byte[])data);
+            }
 
             mResponse.setContentType(contentType);
-            mResponse.setContentLength(contentLength);
+            mResponse.setContentLength(contentBytes.length);
 
             try (OutputStream outputStream = mResponse.getOutputStream()) {
-                // TODO: Support JSONP
-                byte[] writeBytes = (data instanceof String)? ((String) data).getBytes(StandardCharsets.UTF_8) : ((byte[]) data);
-                outputStream.write(writeBytes);
+                outputStream.write(contentBytes);
             } catch (IOException ex) {
                 onError("write failure", ex.getMessage());
             }
@@ -148,7 +169,11 @@ public final class Polling extends Transport {
     }
 
     private void onDataRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+        //noinspection unchecked
+        final Map<String, String> query = (Map<String, String>) mRequest.getAttribute("query");
+
         final boolean isBinary = request.getContentType().equals("application/octet-stream");
+        final boolean jsonp = query.containsKey("j");
 
         try(final ServletInputStream inputStream = request.getInputStream()) {
             final byte[] mReadBuffer = new byte[request.getContentLength()];
@@ -156,7 +181,13 @@ public final class Polling extends Transport {
             //noinspection ResultOfMethodCallIgnored
             inputStream.read(mReadBuffer, 0, mReadBuffer.length);
 
-            onData((isBinary)? mReadBuffer : (new String(mReadBuffer, StandardCharsets.UTF_8)));
+            if (jsonp) {
+                final String packetPayloadRaw = ParseQS.decode(new String(mReadBuffer, StandardCharsets.UTF_8)).get("d");
+                final String packetPayload = packetPayloadRaw.replace("\\n", "\n");
+                onData(packetPayload);
+            } else {
+                onData((isBinary)? mReadBuffer : (new String(mReadBuffer, StandardCharsets.UTF_8)));
+            }
         }
 
         response.setContentType("text/html");
