@@ -307,7 +307,7 @@ public final class EngineIoSocketTest {
         final String packetData = "TestMessage";
         final Packet<String> packet = new Packet<>(Packet.MESSAGE, packetData);
 
-        final Emitter.Listener messageListener = Mockito.spy(Emitter.Listener.class);
+        final Emitter.Listener messageListener = Mockito.mock(Emitter.Listener.class);
         Mockito.doAnswer(invocation -> {
             final Object[] args = invocation.getArguments();
             Assert.assertEquals(1, args.length);

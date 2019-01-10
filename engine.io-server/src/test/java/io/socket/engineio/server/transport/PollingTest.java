@@ -67,7 +67,7 @@ public final class PollingTest {
 
         final HttpServletResponseImpl response = new HttpServletResponseImpl();
 
-        final Emitter.Listener drainListener = Mockito.spy(Emitter.Listener.class);
+        final Emitter.Listener drainListener = Mockito.mock(Emitter.Listener.class);
         Mockito.doAnswer(invocation -> {
             polling.send(new ArrayList<Packet>(){{
                 add(new Packet(Packet.MESSAGE, "Test Data"));
@@ -104,7 +104,7 @@ public final class PollingTest {
 
         final HttpServletResponseImpl response = new HttpServletResponseImpl();
 
-        final Emitter.Listener drainListener = Mockito.spy(Emitter.Listener.class);
+        final Emitter.Listener drainListener = Mockito.mock(Emitter.Listener.class);
         Mockito.doAnswer(invocation -> {
             polling.send(new ArrayList<Packet>(){{
                 add(new Packet(Packet.MESSAGE, "Test Data"));

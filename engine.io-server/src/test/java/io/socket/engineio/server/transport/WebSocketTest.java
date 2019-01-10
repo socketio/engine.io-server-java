@@ -145,7 +145,7 @@ public final class WebSocketTest {
         final EngineIoWebSocket webSocketConnection = new EngineIoWebSocketStub();
         final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
 
-        final Emitter.Listener closeListener = Mockito.spy(Emitter.Listener.class);
+        final Emitter.Listener closeListener = Mockito.mock(Emitter.Listener.class);
         webSocket.on("close", closeListener);
         webSocketConnection.emit("close");
 
@@ -158,7 +158,7 @@ public final class WebSocketTest {
         final EngineIoWebSocket webSocketConnection = Mockito.spy(new EngineIoWebSocketStub());
         final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
 
-        final Emitter.Listener errorListener = Mockito.spy(Emitter.Listener.class);
+        final Emitter.Listener errorListener = Mockito.mock(Emitter.Listener.class);
         webSocket.on("error", errorListener);
         webSocketConnection.emit("error", "test", null);
 
@@ -172,7 +172,7 @@ public final class WebSocketTest {
         final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
 
         final Packet<String> packet = new Packet<>(Packet.MESSAGE, "Test Message");
-        final Emitter.Listener packetListener = Mockito.spy(Emitter.Listener.class);
+        final Emitter.Listener packetListener = Mockito.mock(Emitter.Listener.class);
         Mockito.doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             final Packet argPacket = (Packet) args[0];
