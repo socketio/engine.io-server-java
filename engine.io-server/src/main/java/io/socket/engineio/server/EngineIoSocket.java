@@ -132,7 +132,6 @@ public final class EngineIoSocket extends Emitter {
             transport.off("packet");
             transport.off("close");
             transport.off("error");
-            off("close");
         };
 
         final Listener onError = args -> {
