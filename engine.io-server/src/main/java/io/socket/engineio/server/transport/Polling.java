@@ -5,6 +5,7 @@ import io.socket.engineio.parser.ServerParser;
 import io.socket.engineio.server.Transport;
 import io.socket.parseqs.ParseQS;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.ServletInputStream;
@@ -86,17 +87,23 @@ public final class Polling extends Transport {
             final byte[] contentBytes;
 
             if (jsonp) {
-                final String jsonpIndex = query.get("j").replaceAll("[^0-9]", "");
-                final String jsonContentString = (data instanceof String)?
-                        JSONObject.quote((String)data) :
-                        JSONObject.valueToString(new JSONArray(data));
-                final String jsContentString = jsonContentString
-                        .replace("\u2028", "\\u2028")
-                        .replace("\u2029", "\\u2029");
-                final String contentString = "___eio[" + jsonpIndex + "](" + jsContentString + ")";
+                try {
+                    final String jsonpIndex = query.get("j").replaceAll("[^0-9]", "");
+                    final String jsonContentString;
+                    jsonContentString = (data instanceof String)?
+                            JSONObject.quote((String)data) :
+                            new JSONArray(data).toString();
+                    final String jsContentString = jsonContentString
+                            .replace("\u2028", "\\u2028")
+                            .replace("\u2029", "\\u2029");
+                    final String contentString = "___eio[" + jsonpIndex + "](" + jsContentString + ")";
 
-                contentType = "text/javascript; charset=UTF-8";
-                contentBytes = contentString.getBytes(StandardCharsets.UTF_8);
+                    contentType = "text/javascript; charset=UTF-8";
+                    contentBytes = contentString.getBytes(StandardCharsets.UTF_8);
+                }
+                catch (JSONException e) {
+                    throw new AssertionError(e);
+                }
             } else {
                 contentType = (data instanceof String)? "text/plain; charset=UTF-8" : "application/octet-stream";
                 contentBytes = (data instanceof String)? ((String)data).getBytes(StandardCharsets.UTF_8) : ((byte[])data);

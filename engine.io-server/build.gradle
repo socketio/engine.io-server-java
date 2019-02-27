@@ -1,0 +1,25 @@
+apply plugin: 'com.android.library'
+
+android {
+    lintOptions {
+        abortOnError false
+    }
+
+    defaultConfig {
+        targetSdkVersion 28
+        minSdkVersion 21
+    }
+
+    dependencies {
+        api ('io.socket:engine.io-client:1.0.0')
+        api group: 'javax.servlet', name: 'servlet-api', version: '2.5'
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    compileSdkVersion project.hasProperty('global_compileSdkVersion') ? global_compileSdkVersion : 28
+    buildToolsVersion project.hasProperty('global_buildToolsVersion') ? global_buildToolsVersion : '28.0.3'
+}

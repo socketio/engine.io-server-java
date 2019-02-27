@@ -5,6 +5,7 @@ import io.socket.engineio.parser.Packet;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -215,10 +216,15 @@ public final class EngineIoSocket extends Emitter {
         upgrades.put(WebSocket.NAME);
 
         JSONObject handshakePacket = new JSONObject();
-        handshakePacket.put("sid", mSid);
-        handshakePacket.put("upgrades", upgrades);
-        handshakePacket.put("pingInterval", mServer.getOptions().getPingInterval());
-        handshakePacket.put("pingTimeout", mServer.getOptions().getPingTimeout());
+        try {
+            handshakePacket.put("sid", mSid);
+            handshakePacket.put("upgrades", upgrades);
+            handshakePacket.put("pingInterval", mServer.getOptions().getPingInterval());
+            handshakePacket.put("pingTimeout", mServer.getOptions().getPingTimeout());
+        }
+        catch (JSONException e) {
+            throw new AssertionError(e);
+        }
 
         Packet<String> openPacket = new Packet<>(Packet.OPEN);
         openPacket.data = handshakePacket.toString();

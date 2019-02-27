@@ -14,3 +14,4 @@
 .DS_Store
 target/
 node_modules/
+engine.io-server/build

@@ -5,6 +5,8 @@ import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
 import io.socket.yeast.ServerYeast;
 import io.socket.parseqs.ParseQS;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -92,7 +94,7 @@ public final class EngineIoServer extends Emitter {
             return;
         }
 
-        final String sid = query.getOrDefault("sid", null);
+        final String sid = query.get("sid");
         if (sid != null) {
             if(!mClients.containsKey(query.get("sid"))) {
                 sendErrorMessage(request, response, ServerErrors.UNKNOWN_SID);
@@ -120,7 +122,7 @@ public final class EngineIoServer extends Emitter {
      */
     public void handleWebSocket(EngineIoWebSocket webSocket) {
         final Map<String, String> query = webSocket.getQuery();
-        final String sid = query.getOrDefault("sid", null);
+        final String sid = query.get("sid");
 
         if(sid != null) {
             EngineIoSocket socket = mClients.get(sid);
@@ -161,17 +163,27 @@ public final class EngineIoServer extends Emitter {
                 response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
             }
 
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("code", code.getCode());
-            jsonObject.put("message", code.getMessage());
-            response.getWriter().write(jsonObject.toString());
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("code", code.getCode());
+                jsonObject.put("message", code.getMessage());
+                response.getWriter().write(jsonObject.toString());
+            }
+            catch (JSONException e) {
+                throw new AssertionError(e);
+            }
         } else {
             response.setStatus(403);
 
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("code", ServerErrors.FORBIDDEN.getCode());
-            jsonObject.put("message", ServerErrors.FORBIDDEN.getMessage());
-            response.getWriter().write(jsonObject.toString());
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("code", ServerErrors.FORBIDDEN.getCode());
+                jsonObject.put("message", ServerErrors.FORBIDDEN.getMessage());
+                response.getWriter().write(jsonObject.toString());
+            }
+            catch (JSONException e) {
+                throw new AssertionError(e);
+            }
         }
     }
 
