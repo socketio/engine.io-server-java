@@ -39,6 +39,7 @@ public final class EngineIoServerOptions {
     }
 
     private boolean mIsLocked;
+    private boolean mCorsHandlingDisabled;
     private long mPingInterval;
     private long mPingTimeout;
     private String[] mAllowedCorsOrigins;
@@ -56,10 +57,36 @@ public final class EngineIoServerOptions {
      */
     public static EngineIoServerOptions newFromDefault() {
         return (new EngineIoServerOptions())
+                .setCorsHandlingDisabled(DEFAULT.isCorsHandlingDisabled())
                 .setPingInterval(DEFAULT.getPingInterval())
                 .setPingTimeout(DEFAULT.getPingTimeout())
                 .setAllowedCorsOrigins(DEFAULT.getAllowedCorsOrigins())
                 .setInitialPacket(null);
+    }
+
+    /**
+     * Gets the value of 'isCorsHandlingDisabled' option.
+     *
+     * @return Boolean value indicating if CORS handling is disabled.
+     */
+    public boolean isCorsHandlingDisabled() {
+        return mCorsHandlingDisabled;
+    }
+
+    /**
+     * Sets the 'isCorsHandlingDisabled' option.
+     *
+     * @param corsHandlingDisabled Boolean value for disabling CORS handling.
+     * @return Instance for chaining.
+     * @throws IllegalStateException If instance is locked.
+     */
+    public EngineIoServerOptions setCorsHandlingDisabled(boolean corsHandlingDisabled) throws IllegalStateException {
+        if (mIsLocked) {
+            throw new IllegalStateException("CORS handling cannot be set. Instance is locked.");
+        }
+
+        mCorsHandlingDisabled = corsHandlingDisabled;
+        return this;
     }
 
     /**
