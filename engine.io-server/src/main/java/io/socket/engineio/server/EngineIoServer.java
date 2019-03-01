@@ -89,24 +89,43 @@ public final class EngineIoServer extends Emitter {
         final Map<String, String> query = ParseQS.decode(request.getQueryString());
         request.setAttribute("query", query);
 
+        if (!mOptions.isCorsHandlingDisabled()) {
+            /*
+             * Send cors headers if:
+             * 1. 'Origin' header is present in request
+             * 2. All origins are allowed (mOptions.getAllowedCorsOrigins() == EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL)
+             * 3. Specified origin is allowed (Arrays.binarySearch(mOptions.getAllowedCorsOrigins(), origin) >= 0)
+             * */
+            final String origin = request.getHeader("Origin");
+            boolean sendCors = (origin != null) &&
+                    ((mOptions.getAllowedCorsOrigins() == EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL) ||
+                            (Arrays.binarySearch(mOptions.getAllowedCorsOrigins(), origin) >= 0));
+            if (sendCors) {
+                response.addHeader("Access-Control-Allow-Origin", origin);
+                response.addHeader("Access-Control-Allow-Credentials", "true");
+                response.addHeader("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+                response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
+            }
+        }
+
         if (!query.containsKey("transport") || !query.get("transport").equals("polling")) {
-            sendErrorMessage(request, response, ServerErrors.UNKNOWN_TRANSPORT);
+            sendErrorMessage(response, ServerErrors.UNKNOWN_TRANSPORT);
             return;
         }
 
         final String sid = query.get("sid");
         if (sid != null) {
             if(!mClients.containsKey(query.get("sid"))) {
-                sendErrorMessage(request, response, ServerErrors.UNKNOWN_SID);
+                sendErrorMessage(response, ServerErrors.UNKNOWN_SID);
             } else if(!query.containsKey("transport") ||
                             !query.get("transport").equals(mClients.get(sid).getCurrentTransportName())) {
-                sendErrorMessage(request, response, ServerErrors.BAD_REQUEST);
+                sendErrorMessage(response, ServerErrors.BAD_REQUEST);
             } else {
                 mClients.get(sid).onRequest(request, response);
             }
         } else {
             if(!request.getMethod().toUpperCase().equals("GET")) {
-                sendErrorMessage(request, response, ServerErrors.BAD_HANDSHAKE_METHOD);
+                sendErrorMessage(response, ServerErrors.BAD_HANDSHAKE_METHOD);
             } else {
                 handshakePolling(request, response);
             }
@@ -139,29 +158,13 @@ public final class EngineIoServer extends Emitter {
         }
     }
 
-    private void sendErrorMessage(HttpServletRequest request, HttpServletResponse response, ServerErrors code) throws IOException {
+    private void sendErrorMessage(HttpServletResponse response,
+                                  ServerErrors code) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         if(code != null) {
             response.setStatus(400);
-
-            /*
-            * Send cors headers if:
-            * 1. 'Origin' header is present in request
-            * 2. All origins are allowed (mOptions.getAllowedCorsOrigins() == EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL)
-            * 3. Specified origin is allowed (Arrays.binarySearch(mOptions.getAllowedCorsOrigins(), origin) >= 0)
-            * */
-            final String origin = request.getHeader("Origin");
-            boolean sendCors = (origin != null) &&
-                    ((mOptions.getAllowedCorsOrigins() == EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL) ||
-                            (Arrays.binarySearch(mOptions.getAllowedCorsOrigins(), origin) >= 0));
-            if (sendCors) {
-                response.addHeader("Access-Control-Allow-Origin", origin);
-                response.addHeader("Access-Control-Allow-Credentials", "true");
-                response.addHeader("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
-                response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept");
-            }
 
             try {
                 JSONObject jsonObject = new JSONObject();
