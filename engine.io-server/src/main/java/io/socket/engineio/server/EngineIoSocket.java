@@ -223,6 +223,7 @@ public final class EngineIoSocket extends Emitter {
             handshakePacket.put("pingTimeout", mServer.getOptions().getPingTimeout());
         }
         catch (JSONException e) {
+            // this catch block is a requirement on Android which embeds an older org.json
             throw new AssertionError(e);
         }
 

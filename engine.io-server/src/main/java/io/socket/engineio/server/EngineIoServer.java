@@ -173,6 +173,7 @@ public final class EngineIoServer extends Emitter {
                 response.getWriter().write(jsonObject.toString());
             }
             catch (JSONException e) {
+                // this catch block is a requirement on Android which embeds an older org.json
                 throw new AssertionError(e);
             }
         } else {
@@ -185,6 +186,7 @@ public final class EngineIoServer extends Emitter {
                 response.getWriter().write(jsonObject.toString());
             }
             catch (JSONException e) {
+                // this catch block is a requirement on Android which embeds an older org.json
                 throw new AssertionError(e);
             }
         }

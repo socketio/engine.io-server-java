@@ -102,6 +102,7 @@ public final class Polling extends Transport {
                     contentBytes = contentString.getBytes(StandardCharsets.UTF_8);
                 }
                 catch (JSONException e) {
+                    // this catch block is a requirement on Android which embeds an older org.json
                     throw new AssertionError(e);
                 }
             } else {
