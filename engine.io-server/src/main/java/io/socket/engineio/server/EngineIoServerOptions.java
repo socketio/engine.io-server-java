@@ -32,6 +32,7 @@ public final class EngineIoServerOptions {
     public static final String[] ALLOWED_CORS_ORIGIN_NONE = new String[0];
 
     static {
+        DEFAULT.setCorsHandlingDisabled(false);
         DEFAULT.setPingTimeout(5000);
         DEFAULT.setPingInterval(25000);
         DEFAULT.setAllowedCorsOrigins(ALLOWED_CORS_ORIGIN_ALL);
