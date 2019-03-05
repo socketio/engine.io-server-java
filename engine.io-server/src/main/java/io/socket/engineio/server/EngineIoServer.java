@@ -111,7 +111,7 @@ public final class EngineIoServer extends Emitter {
             return;
         }
 
-        final String sid = query.getOrDefault("sid", null);
+        final String sid = query.get("sid");
         if (sid != null) {
             if(!mClients.containsKey(query.get("sid"))) {
                 sendErrorMessage(response, ServerErrors.UNKNOWN_SID);
@@ -139,7 +139,7 @@ public final class EngineIoServer extends Emitter {
      */
     public void handleWebSocket(EngineIoWebSocket webSocket) {
         final Map<String, String> query = webSocket.getQuery();
-        final String sid = query.getOrDefault("sid", null);
+        final String sid = query.get("sid");
 
         if(sid != null) {
             EngineIoSocket socket = mClients.get(sid);
