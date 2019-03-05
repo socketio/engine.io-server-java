@@ -179,12 +179,10 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void flushBuffer() {
-
     }
 
     @Override
     public void resetBuffer() {
-
     }
 
     @Override
@@ -194,12 +192,10 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void reset() {
-
     }
 
     @Override
     public void setLocale(Locale locale) {
-
     }
 
     @Override

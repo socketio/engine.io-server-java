@@ -198,3 +198,10 @@ Then, the following code can be used to listen for WebSocket connections::
         }
     });
 
+Async Polling
+=============
+
+To enable async polling, mark the servlet with ``asyncSupported`` set to ``true``.
+This can be done with annotations as ``@WebServlet(value = "/engine.io/*", asyncSupported = true)``.
+Or with XML as ``<async-supported>true</async-supported>``.
+Enabling async is recommended as the server is bombarded with GET requests if async is disabled.

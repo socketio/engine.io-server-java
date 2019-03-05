@@ -2,12 +2,14 @@ package io.socket.engineio.server.transport;
 
 import io.socket.emitter.Emitter;
 import io.socket.engineio.parser.Packet;
+import io.socket.engineio.parser.Parser;
 import io.socket.engineio.parser.ServerParser;
 import io.socket.engineio.server.HttpServletResponseImpl;
 import io.socket.engineio.server.ServletInputStreamWrapper;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -206,6 +208,59 @@ public final class PollingTest {
 
         Mockito.verify(polling, Mockito.times(1))
                 .emit(Mockito.eq("packet"), Mockito.any(Packet.class));
+    }
+
+    @Test
+    public void testOnRequest_async() throws IOException {
+        final Polling polling = Mockito.spy(new Polling());
+
+        final AsyncContext asyncContext = Mockito.mock(AsyncContext.class);
+
+        final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.doAnswer(invocationOnMock -> "GET").when(request).getMethod();
+        Mockito.doAnswer(invocationOnMock -> {
+            final HashMap<String, String> queryMap = new HashMap<>();
+            queryMap.put("transport", Polling.NAME);
+            return queryMap;
+        }).when(request).getAttribute("query");
+        Mockito.doAnswer(invocation -> true)
+                .when(request)
+                .isAsyncSupported();
+        Mockito.doAnswer(invocation -> asyncContext)
+                .when(request)
+                .startAsync();
+        Mockito.doAnswer(invocation -> asyncContext)
+                .when(request)
+                .getAsyncContext();
+
+        final HttpServletResponseImpl response = new HttpServletResponseImpl();
+
+        polling.onRequest(request, response);
+
+        Mockito.verify(polling, Mockito.times(0))
+                .send(Mockito.anyList());
+        Mockito.verify(request, Mockito.times(1)).startAsync();
+
+        final ArrayList<Packet> sendPacketList = new ArrayList<Packet>(){{
+            add(new Packet(Packet.MESSAGE, "Test Data"));
+        }};
+        polling.send(sendPacketList);
+
+        Mockito.verify(polling, Mockito.times(1))
+                .send(Mockito.eq(sendPacketList));
+
+        final String responseString = new String(response.getByteOutputStream().toByteArray(), StandardCharsets.UTF_8);
+        final Parser.DecodePayloadCallback<String> decodePayloadCallback = Mockito.mock(Parser.DecodePayloadCallback.class);
+        Mockito.doAnswer(invocation -> {
+            final Packet<String> packet = invocation.getArgument(0);
+
+            assertEquals(Packet.MESSAGE, packet.type);
+            assertEquals("Test Data", packet.data);
+            return true;
+        }).when(decodePayloadCallback).call(Mockito.any(), Mockito.anyInt(), Mockito.anyInt());
+        Parser.decodePayload(responseString, decodePayloadCallback);
+        Mockito.verify(decodePayloadCallback, Mockito.times(1))
+                .call(Mockito.any(), Mockito.anyInt(), Mockito.anyInt());
     }
 
     @Test

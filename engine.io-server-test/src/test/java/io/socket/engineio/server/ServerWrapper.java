@@ -14,6 +14,7 @@ import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,7 +46,12 @@ final class ServerWrapper {
         servletContextHandler.addServlet(new ServletHolder(new HttpServlet() {
             @Override
             protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-                mEngineIoServer.handleRequest(request, response);
+                mEngineIoServer.handleRequest(new HttpServletRequestWrapper(request) {
+                    @Override
+                    public boolean isAsyncSupported() {
+                        return false;
+                    }
+                }, response);
             }
         }), "/engine.io/*");
         servletContextHandler.addServlet(new ServletHolder(new HttpServlet() {

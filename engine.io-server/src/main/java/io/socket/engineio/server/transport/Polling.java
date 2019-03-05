@@ -7,11 +7,15 @@ import io.socket.parseqs.ParseQS;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +25,7 @@ import java.util.Map;
 /**
  * Polling transport.
  */
-public final class Polling extends Transport {
+public final class Polling extends Transport implements AsyncListener {
 
     public static final String NAME = "polling";
 
@@ -32,8 +36,8 @@ public final class Polling extends Transport {
         add(new Packet<String>(Packet.NOOP));
     }});
 
-    private HttpServletRequest mRequest;
-    private HttpServletResponse mResponse;
+    private HttpServletRequest mPollRequest;
+    private HttpServletResponse mPollResponse;
     private boolean mWritable;
     private boolean mShouldClose;
 
@@ -42,11 +46,10 @@ public final class Polling extends Transport {
         mShouldClose = false;
     }
 
+    /* Transport */
+
     @Override
     public synchronized void onRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        mRequest = request;
-        mResponse = response;
-
         switch (request.getMethod().toLowerCase()) {
             case "get":
                 onPollRequest(request, response);
@@ -59,9 +62,6 @@ public final class Polling extends Transport {
                 response.getWriter().write("");
                 break;
         }
-
-        mRequest = null;
-        mResponse = null;
     }
 
     @Override
@@ -73,7 +73,7 @@ public final class Polling extends Transport {
         }
 
         //noinspection unchecked
-        final Map<String, String> query = (Map<String, String>) mRequest.getAttribute("query");
+        final Map<String, String> query = (Map<String, String>) mPollRequest.getAttribute("query");
 
         final boolean supportsBinary = !query.containsKey("b64");
         final boolean jsonp = query.containsKey("j");
@@ -102,14 +102,21 @@ public final class Polling extends Transport {
                 contentBytes = (data instanceof String)? ((String)data).getBytes(StandardCharsets.UTF_8) : ((byte[])data);
             }
 
-            mResponse.setContentType(contentType);
-            mResponse.setContentLength(contentBytes.length);
+            mPollResponse.setContentType(contentType);
+            mPollResponse.setContentLength(contentBytes.length);
 
-            try (OutputStream outputStream = mResponse.getOutputStream()) {
+            try (OutputStream outputStream = mPollResponse.getOutputStream()) {
                 outputStream.write(contentBytes);
             } catch (IOException ex) {
                 onError("write failure", ex.getMessage());
             }
+
+            if (mPollRequest.isAsyncStarted()) {
+                mPollRequest.getAsyncContext().complete();
+            }
+
+            mPollRequest = null;
+            mPollResponse = null;
         });
 
         if(mShouldClose) {
@@ -158,19 +165,64 @@ public final class Polling extends Transport {
         super.onClose();
     }
 
-    private void onPollRequest(@SuppressWarnings("unused") HttpServletRequest request,
+    /* AsyncListener */
+
+    @Override
+    public void onStartAsync(AsyncEvent asyncEvent) {
+    }
+
+    @Override
+    public void onComplete(AsyncEvent asyncEvent) {
+    }
+
+    @Override
+    public void onTimeout(AsyncEvent asyncEvent) {
+        send(new ArrayList<>(PACKET_NOOP));
+    }
+
+    @Override
+    public void onError(AsyncEvent asyncEvent) {
+        onError("async failure", null);
+    }
+
+    /* Private */
+
+    private void onPollRequest(HttpServletRequest request,
                                @SuppressWarnings("unused") HttpServletResponse response) {
+        if (mPollRequest != null) {
+            onError("overlap from client", "");
+            mPollResponse.setStatus(500);
+            try (PrintWriter writer = mPollResponse.getWriter()) {
+                writer.print("error");
+                writer.flush();
+            } catch (IOException ignore) {
+            }
+            return;
+        }
+
+        mPollRequest = request;
+        mPollResponse = response;
+
+        boolean asyncEnabled = false;
+        if (request.isAsyncSupported() || request.isAsyncStarted()) {
+            final AsyncContext asyncContext = request.startAsync();
+            asyncContext.addListener(this);
+            asyncContext.setTimeout(3 * 60 * 1000);
+
+            asyncEnabled = true;
+        }
+
         mWritable = true;
         emit("drain");
 
-        if(mWritable) {
+        if (mWritable && (!asyncEnabled || mShouldClose)) {
             send(new ArrayList<>(PACKET_NOOP));
         }
     }
 
     private void onDataRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         //noinspection unchecked
-        final Map<String, String> query = (Map<String, String>) mRequest.getAttribute("query");
+        final Map<String, String> query = (Map<String, String>) request.getAttribute("query");
 
         final boolean isBinary = request.getContentType().equals("application/octet-stream");
         final boolean jsonp = query.containsKey("j");
