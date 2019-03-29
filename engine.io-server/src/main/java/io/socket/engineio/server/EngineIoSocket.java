@@ -24,7 +24,7 @@ import java.util.TimerTask;
  */
 public final class EngineIoSocket extends Emitter {
 
-    private static final List<Packet> noopPayload = new ArrayList<Packet>() {{
+    private static final List<Packet> PAYLOAD_NOOP = new ArrayList<Packet>() {{
         add(new Packet<>(Packet.NOOP));
     }};
 
@@ -155,7 +155,7 @@ public final class EngineIoSocket extends Emitter {
                 }});
 
                 if (mTransport.isWritable()) {
-                    mTransport.send(noopPayload);
+                    mTransport.send(PAYLOAD_NOOP);
                 }
 
                 emit("upgrading", transport);
