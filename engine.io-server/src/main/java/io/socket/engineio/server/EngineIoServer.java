@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -23,7 +24,7 @@ import java.util.TreeMap;
 @SuppressWarnings("WeakerAccess")
 public final class EngineIoServer extends Emitter {
 
-    private final Map<String, EngineIoSocket> mClients = new TreeMap<>();
+    private final Map<String, EngineIoSocket> mClients = Collections.synchronizedSortedMap(new TreeMap<>());
 
     private final EngineIoServerOptions mOptions;
 
