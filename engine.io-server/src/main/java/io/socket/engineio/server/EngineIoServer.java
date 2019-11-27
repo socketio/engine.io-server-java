@@ -26,6 +26,9 @@ public final class EngineIoServer extends Emitter {
 
     private final Map<String, EngineIoSocket> mClients = Collections.synchronizedSortedMap(new TreeMap<>());
 
+    private final EngineIoSocketTimeoutHandler mPingTimeoutHandler;
+
+
     private final EngineIoServerOptions mOptions;
 
     /**
@@ -44,6 +47,7 @@ public final class EngineIoServer extends Emitter {
     public EngineIoServer(EngineIoServerOptions options) {
         mOptions = options;
         mOptions.lock();
+        mPingTimeoutHandler = new EngineIoSocketTimeoutHandler(mOptions.getMaxTimeoutThreadPoolSize());
     }
 
     /**
@@ -183,7 +187,7 @@ public final class EngineIoServer extends Emitter {
         final String sid = ServerYeast.yeast();
 
         final Transport transport = new Polling();
-        final EngineIoSocket socket = new EngineIoSocket(sid, this);
+        final EngineIoSocket socket = new EngineIoSocket(sid, this, mPingTimeoutHandler);
         socket.init(transport, request);
         transport.onRequest(request, response);
 
@@ -197,7 +201,7 @@ public final class EngineIoServer extends Emitter {
         final String sid = ServerYeast.yeast();
 
         final Transport transport = new WebSocket(webSocket);
-        final EngineIoSocket socket = new EngineIoSocket(sid, this);
+        final EngineIoSocket socket = new EngineIoSocket(sid, this, mPingTimeoutHandler);
         socket.init(transport, null);
 
         mClients.put(sid, socket);

@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -32,17 +32,19 @@ public final class EngineIoSocket extends Emitter {
     private final String mSid;
     private final EngineIoServer mServer;
     private final LinkedList<Packet> mWriteBuffer = new LinkedList<>();
-    private final Timer mPingTimer = new Timer();
 
-    private TimerTask mPingTimeout = null;
+    private final EngineIoSocketTimeoutHandler mPingTimeoutHandler;
+    private ScheduledFuture mPingTimerScheduledReference = null;
+
     private Runnable mCleanupFunction = null;
     private ReadyState mReadyState;
     private Transport mTransport;
     private AtomicBoolean mUpgrading = new AtomicBoolean(false);
 
-    EngineIoSocket(String sid, EngineIoServer server) {
+    EngineIoSocket(String sid, EngineIoServer server, EngineIoSocketTimeoutHandler pingTimeoutHandler) {
         mSid = sid;
         mServer = server;
+        mPingTimeoutHandler = pingTimeoutHandler;
 
         mReadyState = ReadyState.OPENING;
     }
@@ -249,7 +251,7 @@ public final class EngineIoSocket extends Emitter {
     private void onClose(String reason, String description) {
         if(mReadyState != ReadyState.CLOSED) {
             mReadyState = ReadyState.CLOSED;
-            mPingTimer.cancel();
+            mPingTimerScheduledReference.cancel(false);
 
             clearTransport();
             emit("close", reason, description);
@@ -307,17 +309,15 @@ public final class EngineIoSocket extends Emitter {
     }
 
     private void resetPingTimeout() {
-        if(mPingTimeout != null) {
-            mPingTimeout.cancel();
+        if(mPingTimerScheduledReference != null) {
+            mPingTimerScheduledReference.cancel(false);
         }
 
-        mPingTimeout = new TimerTask() {
-            @Override
-            public void run() {
-                onClose("ping timeout", null);
-            }
-        };
-        mPingTimer.schedule(mPingTimeout,
-                mServer.getOptions().getPingInterval() + mServer.getOptions().getPingTimeout());
+        Runnable pingTimeoutTask = () -> onClose("ping timeout", null);
+
+        mPingTimerScheduledReference = mPingTimeoutHandler.schedule(
+                pingTimeoutTask,
+                mServer.getOptions().getPingInterval() + mServer.getOptions().getPingTimeout(),
+                TimeUnit.MILLISECONDS);
     }
 }
