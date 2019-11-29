@@ -32,6 +32,7 @@ public final class EngineIoSocket extends Emitter {
     private final String mSid;
     private final EngineIoServer mServer;
     private final LinkedList<Packet> mWriteBuffer = new LinkedList<>();
+    private final Runnable mPingTimeoutTask = () -> onClose("ping timeout", null);
 
     private final EngineIoSocketTimeoutHandler mPingTimeoutHandler;
     private ScheduledFuture mPingTimerScheduledReference = null;
@@ -308,15 +309,13 @@ public final class EngineIoSocket extends Emitter {
         }
     }
 
-    private void resetPingTimeout() {
+    private synchronized void resetPingTimeout() {
         if(mPingTimerScheduledReference != null) {
             mPingTimerScheduledReference.cancel(false);
         }
 
-        Runnable pingTimeoutTask = () -> onClose("ping timeout", null);
-
         mPingTimerScheduledReference = mPingTimeoutHandler.schedule(
-                pingTimeoutTask,
+                mPingTimeoutTask,
                 mServer.getOptions().getPingInterval() + mServer.getOptions().getPingTimeout(),
                 TimeUnit.MILLISECONDS);
     }
