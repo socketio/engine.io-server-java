@@ -35,7 +35,7 @@ public abstract class Transport extends Emitter {
      *
      * @param packets List of packets to send.
      */
-    public abstract void send(List<Packet> packets);
+    public abstract void send(List<Packet<?>> packets);
 
     /**
      * Checks whether the transport is currently writable.
@@ -83,7 +83,7 @@ public abstract class Transport extends Emitter {
      *
      * @param packet Packet received by transport.
      */
-    protected void onPacket(Packet packet) {
+    protected void onPacket(Packet<?> packet) {
         emit("packet", packet);
     }
 

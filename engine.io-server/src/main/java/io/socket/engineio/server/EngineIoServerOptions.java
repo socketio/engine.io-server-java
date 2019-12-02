@@ -45,7 +45,7 @@ public final class EngineIoServerOptions {
     private long mPingInterval;
     private long mPingTimeout;
     private String[] mAllowedCorsOrigins;
-    private Packet mInitialPacket;
+    private Packet<Object> mInitialPacket;
     private int mMaxTimeoutThreadPoolSize;
 
     private EngineIoServerOptions() {
@@ -182,7 +182,7 @@ public final class EngineIoServerOptions {
      *
      * @return Initial packet.
      */
-    public Packet getInitialPacket() {
+    public Packet<?> getInitialPacket() {
         return mInitialPacket;
     }
 
@@ -194,7 +194,7 @@ public final class EngineIoServerOptions {
      * @throws IllegalStateException If instance is locked.
      * @throws IllegalArgumentException If initialPacket.type is not message or data is null.
      */
-    public EngineIoServerOptions setInitialPacket(Packet initialPacket) throws IllegalStateException, IllegalArgumentException {
+    public EngineIoServerOptions setInitialPacket(Packet<?> initialPacket) throws IllegalStateException, IllegalArgumentException {
         if (mIsLocked) {
             throw new IllegalStateException("Initial packet cannot be set. Instance is locked.");
         }
@@ -210,7 +210,7 @@ public final class EngineIoServerOptions {
 
         mInitialPacket = null;
         if (initialPacket != null) {
-            mInitialPacket = new Packet(initialPacket.type);
+            mInitialPacket = new Packet<>(initialPacket.type);
             mInitialPacket.data = initialPacket.data;
         }
         return this;

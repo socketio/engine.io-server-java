@@ -32,7 +32,7 @@ public final class TransportTest {
         }
 
         @Override
-        public void send(List<Packet> packets) {
+        public void send(List<Packet<?>> packets) {
         }
 
         @Override
@@ -51,7 +51,7 @@ public final class TransportTest {
         }
 
         @Override
-        public void onPacket(Packet packet) {
+        public void onPacket(Packet<?> packet) {
             super.onPacket(packet);
         }
 
@@ -111,22 +111,20 @@ public final class TransportTest {
         Mockito.verify(transport, Mockito.times(1)).emit("error", "test", null);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testOnPacket() {
         final TestTransport transport = Mockito.spy(new TestTransport());
-        final Packet testPacket = new Packet(Packet.MESSAGE, "test");
+        final Packet<?> testPacket = new Packet<>(Packet.MESSAGE, "test");
 
         transport.onPacket(testPacket);
         Mockito.verify(transport, Mockito.times(1)).emit("packet", testPacket);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testOnData() {
         final TestTransport transport = Mockito.spy(new TestTransport());
 
-        final Packet testPacket = new Packet(Packet.MESSAGE, "test");
+        final Packet<?> testPacket = new Packet<>(Packet.MESSAGE, "test");
         ServerParser.encodePacket(testPacket, false, data -> {
             String packetData = (String) data;
 

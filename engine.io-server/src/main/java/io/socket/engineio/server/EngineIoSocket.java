@@ -25,17 +25,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class EngineIoSocket extends Emitter {
 
-    private static final List<Packet> PAYLOAD_NOOP = new ArrayList<Packet>() {{
+    private static final List<Packet<?>> PAYLOAD_NOOP = new ArrayList<Packet<?>>() {{
         add(new Packet<>(Packet.NOOP));
     }};
 
     private final String mSid;
     private final EngineIoServer mServer;
-    private final LinkedList<Packet> mWriteBuffer = new LinkedList<>();
+    private final LinkedList<Packet<?>> mWriteBuffer = new LinkedList<>();
     private final Runnable mPingTimeoutTask = () -> onClose("ping timeout", null);
 
     private final EngineIoSocketTimeoutHandler mPingTimeoutHandler;
-    private ScheduledFuture mPingTimerScheduledReference = null;
+    private ScheduledFuture<?> mPingTimerScheduledReference = null;
 
     private Runnable mCleanupFunction = null;
     private ReadyState mReadyState;
@@ -76,7 +76,7 @@ public final class EngineIoSocket extends Emitter {
      *
      * @param packet The packet to send.
      */
-    public void send(Packet packet) {
+    public void send(Packet<?> packet) {
         sendPacket(packet);
     }
 
@@ -152,12 +152,12 @@ public final class EngineIoSocket extends Emitter {
         };
 
         transport.on("packet", args -> {
-            final Packet packet = (Packet) args[0];
+            final Packet<?> packet = (Packet<?>) args[0];
             if(packet.type.equals(Packet.PING) && (packet.data != null) && packet.data.equals("probe")) {
                 final Packet<String> replyPacket = new Packet<>(Packet.PONG);
                 replyPacket.data = "probe";
 
-                transport.send(new ArrayList<Packet>() {{
+                transport.send(new ArrayList<Packet<?>>() {{
                     add(replyPacket);
                 }});
 
@@ -201,7 +201,7 @@ public final class EngineIoSocket extends Emitter {
             String description = (args.length > 0)? ((String) args[0]) : null;
             onClose("transport close", description);
         });
-        transport.on("packet", args -> onPacket((Packet) args[0]));
+        transport.on("packet", args -> onPacket((Packet<?>) args[0]));
         transport.on("drain", args -> flush());
 
         mCleanupFunction = () -> {
@@ -263,7 +263,7 @@ public final class EngineIoSocket extends Emitter {
         onClose("transport error", null);
     }
 
-    private void onPacket(Packet packet) {
+    private void onPacket(Packet<?> packet) {
         if(mReadyState == ReadyState.OPEN) {
             emit("packet", packet);
 
@@ -271,7 +271,7 @@ public final class EngineIoSocket extends Emitter {
 
             switch (packet.type) {
                 case Packet.PING:
-                    sendPacket(new Packet(Packet.PONG));
+                    sendPacket(new Packet<>(Packet.PONG));
                     emit("heartbeat");
                     break;
                 case Packet.ERROR:
@@ -285,7 +285,7 @@ public final class EngineIoSocket extends Emitter {
         }
     }
 
-    private void sendPacket(Packet packet) {
+    private void sendPacket(Packet<?> packet) {
         if((mReadyState != ReadyState.CLOSING) && (mReadyState != ReadyState.CLOSED)) {
             synchronized (mWriteBuffer) {
                 mWriteBuffer.add(packet);

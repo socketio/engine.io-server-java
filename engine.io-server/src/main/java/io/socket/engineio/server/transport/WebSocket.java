@@ -31,8 +31,8 @@ public final class WebSocket extends Transport {
     public void onRequest(HttpServletRequest request, HttpServletResponse response) { }
 
     @Override
-    public void send(List<Packet> packets) {
-        final Parser.EncodeCallback encodeCallback = data -> {
+    public void send(List<Packet<?>> packets) {
+        final Parser.EncodeCallback<?> encodeCallback = data -> {
             try {
                 if(data instanceof String) {
                     mConnection.write((String) data);
@@ -43,7 +43,7 @@ public final class WebSocket extends Transport {
                 onError("write error", ex.getMessage());
             }
         };
-        for (Packet packet : packets) {
+        for (Packet<?> packet : packets) {
             ServerParser.encodePacket(packet, true, encodeCallback);
         }
     }

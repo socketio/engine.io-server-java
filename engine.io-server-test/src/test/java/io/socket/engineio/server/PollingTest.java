@@ -30,7 +30,7 @@ public final class PollingTest {
             serverWrapper.getEngineIoServer().on("connection", args -> {
                 final EngineIoSocket socket = (EngineIoSocket) args[0];
                 socket.on("message", args1 -> {
-                    Packet packet = new Packet(Packet.MESSAGE);
+                    Packet<Object> packet = new Packet<>(Packet.MESSAGE);
                     packet.data = args1[0];
                     socket.send(packet);
                 });
@@ -50,7 +50,7 @@ public final class PollingTest {
             serverWrapper.getEngineIoServer().on("connection", args -> {
                 final EngineIoSocket socket = (EngineIoSocket) args[0];
                 socket.on("message", args1 -> {
-                    Packet packet = new Packet(Packet.MESSAGE);
+                    Packet<Object> packet = new Packet<>(Packet.MESSAGE);
                     packet.data = args1[0];
                     socket.send(packet);
                 });
@@ -70,7 +70,7 @@ public final class PollingTest {
             serverWrapper.getEngineIoServer().on("connection", args -> {
                 final EngineIoSocket socket = (EngineIoSocket) args[0];
                 socket.on("message", args1 -> {
-                    Packet packet = new Packet(Packet.MESSAGE);
+                    Packet<Object> packet = new Packet<>(Packet.MESSAGE);
                     packet.data = args1[0];
                     socket.send(packet);
                 });
@@ -92,7 +92,7 @@ public final class PollingTest {
                 final String echoMessage = PollingTest.class.getSimpleName() + System.currentTimeMillis();
                 socket.on("message", args1 -> assertEquals(echoMessage, args1[0]));
 
-                Packet packet = new Packet(Packet.MESSAGE);
+                Packet<Object> packet = new Packet<>(Packet.MESSAGE);
                 packet.data = echoMessage;
                 socket.send(packet);
             });

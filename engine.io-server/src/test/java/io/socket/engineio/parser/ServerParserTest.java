@@ -66,7 +66,7 @@ public final class ServerParserTest {
 
     @Test
     public void testEncodePayload_string_empty() {
-        final Packet[] packets = new Packet[0];
+        final Packet<?>[] packets = new Packet[0];
         final JSONArray jsonArray = new JSONArray();
 
         ServerParser.encodePayload(packets, false, data -> {
@@ -81,7 +81,7 @@ public final class ServerParserTest {
                 "Hello World",
                 "Engine.IO"
         };
-        final Packet[] packets = new Packet[messages.length];
+        final Packet<?>[] packets = new Packet[messages.length];
         final JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < messages.length; i++) {
             jsonArray.put(i, messages[i]);
@@ -102,7 +102,7 @@ public final class ServerParserTest {
     public void testEncodePayload_binary_empty() {
         final byte[][] messages = new byte[][] {
         };
-        final Packet[] packets = new Packet[messages.length];
+        final Packet<?>[] packets = new Packet[messages.length];
         final JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < messages.length; i++) {
             jsonArray.put(i, messages[i]);
@@ -123,7 +123,7 @@ public final class ServerParserTest {
         final byte[][] messages = new byte[][] {
                 {1, 2, 3, 4, 5}, {11, 12, 13, 14, 15}
         };
-        final Packet[] packets = new Packet[messages.length];
+        final Packet<?>[] packets = new Packet[messages.length];
         final JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < messages.length; i++) {
             jsonArray.put(i, messages[i]);
@@ -144,7 +144,7 @@ public final class ServerParserTest {
         final byte[][] messages = new byte[][] {
                 {1, 2, 3, 4, 5}, {11, 12, 13, 14, 15}
         };
-        final Packet[] packets = new Packet[messages.length];
+        final Packet<?>[] packets = new Packet[messages.length];
         final JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < messages.length; i++) {
             jsonArray.put(i, messages[i]);
@@ -167,7 +167,7 @@ public final class ServerParserTest {
 
     @Test
     public void testDecodePacket_null() {
-        Packet packet = ServerParser.decodePacket(null);
+        Packet<?> packet = ServerParser.decodePacket(null);
         assertNotNull(packet);
         assertEquals(Packet.ERROR, packet.type);
         assertEquals("parser error", packet.data);
@@ -183,7 +183,7 @@ public final class ServerParserTest {
     public void testDecodePacket_string() {
         final Packet<String> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO");
         ServerParser.encodePacket(packetOriginal, false, data -> {
-            Packet packetDecoded = ServerParser.decodePacket(data);
+            Packet<?> packetDecoded = ServerParser.decodePacket(data);
             assertEquals(Packet.MESSAGE, packetDecoded.type);
             assertEquals(String.class, packetDecoded.data.getClass());
             assertEquals(packetOriginal.data, packetDecoded.data);
@@ -194,7 +194,7 @@ public final class ServerParserTest {
     public void testDecodePacket_binary() {
         final Packet<byte[]> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
         ServerParser.encodePacket(packetOriginal, true, data -> {
-            Packet packetDecoded = ServerParser.decodePacket(data);
+            Packet<?> packetDecoded = ServerParser.decodePacket(data);
             assertEquals(Packet.MESSAGE, packetDecoded.type);
             assertEquals(byte[].class, packetDecoded.data.getClass());
             assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
@@ -205,7 +205,7 @@ public final class ServerParserTest {
     public void testDecodePacket_base64() {
         final Packet<byte[]> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
         ServerParser.encodePacket(packetOriginal, false, data -> {
-            Packet packetDecoded = ServerParser.decodePacket(data);
+            Packet<?> packetDecoded = ServerParser.decodePacket(data);
             assertEquals(Packet.MESSAGE, packetDecoded.type);
             assertEquals(byte[].class, packetDecoded.data.getClass());
             assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
@@ -219,17 +219,15 @@ public final class ServerParserTest {
 
     @Test
     public void testDecodePayload_string() {
-        final Packet[] packets = new Packet[] {
-                new Packet<String>(Packet.MESSAGE),
-                new Packet<String>(Packet.MESSAGE)
-        };
-        packets[0].data = "Engine.IO";
-        packets[1].data = "Test.Data";
+        final Packet<?>[] packets = new Packet[2];
+        packets[0] = new Packet<>(Packet.MESSAGE, "Engine.IO");
+        packets[1] = new Packet<>(Packet.MESSAGE, "Test.Data");
+
         ServerParser.encodePayload(packets, false, data -> {
             assertEquals(String.class, data.getClass());
 
             ServerParser.decodePayload(data, (packet, index, total) -> {
-                Packet originalPacket = packets[index];
+                Packet<?> originalPacket = packets[index];
                 assertEquals(originalPacket.data.getClass(), packet.data.getClass());
                 assertEquals(originalPacket.type, packet.type);
                 assertEquals(originalPacket.data, packet.data);
@@ -241,17 +239,15 @@ public final class ServerParserTest {
 
     @Test
     public void testDecodePayload_binary() {
-        final Packet[] packets = new Packet[] {
-                new Packet<byte[]>(Packet.MESSAGE),
-                new Packet<byte[]>(Packet.MESSAGE)
-        };
-        packets[0].data = "Engine.IO".getBytes(StandardCharsets.UTF_8);
-        packets[1].data = "Test.Data".getBytes(StandardCharsets.UTF_8);
+        final Packet<?>[] packets = new Packet[2];
+        packets[0] = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
+        packets[1] = new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8));
+
         ServerParser.encodePayload(packets, true, data -> {
             assertEquals(byte[].class, data.getClass());
 
             ServerParser.decodePayload(data, (packet, index, total) -> {
-                Packet originalPacket = packets[index];
+                Packet<?> originalPacket = packets[index];
                 assertEquals(originalPacket.data.getClass(), packet.data.getClass());
                 assertEquals(originalPacket.type, packet.type);
                 assertArrayEquals((byte[]) originalPacket.data, (byte[]) packet.data);
@@ -263,17 +259,15 @@ public final class ServerParserTest {
 
     @Test
     public void testDecodePayload_base64() {
-        final Packet[] packets = new Packet[] {
-                new Packet<byte[]>(Packet.MESSAGE),
-                new Packet<byte[]>(Packet.MESSAGE)
-        };
-        packets[0].data = "Engine.IO".getBytes(StandardCharsets.UTF_8);
-        packets[1].data = "Test.Data".getBytes(StandardCharsets.UTF_8);
+        final Packet<?>[] packets = new Packet[2];
+        packets[0] = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
+        packets[1] = new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8));
+
         ServerParser.encodePayload(packets, false, data -> {
             assertEquals(String.class, data.getClass());
 
             ServerParser.decodePayload(data, (packet, index, total) -> {
-                Packet originalPacket = packets[index];
+                Packet<?> originalPacket = packets[index];
                 assertEquals(originalPacket.data.getClass(), packet.data.getClass());
                 assertEquals(originalPacket.type, packet.type);
                 assertArrayEquals((byte[]) originalPacket.data, (byte[]) packet.data);
@@ -285,17 +279,15 @@ public final class ServerParserTest {
 
     @Test
     public void testDecodePayload_mixed_binary() {
-        final Packet[] packets = new Packet[] {
-                new Packet<String>(Packet.MESSAGE),
-                new Packet<byte[]>(Packet.MESSAGE)
-        };
-        packets[0].data = "Engine.IO";
-        packets[1].data = "Test.Data".getBytes(StandardCharsets.UTF_8);
+        final Packet<?>[] packets = new Packet[2];
+        packets[0] = new Packet<>(Packet.MESSAGE, "Engine.IO");
+        packets[1] = new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8));
+
         ServerParser.encodePayload(packets, true, data -> {
             assertEquals(byte[].class, data.getClass());
 
             ServerParser.decodePayload(data, (packet, index, total) -> {
-                Packet originalPacket = packets[index];
+                Packet<?> originalPacket = packets[index];
                 assertEquals(originalPacket.data.getClass(), packet.data.getClass());
                 assertEquals(originalPacket.type, packet.type);
 
@@ -312,17 +304,15 @@ public final class ServerParserTest {
 
     @Test
     public void testDecodePayload_mixed_base64() {
-        final Packet[] packets = new Packet[] {
-                new Packet<String>(Packet.MESSAGE),
-                new Packet<byte[]>(Packet.MESSAGE)
-        };
-        packets[0].data = "Engine.IO";
-        packets[1].data = "Test.Data".getBytes(StandardCharsets.UTF_8);
+        final Packet<?>[] packets = new Packet[2];
+        packets[0] = new Packet<>(Packet.MESSAGE, "Engine.IO");
+        packets[1] = new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8));
+
         ServerParser.encodePayload(packets, false, data -> {
             assertEquals(String.class, data.getClass());
 
             ServerParser.decodePayload(data, (packet, index, total) -> {
-                Packet originalPacket = packets[index];
+                Packet<?> originalPacket = packets[index];
                 assertEquals(originalPacket.data.getClass(), packet.data.getClass());
                 assertEquals(originalPacket.type, packet.type);
 
@@ -339,19 +329,17 @@ public final class ServerParserTest {
 
     @Test
     public void testDecodePayload_exit() {
-        final Packet[] packets = new Packet[] {
-                new Packet<String>(Packet.MESSAGE),
-                new Packet<String>(Packet.MESSAGE)
-        };
-        packets[0].data = "Engine.IO";
-        packets[1].data = "Test.Data";
+        final Packet<?>[] packets = new Packet[2];
+        packets[0] = new Packet<>(Packet.MESSAGE, "Engine.IO");
+        packets[1] = new Packet<>(Packet.MESSAGE, "Test.Data");
+
         ServerParser.encodePayload(packets, false, data -> {
             assertEquals(String.class, data.getClass());
 
             ServerParser.decodePayload(data, (packet, index, total) -> {
                 assertEquals(0, index);
 
-                Packet originalPacket = packets[index];
+                Packet<?> originalPacket = packets[index];
                 assertEquals(originalPacket.data.getClass(), packet.data.getClass());
                 assertEquals(originalPacket.type, packet.type);
                 assertEquals(originalPacket.data, packet.data);
@@ -361,7 +349,7 @@ public final class ServerParserTest {
         });
     }
 
-    @SuppressWarnings({"unchecked", "ConstantConditions", "ResultOfMethodCallIgnored"})
+    @SuppressWarnings({"ConstantConditions", "ResultOfMethodCallIgnored"})
     private <T> T runScriptAndGetOutput(String script, Object input, Class<T> outputClass) {
         byte[] nodeInputBytes;
         if (input instanceof String) {
@@ -391,7 +379,8 @@ public final class ServerParserTest {
             processInputStream.close();
 
             if(outputClass.equals(String.class)) {
-                return (T) new String(result, StandardCharsets.UTF_8);
+                @SuppressWarnings("unchecked") T t = (T) new String(result, StandardCharsets.UTF_8);
+                return t;
             } else if (outputClass.equals(byte[].class)) {
                 return (T) result;
             } else {

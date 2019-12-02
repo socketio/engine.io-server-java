@@ -73,15 +73,14 @@ public final class WebSocketTest {
                 .close();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testSend_string() {
         final EngineIoWebSocket webSocketConnection = Mockito.mock(EngineIoWebSocket.class);
         final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
 
         final String stringData = "Test string";
-        final Packet packet = new Packet(Packet.MESSAGE, stringData);
-        webSocket.send(new ArrayList<Packet>() {{
+        final Packet<?> packet = new Packet<>(Packet.MESSAGE, stringData);
+        webSocket.send(new ArrayList<Packet<?>>() {{
             add(packet);
         }});
 
@@ -96,15 +95,14 @@ public final class WebSocketTest {
         });
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testSend_binary() {
         final EngineIoWebSocket webSocketConnection = Mockito.mock(EngineIoWebSocket.class);
         final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
 
         final byte[] binaryData = "Test string".getBytes(StandardCharsets.UTF_8);
-        final Packet packet = new Packet(Packet.MESSAGE, binaryData);
-        webSocket.send(new ArrayList<Packet>() {{
+        final Packet<?> packet = new Packet<>(Packet.MESSAGE, binaryData);
+        webSocket.send(new ArrayList<Packet<?>>() {{
             add(packet);
         }});
 
@@ -119,7 +117,6 @@ public final class WebSocketTest {
         });
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testSend_error() throws IOException {
         final EngineIoWebSocket webSocketConnection = Mockito.mock(EngineIoWebSocket.class);
@@ -129,8 +126,8 @@ public final class WebSocketTest {
         webSocket.on("error", args -> { });
 
         final String stringData = "Test string";
-        final Packet packet = new Packet(Packet.MESSAGE, stringData);
-        webSocket.send(new ArrayList<Packet>() {{
+        final Packet<?> packet = new Packet<>(Packet.MESSAGE, stringData);
+        webSocket.send(new ArrayList<Packet<?>>() {{
             add(packet);
         }});
 
@@ -174,8 +171,8 @@ public final class WebSocketTest {
         final Packet<String> packet = new Packet<>(Packet.MESSAGE, "Test Message");
         final Emitter.Listener packetListener = Mockito.mock(Emitter.Listener.class);
         Mockito.doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            final Packet argPacket = (Packet) args[0];
+            final Object[] args = invocation.getArguments();
+            @SuppressWarnings("unchecked") final Packet<?> argPacket = (Packet<Object>) args[0];
             assertEquals(packet.type, argPacket.type);
             assertEquals(packet.data, argPacket.data);
             return null;

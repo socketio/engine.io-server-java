@@ -29,10 +29,10 @@ public final class Polling extends Transport implements AsyncListener {
 
     public static final String NAME = "polling";
 
-    private static final List<Packet> PACKET_CLOSE = Collections.unmodifiableList(new ArrayList<Packet>() {{
+    private static final List<Packet<?>> PACKET_CLOSE = Collections.unmodifiableList(new ArrayList<Packet<?>>() {{
         add(new Packet<String>(Packet.CLOSE));
     }});
-    private static final List<Packet> PACKET_NOOP = Collections.unmodifiableList(new ArrayList<Packet>() {{
+    private static final List<Packet<?>> PACKET_NOOP = Collections.unmodifiableList(new ArrayList<Packet<?>>() {{
         add(new Packet<String>(Packet.NOOP));
     }});
 
@@ -65,15 +65,14 @@ public final class Polling extends Transport implements AsyncListener {
     }
 
     @Override
-    public synchronized void send(List<Packet> packets) {
+    public synchronized void send(List<Packet<?>> packets) {
         mWritable = false;
 
         if(mShouldClose) {
-            packets.add(new Packet(Packet.CLOSE));
+            packets.add(new Packet<>(Packet.CLOSE));
         }
 
-        //noinspection unchecked
-        final Map<String, String> query = (Map<String, String>) mPollRequest.getAttribute("query");
+        @SuppressWarnings("unchecked") final Map<String, String> query = (Map<String, String>) mPollRequest.getAttribute("query");
 
         final boolean supportsBinary = !query.containsKey("b64");
         final boolean jsonp = query.containsKey("j");
@@ -221,8 +220,7 @@ public final class Polling extends Transport implements AsyncListener {
     }
 
     private void onDataRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-        //noinspection unchecked
-        final Map<String, String> query = (Map<String, String>) request.getAttribute("query");
+        @SuppressWarnings("unchecked") final Map<String, String> query = (Map<String, String>) request.getAttribute("query");
 
         final boolean isBinary = request.getContentType().equals("application/octet-stream");
         final boolean jsonp = query.containsKey("j");

@@ -71,8 +71,8 @@ public final class PollingTest {
 
         final Emitter.Listener drainListener = Mockito.mock(Emitter.Listener.class);
         Mockito.doAnswer(invocation -> {
-            polling.send(new ArrayList<Packet>(){{
-                add(new Packet(Packet.MESSAGE, "Test Data"));
+            polling.send(new ArrayList<Packet<?>>(){{
+                add(new Packet<>(Packet.MESSAGE, "Test Data"));
             }});
             return null;
         }).when(drainListener).call();
@@ -108,8 +108,8 @@ public final class PollingTest {
 
         final Emitter.Listener drainListener = Mockito.mock(Emitter.Listener.class);
         Mockito.doAnswer(invocation -> {
-            polling.send(new ArrayList<Packet>(){{
-                add(new Packet(Packet.MESSAGE, "Test Data"));
+            polling.send(new ArrayList<Packet<?>>(){{
+                add(new Packet<>(Packet.MESSAGE, "Test Data"));
             }});
             return null;
         }).when(drainListener).call();
@@ -137,7 +137,7 @@ public final class PollingTest {
 
         final Polling polling = Mockito.spy(new Polling());
         polling.on("packet", args -> {
-            final Packet packet = (Packet) args[0];
+            final Packet<?> packet = (Packet<Object>) args[0];
             assertEquals(Packet.MESSAGE, packet.type);
             assertEquals(messageData, packet.data);
         });
@@ -177,7 +177,7 @@ public final class PollingTest {
 
         final Polling polling = Mockito.spy(new Polling());
         polling.on("packet", args -> {
-            final Packet packet = (Packet) args[0];
+            final Packet<?> packet = (Packet<Object>) args[0];
             assertEquals(Packet.MESSAGE, packet.type);
             assertEquals(messageData, packet.data);
         });
@@ -241,8 +241,8 @@ public final class PollingTest {
                 .send(Mockito.anyList());
         Mockito.verify(request, Mockito.times(1)).startAsync();
 
-        final ArrayList<Packet> sendPacketList = new ArrayList<Packet>(){{
-            add(new Packet(Packet.MESSAGE, "Test Data"));
+        final ArrayList<Packet<?>> sendPacketList = new ArrayList<Packet<?>>(){{
+            add(new Packet<>(Packet.MESSAGE, "Test Data"));
         }};
         polling.send(sendPacketList);
 

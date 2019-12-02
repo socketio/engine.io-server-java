@@ -25,7 +25,7 @@ public final class EngineIoSocketTest {
         }
 
         @Override
-        public void send(List<Packet> packets) {
+        public void send(List<Packet<?>> packets) {
         }
 
         @Override
@@ -51,8 +51,8 @@ public final class EngineIoSocketTest {
         final EngineIoSocket socket = Mockito.spy(new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer(), mPingTimeoutHandler));
 
         Mockito.doAnswer(invocationOnMock -> {
-            final List<Packet> packetList = invocationOnMock.getArgument(0);
-            for (Packet packet : packetList) {
+            final List<Packet<?>> packetList = invocationOnMock.getArgument(0);
+            for (Packet<?> packet : packetList) {
                 if (packet.type.equals(Packet.OPEN)) {
                     final JSONObject jsonObject = new JSONObject((String) packet.data);
                     Assert.assertTrue(jsonObject.has("sid"));
@@ -77,7 +77,7 @@ public final class EngineIoSocketTest {
 
     @Test
     public void testInit_initialPacket() {
-        final Packet initialPacket = new Packet<>(Packet.MESSAGE, "Initial Message");
+        final Packet<?> initialPacket = new Packet<>(Packet.MESSAGE, "Initial Message");
         final EngineIoServerOptions options = EngineIoServerOptions.newFromDefault()
                 .setInitialPacket(initialPacket);
 
@@ -85,8 +85,8 @@ public final class EngineIoSocketTest {
         final EngineIoSocket socket = Mockito.spy(new EngineIoSocket(ServerYeast.yeast(), new EngineIoServer(options), mPingTimeoutHandler));
 
         Mockito.doAnswer(invocationOnMock -> {
-            final List<Packet> packetList = invocationOnMock.getArgument(0);
-            for (Packet packet : packetList) {
+            final List<Packet<?>> packetList = invocationOnMock.getArgument(0);
+            for (Packet<?> packet : packetList) {
                 if (packet.type.equals(Packet.MESSAGE)) {
                     Assert.assertEquals(initialPacket.data, packet.data);
                 }
@@ -125,7 +125,7 @@ public final class EngineIoSocketTest {
         final Packet<String> packet = new Packet<>(Packet.MESSAGE, "TestMessage");
 
         Mockito.doAnswer(invocationOnMock -> {
-            List<Packet> packets = (List<Packet>) invocationOnMock.getArguments()[0];
+            List<Packet<?>> packets = (List<Packet<?>>) invocationOnMock.getArguments()[0];
             Assert.assertEquals(1, packets.size());
             Assert.assertEquals(packet, packets.get(0));
             return null;
@@ -157,7 +157,7 @@ public final class EngineIoSocketTest {
 
         Mockito.doAnswer(invocationOnMock -> true).when(transport).isWritable();
         Mockito.doAnswer(invocationOnMock -> {
-            List<Packet> packets = (List<Packet>) invocationOnMock.getArguments()[0];
+            List<Packet<?>> packets = (List<Packet<?>>) invocationOnMock.getArguments()[0];
             Assert.assertEquals(1, packets.size());
             Assert.assertEquals(packet, packets.get(0));
             return null;
@@ -242,7 +242,7 @@ public final class EngineIoSocketTest {
         final Emitter.Listener closeListener = Mockito.mock(Emitter.Listener.class);
         socket.on("close", closeListener);
 
-        socket.send(new Packet(Packet.NOOP));
+        socket.send(new Packet<>(Packet.NOOP));
 
         Thread.sleep(server.getOptions().getPingInterval() + server.getOptions().getPingTimeout() + 500);
 
@@ -339,7 +339,7 @@ public final class EngineIoSocketTest {
         socket.on("heartbeat", heartbeatListener);
 
         Mockito.doAnswer(invocationOnMock -> {
-            final Packet argPacket = ((List<Packet>) invocationOnMock.getArgument(0)).get(0);
+            final Packet<?> argPacket = ((List<Packet<?>>) invocationOnMock.getArgument(0)).get(0);
             Assert.assertEquals(Packet.PONG, argPacket.type);
             return null;
         }).when(transport).send(Mockito.anyList());
@@ -382,11 +382,11 @@ public final class EngineIoSocketTest {
         final Transport transport2 = Mockito.spy(new StubTransport());
         Mockito.doAnswer(invocationOnMock -> WebSocket.NAME).when(transport2).getName();
         Mockito.doAnswer(invocationOnMock -> {
-            final List<Packet> packetList = invocationOnMock.getArgument(0);
+            final List<Packet<?>> packetList = invocationOnMock.getArgument(0);
 
             Assert.assertEquals(1, packetList.size());
 
-            final Packet packet = packetList.get(0);
+            final Packet<?> packet = packetList.get(0);
             Assert.assertEquals(Packet.PONG, packet.type);
             Assert.assertEquals("probe", packet.data);
 
