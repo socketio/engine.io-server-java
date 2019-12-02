@@ -13,8 +13,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An engine.io socket.
@@ -31,17 +32,20 @@ public final class EngineIoSocket extends Emitter {
     private final String mSid;
     private final EngineIoServer mServer;
     private final LinkedList<Packet> mWriteBuffer = new LinkedList<>();
-    private final Timer mPingTimer = new Timer();
+    private final Runnable mPingTimeoutTask = () -> onClose("ping timeout", null);
 
-    private TimerTask mPingTimeout = null;
+    private final EngineIoSocketTimeoutHandler mPingTimeoutHandler;
+    private ScheduledFuture mPingTimerScheduledReference = null;
+
     private Runnable mCleanupFunction = null;
     private ReadyState mReadyState;
     private Transport mTransport;
-    private boolean mUpgrading = false;
+    private AtomicBoolean mUpgrading = new AtomicBoolean(false);
 
-    EngineIoSocket(String sid, EngineIoServer server) {
+    EngineIoSocket(String sid, EngineIoServer server, EngineIoSocketTimeoutHandler pingTimeoutHandler) {
         mSid = sid;
         mServer = server;
+        mPingTimeoutHandler = pingTimeoutHandler;
 
         mReadyState = ReadyState.OPENING;
     }
@@ -111,6 +115,9 @@ public final class EngineIoSocket extends Emitter {
      */
     void onRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         mTransport.onRequest(request, response);
+
+        if (mUpgrading.get() && mTransport.isWritable() && mWriteBuffer.isEmpty())
+            mTransport.send(PAYLOAD_NOOP);
     }
 
     /**
@@ -121,7 +128,7 @@ public final class EngineIoSocket extends Emitter {
      */
     @SuppressWarnings("SameParameterValue")
     boolean canUpgrade(String transport) {
-        return (!mUpgrading && mTransport.getName().equals(Polling.NAME) && transport.equals(WebSocket.NAME));
+        return (!mUpgrading.get() && mTransport.getName().equals(Polling.NAME) && transport.equals(WebSocket.NAME));
     }
 
     /**
@@ -130,10 +137,10 @@ public final class EngineIoSocket extends Emitter {
      * @param transport The transport to upgrade to.
      */
     void upgrade(final Transport transport) {
-        mUpgrading = true;
+        mUpgrading.set(true);
 
         final Runnable cleanup = () -> {
-            mUpgrading = false;
+            mUpgrading.set(false);
             transport.off("packet");
             transport.off("close");
             transport.off("error");
@@ -245,7 +252,7 @@ public final class EngineIoSocket extends Emitter {
     private void onClose(String reason, String description) {
         if(mReadyState != ReadyState.CLOSED) {
             mReadyState = ReadyState.CLOSED;
-            mPingTimer.cancel();
+            mPingTimerScheduledReference.cancel(false);
 
             clearTransport();
             emit("close", reason, description);
@@ -302,18 +309,14 @@ public final class EngineIoSocket extends Emitter {
         }
     }
 
-    private void resetPingTimeout() {
-        if(mPingTimeout != null) {
-            mPingTimeout.cancel();
+    private synchronized void resetPingTimeout() {
+        if(mPingTimerScheduledReference != null) {
+            mPingTimerScheduledReference.cancel(false);
         }
 
-        mPingTimeout = new TimerTask() {
-            @Override
-            public void run() {
-                onClose("ping timeout", null);
-            }
-        };
-        mPingTimer.schedule(mPingTimeout,
-                mServer.getOptions().getPingInterval() + mServer.getOptions().getPingTimeout());
+        mPingTimerScheduledReference = mPingTimeoutHandler.schedule(
+                mPingTimeoutTask,
+                mServer.getOptions().getPingInterval() + mServer.getOptions().getPingTimeout(),
+                TimeUnit.MILLISECONDS);
     }
 }

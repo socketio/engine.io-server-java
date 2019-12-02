@@ -46,8 +46,8 @@ public final class JettyWebSocketHandler extends EngineIoWebSocket implements We
 
     @Override
     public void close() {
-        assert mSession != null;
-        mSession.close();
+        if (mSession != null)
+            mSession.close();
     }
 
     /* WebSocketListener */

@@ -36,6 +36,7 @@ public final class EngineIoServerOptions {
         DEFAULT.setPingTimeout(5000);
         DEFAULT.setPingInterval(25000);
         DEFAULT.setAllowedCorsOrigins(ALLOWED_CORS_ORIGIN_ALL);
+        DEFAULT.setMaxTimeoutThreadPoolSize(20);
         DEFAULT.lock();
     }
 
@@ -45,6 +46,7 @@ public final class EngineIoServerOptions {
     private long mPingTimeout;
     private String[] mAllowedCorsOrigins;
     private Packet mInitialPacket;
+    private int mMaxTimeoutThreadPoolSize;
 
     private EngineIoServerOptions() {
         mIsLocked = false;
@@ -62,6 +64,7 @@ public final class EngineIoServerOptions {
                 .setPingInterval(DEFAULT.getPingInterval())
                 .setPingTimeout(DEFAULT.getPingTimeout())
                 .setAllowedCorsOrigins(DEFAULT.getAllowedCorsOrigins())
+                .setMaxTimeoutThreadPoolSize(DEFAULT.getMaxTimeoutThreadPoolSize())
                 .setInitialPacket(null);
     }
 
@@ -218,5 +221,31 @@ public final class EngineIoServerOptions {
      */
     public void lock() {
         mIsLocked = true;
+    }
+
+
+    /**
+     * Gets the max threadpool size for the ping timeout timers.
+     *
+     * @return Max threadpool size for ping timeout timers.
+     */
+    public int getMaxTimeoutThreadPoolSize() {
+        return mMaxTimeoutThreadPoolSize;
+    }
+
+    /**
+     * Sets the max threadpool size for the ping timeout timers.
+     *
+     * @param maxTimeoutThreadPoolSize Max threadpool size for handling ping timeouts.
+     * @return Instance for chaining.
+     * @throws IllegalStateException If instance is locked.
+     */
+    public EngineIoServerOptions setMaxTimeoutThreadPoolSize(int maxTimeoutThreadPoolSize) throws IllegalStateException {
+        if (mIsLocked) {
+            throw new IllegalStateException("Max timeout thread pool size cannot be set. Instance is locked.");
+        }
+
+        mMaxTimeoutThreadPoolSize = maxTimeoutThreadPoolSize;
+        return this;
     }
 }
