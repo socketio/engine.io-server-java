@@ -15,7 +15,7 @@
     <description>Jetty WebSocket adapter module.</description>
 
     <properties>
-        <revision>1.3.2</revision>
+        <revision>1.3.3</revision>
     </properties>
 
     <dependencies>

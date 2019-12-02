@@ -15,7 +15,7 @@
     <description>Engine.IO server library for Java</description>
 
     <properties>
-        <revision>1.3.2</revision>
+        <revision>1.3.3</revision>
     </properties>
 
     <dependencies>

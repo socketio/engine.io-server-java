@@ -14,7 +14,7 @@
     <description>This module contains integration tests.</description>
 
     <properties>
-        <revision>1.3.2</revision>
+        <revision>1.3.3</revision>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
     </properties>

@@ -19,7 +19,7 @@
     </modules>
 
     <properties>
-        <revision>1.3.2</revision>
+        <revision>1.3.3</revision>
         <github.global.server>github</github.global.server>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
