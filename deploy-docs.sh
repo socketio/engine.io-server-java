@@ -9,7 +9,7 @@ set -e
 JAVADOC_DIR=$(pwd)/target/site/apidocs
 
 # Build the javadocs
-mvn clean javadoc:aggregate
+mvn -DskipTests clean javadoc:aggregate
 
 # Activate virtualenv
 virtualenv -p python3 venv
