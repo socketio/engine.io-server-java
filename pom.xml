@@ -6,7 +6,7 @@
 
     <groupId>io.socket</groupId>
     <artifactId>engine.io-server-bom</artifactId>
-    <version>1.3.1</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <name>engine.io</name>
     <description>Engine.IO server library for Java</description>
@@ -19,6 +19,7 @@
     </modules>
 
     <properties>
+        <revision>1.3.1</revision>
         <github.global.server>github</github.global.server>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -47,7 +48,7 @@
     </developers>
 
     <prerequisites>
-        <maven>3.0.4</maven>
+        <maven>3.5.0</maven>
     </prerequisites>
 
     <distributionManagement>
@@ -66,12 +67,12 @@
             <dependency>
                 <groupId>io.socket</groupId>
                 <artifactId>engine.io-server</artifactId>
-                <version>1.3.1</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>io.socket</groupId>
                 <artifactId>engine.io-server-jetty</artifactId>
-                <version>1.3.1</version>
+                <version>${revision}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
