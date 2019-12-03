@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.socket</groupId>
         <artifactId>engine.io-server-bom</artifactId>
-        <version>${revision}</version>
+        <version>1.3.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,15 +14,10 @@
     <name>engine.io-server-jetty</name>
     <description>Jetty WebSocket adapter module.</description>
 
-    <properties>
-        <revision>1.3.3</revision>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.socket</groupId>
             <artifactId>engine.io-server</artifactId>
-            <version>${revision}</version>
         </dependency>
         
         <dependency>

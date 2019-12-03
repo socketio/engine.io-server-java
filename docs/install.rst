@@ -16,7 +16,7 @@ Add the following dependency to your ``pom.xml``.::
       <dependency>
         <groupId>io.socket</groupId>
         <artifactId>engine.io-server</artifactId>
-        <version>1.3.3</version>
+        <version>1.3.4</version>
       </dependency>
     </dependencies>
 
@@ -25,7 +25,7 @@ Gradle
 
 Add it as a gradle dependency in ``build.gradle``.::
 
-    compile ('io.socket:engine.io-server:1.3.3')
+    compile ('io.socket:engine.io-server:1.3.4')
 
 .. _install-jetty-ws-adapter:
 
