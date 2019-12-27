@@ -143,7 +143,7 @@ public final class PollingTest {
         });
 
         final Packet<String> requestPacket = new Packet<>(Packet.MESSAGE, messageData);
-        ServerParser.encodePayloadAsBinary(new Packet[]{requestPacket}, data -> {
+        ServerParser.encodePayloadAsBinary(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, data -> {
             final ByteArrayInputStream requestInputStream = new ByteArrayInputStream(data);
             final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
             Mockito.doAnswer(invocationOnMock -> "POST").when(request).getMethod();
@@ -268,7 +268,7 @@ public final class PollingTest {
         final Polling polling = Mockito.spy(new Polling());
 
         final Packet<String> requestPacket = new Packet<>(Packet.CLOSE);
-        ServerParser.encodePayloadAsBinary(new Packet[]{requestPacket}, data -> {
+        ServerParser.encodePayloadAsBinary(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, data -> {
             final ByteArrayInputStream requestInputStream = new ByteArrayInputStream(data);
             final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
             Mockito.doAnswer(invocationOnMock -> "POST").when(request).getMethod();
@@ -337,7 +337,7 @@ public final class PollingTest {
         polling.on("drain", args -> polling.close());
 
         final Packet<String> requestPacket = new Packet<>(Packet.CLOSE);
-        ServerParser.encodePayloadAsBinary(new Packet[]{requestPacket}, data -> {
+        ServerParser.encodePayloadAsBinary(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, data -> {
             final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
             Mockito.doAnswer(invocationOnMock -> "GET").when(request).getMethod();
             Mockito.doAnswer(invocationOnMock -> {

@@ -80,7 +80,7 @@ public final class Polling extends Transport implements AsyncListener {
         if(packets.size() == 0) {
             throw new IllegalArgumentException("No packets to send.");
         }
-        ServerParser.encodePayload(packets.toArray(new Packet[0]), supportsBinary, data -> {
+        ServerParser.encodePayload(packets, supportsBinary, data -> {
             final String contentType;
             final byte[] contentBytes;
 

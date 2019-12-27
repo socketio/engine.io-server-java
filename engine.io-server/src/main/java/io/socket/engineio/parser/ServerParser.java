@@ -1,15 +1,12 @@
 package io.socket.engineio.parser;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Handles parsing of engine.io packets and payloads.
  */
-@SuppressWarnings({"unchecked"})
+@SuppressWarnings({"unchecked", "rawtypes"})
 public final class ServerParser {
 
     @SuppressWarnings("WeakerAccess")
@@ -64,7 +61,7 @@ public final class ServerParser {
      * @param supportsBinary Whether the transport supports binary encoding.
      * @param callback The callback to be called with the encoded data.
      */
-    public static void encodePayload(Packet[] packets, boolean supportsBinary, Parser.EncodeCallback callback) {
+    public static void encodePayload(List<Packet<?>> packets, boolean supportsBinary, Parser.EncodeCallback callback) {
         boolean isBinary = false;
         for (Packet packet : packets) {
             if (packet.data instanceof byte[]) {
@@ -79,7 +76,7 @@ public final class ServerParser {
             return;
         }
 
-        if (packets.length == 0) {
+        if (packets.size() == 0) {
             callback.call("0:");
             return;
         }
@@ -100,13 +97,13 @@ public final class ServerParser {
      * @param callback The callback to be called with the encoded data.
      */
     @SuppressWarnings("Duplicates")
-    public static void encodePayloadAsBinary(Packet[] packets, Parser.EncodeCallback<byte[]> callback) {
-        if (packets.length == 0) {
+    public static void encodePayloadAsBinary(List<Packet<?>> packets, Parser.EncodeCallback<byte[]> callback) {
+        if (packets.size() == 0) {
             callback.call(new byte[0]);
             return;
         }
 
-        final ArrayList<byte[]> results = new ArrayList<>(packets.length);
+        final ArrayList<byte[]> results = new ArrayList<>(packets.size());
 
         for (Packet packet : packets) {
             encodePacket(packet, true, packet1 -> {
