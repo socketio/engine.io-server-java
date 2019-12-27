@@ -73,6 +73,7 @@ public final class EngineIoSocket extends Emitter {
     /**
      * Send a packet to the remote client.
      * Queuing of packets in case of polling transport are handled internally.
+     * This method is thread safe.
      *
      * @param packet The packet to send.
      */

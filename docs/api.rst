@@ -51,6 +51,7 @@ send
 
 Call this method on a connected ``EngineIoSocket`` instance to queue a packet for sending to
 remote client.
+This method is thread safe.
 
 close
 ^^^^^
