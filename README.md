@@ -3,12 +3,14 @@
 
 This is the Engine.IO Server Library for Java ported from the [JavaScript server](https://github.com/socketio/engine.io).
 
-See also: [Engine.IO-client Java](https://github.com/socketio/engine.io-client-java)
+See also: [Socket.IO-server Java](https://github.com/trinopoty/socket.io-server-java), [Engine.IO-client Java](https://github.com/socketio/engine.io-client-java)
 
 ## Documentation
 Complete documentation can be found [here](https://socketio.github.io/engine.io-server-java/).
 
 ## Installation
+If you're looking for the socket.io library instead, please [see here](https://github.com/trinopoty/socket.io-server-java).
+
 The latest artifact is available on Maven Central.
 
 ### Maven
@@ -36,6 +38,8 @@ compile ('io.socket:engine.io-server:1.3.4')
 The current version of engine.io-java does not support protocol 1.x.
 
 ## Usage
+If you're looking for the socket.io library instead, please [see here](https://github.com/trinopoty/socket.io-server-java).
+
 Usage is slightly different based on the server being used.
 
 Create a servlet to handle the HTTP requests as follows:
