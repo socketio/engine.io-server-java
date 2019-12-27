@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -298,10 +299,9 @@ public final class EngineIoSocket extends Emitter {
 
     private void flush() {
         if((mReadyState != ReadyState.CLOSED) && (mTransport.isWritable()) && (mWriteBuffer.size() > 0)) {
-            Object[] emitArg = mWriteBuffer.toArray();
-            emit("flush", emitArg);
-
             synchronized (mWriteBuffer) {
+                emit("flush", Collections.unmodifiableCollection(mWriteBuffer));
+
                 mTransport.send(mWriteBuffer);
                 mWriteBuffer.clear();
             }
