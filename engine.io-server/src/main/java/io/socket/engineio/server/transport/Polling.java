@@ -36,12 +36,16 @@ public final class Polling extends Transport implements AsyncListener {
         add(new Packet<String>(Packet.NOOP));
     }});
 
+    private final Object mLockObject;
+
     private HttpServletRequest mPollRequest;
     private HttpServletResponse mPollResponse;
     private boolean mWritable;
     private boolean mShouldClose;
 
-    public Polling() {
+    public Polling(Object lockObject) {
+        mLockObject = lockObject;
+
         mWritable = false;
         mShouldClose = false;
     }
@@ -49,77 +53,81 @@ public final class Polling extends Transport implements AsyncListener {
     /* Transport */
 
     @Override
-    public synchronized void onRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        switch (request.getMethod().toLowerCase()) {
-            case "get":
-                onPollRequest(request, response);
-                break;
-            case "post":
-                onDataRequest(request, response);
-                break;
-            default:
-                response.setStatus(500);
-                response.getWriter().write("");
-                break;
+    public void onRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        synchronized (mLockObject) {
+            switch (request.getMethod().toLowerCase()) {
+                case "get":
+                    onPollRequest(request, response);
+                    break;
+                case "post":
+                    onDataRequest(request, response);
+                    break;
+                default:
+                    response.setStatus(500);
+                    response.getWriter().write("");
+                    break;
+            }
         }
     }
 
     @Override
-    public synchronized void send(List<Packet<?>> packets) {
-        mWritable = false;
+    public void send(List<Packet<?>> packets) {
+        synchronized (mLockObject) {
+            mWritable = false;
 
-        if(mShouldClose) {
-            packets.add(new Packet<>(Packet.CLOSE));
-        }
-
-        @SuppressWarnings("unchecked") final Map<String, String> query = (Map<String, String>) mPollRequest.getAttribute("query");
-
-        final boolean supportsBinary = !query.containsKey("b64");
-        final boolean jsonp = query.containsKey("j");
-
-        if(packets.size() == 0) {
-            throw new IllegalArgumentException("No packets to send.");
-        }
-        ServerParser.encodePayload(packets, supportsBinary, data -> {
-            final String contentType;
-            final byte[] contentBytes;
-
-            if (jsonp) {
-                final String jsonpIndex = query.get("j").replaceAll("[^0-9]", "");
-                final String jsonContentString = (data instanceof String)?
-                        JSONObject.quote((String)data) :
-                        JSONObject.valueToString(new JSONArray(data));
-                final String jsContentString = jsonContentString
-                        .replace("\u2028", "\\u2028")
-                        .replace("\u2029", "\\u2029");
-                final String contentString = "___eio[" + jsonpIndex + "](" + jsContentString + ")";
-
-                contentType = "text/javascript; charset=UTF-8";
-                contentBytes = contentString.getBytes(StandardCharsets.UTF_8);
-            } else {
-                contentType = (data instanceof String)? "text/plain; charset=UTF-8" : "application/octet-stream";
-                contentBytes = (data instanceof String)? ((String)data).getBytes(StandardCharsets.UTF_8) : ((byte[])data);
+            if(mShouldClose) {
+                packets.add(new Packet<>(Packet.CLOSE));
             }
 
-            mPollResponse.setContentType(contentType);
-            mPollResponse.setContentLength(contentBytes.length);
+            @SuppressWarnings("unchecked") final Map<String, String> query = (Map<String, String>) mPollRequest.getAttribute("query");
 
-            try (OutputStream outputStream = mPollResponse.getOutputStream()) {
-                outputStream.write(contentBytes);
-            } catch (IOException ex) {
-                onError("write failure", ex.getMessage());
+            final boolean supportsBinary = !query.containsKey("b64");
+            final boolean jsonp = query.containsKey("j");
+
+            if(packets.size() == 0) {
+                throw new IllegalArgumentException("No packets to send.");
             }
+            ServerParser.encodePayload(packets, supportsBinary, data -> {
+                final String contentType;
+                final byte[] contentBytes;
 
-            if (mPollRequest.isAsyncStarted()) {
-                mPollRequest.getAsyncContext().complete();
+                if (jsonp) {
+                    final String jsonpIndex = query.get("j").replaceAll("[^0-9]", "");
+                    final String jsonContentString = (data instanceof String)?
+                            JSONObject.quote((String)data) :
+                            JSONObject.valueToString(new JSONArray(data));
+                    final String jsContentString = jsonContentString
+                            .replace("\u2028", "\\u2028")
+                            .replace("\u2029", "\\u2029");
+                    final String contentString = "___eio[" + jsonpIndex + "](" + jsContentString + ")";
+
+                    contentType = "text/javascript; charset=UTF-8";
+                    contentBytes = contentString.getBytes(StandardCharsets.UTF_8);
+                } else {
+                    contentType = (data instanceof String)? "text/plain; charset=UTF-8" : "application/octet-stream";
+                    contentBytes = (data instanceof String)? ((String)data).getBytes(StandardCharsets.UTF_8) : ((byte[])data);
+                }
+
+                mPollResponse.setContentType(contentType);
+                mPollResponse.setContentLength(contentBytes.length);
+
+                try (OutputStream outputStream = mPollResponse.getOutputStream()) {
+                    outputStream.write(contentBytes);
+                } catch (IOException ex) {
+                    onError("write failure", ex.getMessage());
+                }
+
+                if (mPollRequest.isAsyncStarted()) {
+                    mPollRequest.getAsyncContext().complete();
+                }
+
+                mPollRequest = null;
+                mPollResponse = null;
+            });
+
+            if(mShouldClose) {
+                onClose();
             }
-
-            mPollRequest = null;
-            mPollResponse = null;
-        });
-
-        if(mShouldClose) {
-            onClose();
         }
     }
 
@@ -134,12 +142,14 @@ public final class Polling extends Transport implements AsyncListener {
     }
 
     @Override
-    protected synchronized void doClose() {
-        if(mWritable) {
-            send(new ArrayList<>(PACKET_CLOSE));
-            onClose();
-        } else {
-            mShouldClose = true;
+    protected void doClose() {
+        synchronized (mLockObject) {
+            if(mWritable) {
+                send(new ArrayList<>(PACKET_CLOSE));
+                onClose();
+            } else {
+                mShouldClose = true;
+            }
         }
     }
 

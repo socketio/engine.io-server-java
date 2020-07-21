@@ -24,21 +24,21 @@ public final class PollingTest {
 
     @Test
     public void testName() {
-        final Polling polling = new Polling();
+        final Polling polling = new Polling(new Object());
 
         assertEquals(Polling.NAME, polling.getName());
     }
 
     @Test
     public void testWritable_normal() {
-        final Polling polling = new Polling();
+        final Polling polling = new Polling(new Object());
 
         assertFalse(polling.isWritable());
     }
 
     @Test
     public void testOnRequest_error() throws IOException {
-        final Polling polling = Mockito.spy(new Polling());
+        final Polling polling = Mockito.spy(new Polling(new Object()));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.doAnswer(invocationOnMock -> "DELETE").when(request).getMethod();
@@ -57,7 +57,7 @@ public final class PollingTest {
 
     @Test
     public void testOnRequest_poll() throws IOException {
-        final Polling polling = Mockito.spy(new Polling());
+        final Polling polling = Mockito.spy(new Polling(new Object()));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.doAnswer(invocationOnMock -> "GET").when(request).getMethod();
@@ -93,7 +93,7 @@ public final class PollingTest {
 
     @Test
     public void testOnRequest_poll_jsonp() throws IOException {
-        final Polling polling = Mockito.spy(new Polling());
+        final Polling polling = Mockito.spy(new Polling(new Object()));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.doAnswer(invocationOnMock -> "GET").when(request).getMethod();
@@ -135,7 +135,7 @@ public final class PollingTest {
     public void testOnRequest_data() {
         final String messageData = "Test Data";
 
-        final Polling polling = Mockito.spy(new Polling());
+        final Polling polling = Mockito.spy(new Polling(new Object()));
         polling.on("packet", args -> {
             final Packet<?> packet = (Packet<Object>) args[0];
             assertEquals(Packet.MESSAGE, packet.type);
@@ -175,7 +175,7 @@ public final class PollingTest {
     public void testOnRequest_data_jsonp() {
         final String messageData = "Test Data";
 
-        final Polling polling = Mockito.spy(new Polling());
+        final Polling polling = Mockito.spy(new Polling(new Object()));
         polling.on("packet", args -> {
             final Packet<?> packet = (Packet<Object>) args[0];
             assertEquals(Packet.MESSAGE, packet.type);
@@ -212,7 +212,7 @@ public final class PollingTest {
 
     @Test
     public void testOnRequest_async() throws IOException {
-        final Polling polling = Mockito.spy(new Polling());
+        final Polling polling = Mockito.spy(new Polling(new Object()));
 
         final AsyncContext asyncContext = Mockito.mock(AsyncContext.class);
 
@@ -265,7 +265,7 @@ public final class PollingTest {
 
     @Test
     public void testClose_client() {
-        final Polling polling = Mockito.spy(new Polling());
+        final Polling polling = Mockito.spy(new Polling(new Object()));
 
         final Packet<String> requestPacket = new Packet<>(Packet.CLOSE);
         ServerParser.encodePayloadAsBinary(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, data -> {
@@ -298,7 +298,7 @@ public final class PollingTest {
 
     @Test
     public void testClose_server1() throws IOException {
-        final Polling polling = Mockito.spy(new Polling());
+        final Polling polling = Mockito.spy(new Polling(new Object()));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.doAnswer(invocationOnMock -> "GET").when(request).getMethod();
@@ -332,7 +332,7 @@ public final class PollingTest {
 
     @Test
     public void testClose_server2() {
-        final Polling polling = Mockito.spy(new Polling());
+        final Polling polling = Mockito.spy(new Polling(new Object()));
 
         polling.on("drain", args -> polling.close());
 

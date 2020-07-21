@@ -185,8 +185,9 @@ public final class EngineIoServer extends Emitter {
     private void handshakePolling(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String sid = ServerYeast.yeast();
 
-        final Transport transport = new Polling();
-        final EngineIoSocket socket = new EngineIoSocket(sid, this, mPingTimeoutHandler);
+        final Object lockObject = new Object();
+        final EngineIoSocket socket = new EngineIoSocket(lockObject, sid, this, mPingTimeoutHandler);
+        final Transport transport = new Polling(lockObject);
         socket.init(transport, request);
         transport.onRequest(request, response);
 
@@ -200,7 +201,7 @@ public final class EngineIoServer extends Emitter {
         final String sid = ServerYeast.yeast();
 
         final Transport transport = new WebSocket(webSocket);
-        final EngineIoSocket socket = new EngineIoSocket(sid, this, mPingTimeoutHandler);
+        final EngineIoSocket socket = new EngineIoSocket(new Object(), sid, this, mPingTimeoutHandler);
         socket.init(transport, null);
 
         mClients.put(sid, socket);

@@ -35,6 +35,7 @@ public final class EngineIoSocket extends Emitter {
     private final LinkedList<Packet<?>> mWriteBuffer = new LinkedList<>();
     private final Runnable mPingTimeoutTask = () -> onClose("ping timeout", null);
 
+    private final Object mLockObject;
     private final EngineIoSocketTimeoutHandler mPingTimeoutHandler;
     private ScheduledFuture<?> mPingTimerScheduledReference = null;
 
@@ -43,7 +44,9 @@ public final class EngineIoSocket extends Emitter {
     private Transport mTransport;
     private AtomicBoolean mUpgrading = new AtomicBoolean(false);
 
-    EngineIoSocket(String sid, EngineIoServer server, EngineIoSocketTimeoutHandler pingTimeoutHandler) {
+    EngineIoSocket(Object lockObject, String sid, EngineIoServer server, EngineIoSocketTimeoutHandler pingTimeoutHandler) {
+        mLockObject = lockObject;
+
         mSid = sid;
         mServer = server;
         mPingTimeoutHandler = pingTimeoutHandler;
@@ -289,7 +292,7 @@ public final class EngineIoSocket extends Emitter {
 
     private void sendPacket(Packet<?> packet) {
         if((mReadyState != ReadyState.CLOSING) && (mReadyState != ReadyState.CLOSED)) {
-            synchronized (mWriteBuffer) {
+            synchronized (mLockObject) {
                 mWriteBuffer.add(packet);
             }
 
@@ -299,7 +302,7 @@ public final class EngineIoSocket extends Emitter {
 
     private void flush() {
         if((mReadyState != ReadyState.CLOSED) && (mTransport.isWritable()) && (mWriteBuffer.size() > 0)) {
-            synchronized (mWriteBuffer) {
+            synchronized (mLockObject) {
                 emit("flush", Collections.unmodifiableCollection(mWriteBuffer));
 
                 mTransport.send(mWriteBuffer);
@@ -310,14 +313,16 @@ public final class EngineIoSocket extends Emitter {
         }
     }
 
-    private synchronized void resetPingTimeout() {
-        if(mPingTimerScheduledReference != null) {
-            mPingTimerScheduledReference.cancel(false);
-        }
+    private void resetPingTimeout() {
+        synchronized (mLockObject) {
+            if(mPingTimerScheduledReference != null) {
+                mPingTimerScheduledReference.cancel(false);
+            }
 
-        mPingTimerScheduledReference = mPingTimeoutHandler.schedule(
-                mPingTimeoutTask,
-                mServer.getOptions().getPingInterval() + mServer.getOptions().getPingTimeout(),
-                TimeUnit.MILLISECONDS);
+            mPingTimerScheduledReference = mPingTimeoutHandler.schedule(
+                    mPingTimeoutTask,
+                    mServer.getOptions().getPingInterval() + mServer.getOptions().getPingTimeout(),
+                    TimeUnit.MILLISECONDS);
+        }
     }
 }
