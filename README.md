@@ -3,6 +3,8 @@
 
 This is the Engine.IO Server Library for Java ported from the [JavaScript server](https://github.com/socketio/engine.io).
 
+**NOTE** This library will follow the major version of the JS library starting with version 4.
+
 See also: [Socket.IO-server Java](https://github.com/trinopoty/socket.io-server-java), [Engine.IO-client Java](https://github.com/socketio/engine.io-client-java)
 
 ## Documentation
@@ -21,7 +23,7 @@ Add the following dependency to your `pom.xml`.
   <dependency>
     <groupId>io.socket</groupId>
     <artifactId>engine.io-server</artifactId>
-    <version>1.3.5</version>
+    <version>4.0.0</version>
   </dependency>
 </dependencies>
 ```
@@ -30,7 +32,7 @@ Add the following dependency to your `pom.xml`.
 Add it as a gradle dependency in `build.gradle`.
 
 ```groovy
-compile ('io.socket:engine.io-server:1.3.5')
+compile ('io.socket:engine.io-server:4.0.0')
 ```
 
 #### Engine.IO Protocol 1.x suppport
