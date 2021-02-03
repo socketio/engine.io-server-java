@@ -127,7 +127,10 @@ public final class EngineIoSocketTest {
         Mockito.doAnswer(invocationOnMock -> {
             List<Packet<?>> packets = (List<Packet<?>>) invocationOnMock.getArguments()[0];
             Assert.assertEquals(1, packets.size());
-            Assert.assertEquals(packet, packets.get(0));
+
+            if (packets.get(0).type.equals(Packet.MESSAGE)) {
+                Assert.assertEquals(packet.data, packets.get(0).data);
+            }
             return null;
         }).when(transport).send(Mockito.anyList());
 
@@ -159,7 +162,10 @@ public final class EngineIoSocketTest {
         Mockito.doAnswer(invocationOnMock -> {
             List<Packet<?>> packets = (List<Packet<?>>) invocationOnMock.getArguments()[0];
             Assert.assertEquals(1, packets.size());
-            Assert.assertEquals(packet, packets.get(0));
+
+            if (packets.get(0).type.equals(Packet.MESSAGE)) {
+                Assert.assertEquals(packet.data, packets.get(0).data);
+            }
             return null;
         }).when(transport).send(Mockito.anyList());
 
@@ -167,7 +173,6 @@ public final class EngineIoSocketTest {
 
         Mockito.verify(transport, Mockito.times(2))
                 .send(Mockito.anyList());
-
     }
 
     @Test
