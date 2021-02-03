@@ -59,26 +59,6 @@ public final class EngineIoServer extends Emitter {
     }
 
     /**
-     * Get configured ping timeout.
-     *
-     * @return Ping timeout value in milliseconds.
-     */
-    @Deprecated
-    public long getPingTimeout() {
-        return mOptions.getPingTimeout();
-    }
-
-    /**
-     * Get configured ping interval.
-     *
-     * @return Ping timeout value in milliseconds.
-     */
-    @Deprecated
-    public long getPingInterval() {
-        return mOptions.getPingInterval();
-    }
-
-    /**
      * Handle an HTTP request.
      *
      * This method handles polling transport connections.
