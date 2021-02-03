@@ -22,7 +22,7 @@ public final class ServerParserTest {
      */
     @Test
     public void testProtocolVersion() {
-        assertEquals(3, ServerParser.PROTOCOL);
+        assertEquals(4, ServerParser.PROTOCOL);
     }
 
     @Test

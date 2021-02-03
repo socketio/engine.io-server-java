@@ -87,7 +87,7 @@ public final class ServerParser {
             final String stringData = (String) data;
             if(stringData.charAt(0) == 'b') {
                 Packet<byte[]> packet = new Packet<>(Packet.MESSAGE);
-                packet.data = Base64.getDecoder().decode(stringData.substring(1));
+                packet.data = java.util.Base64.getDecoder().decode(stringData.substring(1));
                 return packet;
             } else {
                 Packet<String> packet = new Packet<>(packetsList.get(
@@ -138,7 +138,7 @@ public final class ServerParser {
             callback.call(packet.data);
         } else {
             String resultBuilder = "b" +
-                    Base64.getEncoder().encodeToString(packet.data);
+                    java.util.Base64.getEncoder().encodeToString(packet.data);
             callback.call(resultBuilder);
         }
     }
