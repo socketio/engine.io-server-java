@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,6 +21,16 @@ public final class TransportTest {
         }
 
         /* Abstract overrides */
+
+        @Override
+        public Map<String, String> getInitialQuery() {
+            return null;
+        }
+
+        @Override
+        public Map<String, List<String>> getInitialHeaders() {
+            return null;
+        }
 
         @Override
         public String getName() {

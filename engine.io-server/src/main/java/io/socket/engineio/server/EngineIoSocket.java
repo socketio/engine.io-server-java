@@ -10,10 +10,7 @@ import org.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,6 +42,8 @@ public final class EngineIoSocket extends Emitter {
     private Runnable mCleanupFunction = null;
     private ReadyState mReadyState;
     private Transport mTransport;
+    private Map<String, String> mInitialQuery;
+    private Map<String, List<String>> mInitialHeaders;
 
     EngineIoSocket(Object lockObject, String sid, EngineIoServer server, EngineIoSocketScheduledTaskHandler scheduledTaskHandler) {
         mLockObject = lockObject;
@@ -74,6 +73,24 @@ public final class EngineIoSocket extends Emitter {
     @SuppressWarnings("WeakerAccess")
     public ReadyState getReadyState() {
         return mReadyState;
+    }
+
+    /**
+     * Get the query parameters of the initial HTTP connection.
+     *
+     * @return Query parameters of the initial HTTP connection.
+     */
+    public Map<String, String> getInitialQuery() {
+        return mInitialQuery;
+    }
+
+    /**
+     * Get the headers of the initial HTTP connection.
+     *
+     * @return Headers of the initial HTTP connection.
+     */
+    public Map<String, List<String>> getInitialHeaders() {
+        return mInitialHeaders;
     }
 
     /**
@@ -110,6 +127,8 @@ public final class EngineIoSocket extends Emitter {
      */
     void init(Transport transport, @SuppressWarnings("unused") HttpServletRequest initialRequest) {
         setTransport(transport);
+        mInitialQuery = transport.getInitialQuery();
+        mInitialHeaders = transport.getInitialHeaders();
         onOpen();
     }
 

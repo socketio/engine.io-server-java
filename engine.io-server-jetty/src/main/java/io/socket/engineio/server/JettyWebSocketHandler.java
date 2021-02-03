@@ -6,6 +6,7 @@ import org.eclipse.jetty.websocket.api.WebSocketListener;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,6 +18,7 @@ public final class JettyWebSocketHandler extends EngineIoWebSocket implements We
 
     private Session mSession;
     private Map<String, String> mQuery;
+    private Map<String, List<String>> mHeaders;
 
     @SuppressWarnings("WeakerAccess")
     public JettyWebSocketHandler(EngineIoServer server) {
@@ -28,6 +30,11 @@ public final class JettyWebSocketHandler extends EngineIoWebSocket implements We
     @Override
     public Map<String, String> getQuery() {
         return mQuery;
+    }
+
+    @Override
+    public Map<String, List<String>> getConnectionHeaders() {
+        return mHeaders;
     }
 
     @Override
@@ -56,6 +63,7 @@ public final class JettyWebSocketHandler extends EngineIoWebSocket implements We
     public void onWebSocketConnect(Session session) {
         mSession = session;
         mQuery = ParseQS.decode(session.getUpgradeRequest().getQueryString());
+        mHeaders = session.getUpgradeRequest().getHeaders();
 
         mServer.handleWebSocket(this);
     }

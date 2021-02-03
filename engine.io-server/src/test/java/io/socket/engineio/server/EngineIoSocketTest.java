@@ -14,11 +14,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public final class EngineIoSocketTest {
 
     private static final String SUB_TRANSPORT_NAME = "stubTransport";
     private static final class StubTransport extends Transport {
+
+        @Override
+        public Map<String, String> getInitialQuery() {
+            return null;
+        }
+
+        @Override
+        public Map<String, List<String>> getInitialHeaders() {
+            return null;
+        }
 
         @Override
         public void onRequest(HttpServletRequest request, HttpServletResponse response) {

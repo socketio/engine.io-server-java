@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -24,6 +25,11 @@ public final class WebSocketTest {
 
         @Override
         public Map<String, String> getQuery() {
+            return new HashMap<>();
+        }
+
+        @Override
+        public Map<String, List<String>> getConnectionHeaders() {
             return new HashMap<>();
         }
 

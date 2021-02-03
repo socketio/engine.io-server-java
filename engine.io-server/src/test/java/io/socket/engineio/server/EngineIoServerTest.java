@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -22,18 +23,25 @@ public final class EngineIoServerTest {
     private static final class WebSocketConnectionStub extends EngineIoWebSocket {
 
         private final Map<String, String> mQuery;
+        private final Map<String, List<String>> mHeaders;
 
         WebSocketConnectionStub() {
-            this(new HashMap<>());
+            this(new HashMap<>(), new HashMap<>());
         }
 
-        WebSocketConnectionStub(Map<String, String> query) {
+        WebSocketConnectionStub(Map<String, String> query, Map<String, List<String>> headers) {
             mQuery = query;
+            mHeaders = headers;
         }
 
         @Override
         public Map<String, String> getQuery() {
             return mQuery;
+        }
+
+        @Override
+        public Map<String, List<String>> getConnectionHeaders() {
+            return mHeaders;
         }
 
         @Override

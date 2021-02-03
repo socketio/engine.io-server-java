@@ -3,6 +3,7 @@ package io.socket.engineio.server;
 import io.socket.emitter.Emitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,9 +14,16 @@ public abstract class EngineIoWebSocket extends Emitter {
     /**
      * Get the query of the initial HTTP request.
      *
-     * @return Map of string keys and values of query.
+     * @return Query parameters of the initial HTTP request.
      */
     public abstract Map<String, String> getQuery();
+
+    /**
+     * Get the headers in the initial HTTP request.
+     *
+     * @return Headers of the initial HTTP request.
+     */
+    public abstract Map<String, List<String>> getConnectionHeaders();
 
     /**
      * Write a string to the WebSocket and send to remote client.

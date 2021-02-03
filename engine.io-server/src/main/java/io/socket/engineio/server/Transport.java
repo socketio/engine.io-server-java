@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Base class for all transports.
@@ -20,6 +21,20 @@ public abstract class Transport extends Emitter {
     protected Transport() {
         mReadyState = ReadyState.OPEN;
     }
+
+    /**
+     * Get the query parameters of the initial HTTP request.
+     *
+     * @return Query parameters of the initial HTTP request.
+     */
+    public abstract Map<String, String> getInitialQuery();
+
+    /**
+     * Get the headers of the initial HTTP request.
+     *
+     * @return Headers of the initial HTTP request.
+     */
+    public abstract Map<String, List<String>> getInitialHeaders();
 
     /**
      * Handle a client HTTP request.

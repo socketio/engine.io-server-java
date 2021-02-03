@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * WebSocket transport.
@@ -25,6 +26,16 @@ public final class WebSocket extends Transport {
         mConnection.on("message", args -> onData(args[0]));
         mConnection.on("close", args -> onClose());
         mConnection.on("error", args -> onError((String) args[0], (String) args[1]));
+    }
+
+    @Override
+    public Map<String, String> getInitialQuery() {
+        return mConnection.getQuery();
+    }
+
+    @Override
+    public Map<String, List<String>> getInitialHeaders() {
+        return mConnection.getConnectionHeaders();
     }
 
     @Override

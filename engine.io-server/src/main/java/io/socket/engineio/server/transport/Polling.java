@@ -17,10 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Polling transport.
@@ -42,6 +39,8 @@ public final class Polling extends Transport implements AsyncListener {
     private HttpServletResponse mPollResponse;
     private boolean mWritable;
     private boolean mShouldClose;
+    private Map<String, String> mQuery;
+    private Map<String, List<String>> mHeaders;
 
     public Polling(Object lockObject) {
         mLockObject = lockObject;
@@ -53,8 +52,44 @@ public final class Polling extends Transport implements AsyncListener {
     /* Transport */
 
     @Override
+    public Map<String, String> getInitialQuery() {
+        return mQuery;
+    }
+
+    @Override
+    public Map<String, List<String>> getInitialHeaders() {
+        return mHeaders;
+    }
+
+    @Override
     public void onRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         synchronized (mLockObject) {
+            if (mQuery == null) {
+                if (request.getQueryString() != null) {
+                    mQuery = ParseQS.decode(request.getQueryString());
+                } else {
+                    mQuery = new HashMap<>();
+                }
+            }
+            if (mHeaders == null) {
+                mHeaders = new HashMap<>();
+
+                final Enumeration<String> iter = request.getHeaderNames();
+                if (iter != null) {
+                    while (iter.hasMoreElements()) {
+                        final String headerName = iter.nextElement();
+                        final List<String> headerValues = new ArrayList<>();
+
+                        final Enumeration<String> iter2 = request.getHeaders(headerName);
+                        while (iter2.hasMoreElements()) {
+                            headerValues.add(iter2.nextElement());
+                        }
+
+                        mHeaders.put(headerName, headerValues);
+                    }
+                }
+            }
+
             switch (request.getMethod().toLowerCase()) {
                 case "get":
                     onPollRequest(request, response);
