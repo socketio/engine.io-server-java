@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,7 +35,7 @@ public final class EngineIoSocket extends Emitter {
     private final Runnable mPingTimeoutTask = () -> onClose("ping timeout", null);
 
     private final Object mLockObject;
-    private final EngineIoSocketScheduledTaskHandler mScheduledTaskHandler;
+    private final ScheduledExecutorService mScheduledTaskHandler;
     private ScheduledFuture<?> mPingFuture = null;
     private ScheduledFuture<?> mPintTimeoutFuture = null;
 
@@ -45,7 +46,7 @@ public final class EngineIoSocket extends Emitter {
     private Map<String, String> mInitialQuery;
     private Map<String, List<String>> mInitialHeaders;
 
-    EngineIoSocket(Object lockObject, String sid, EngineIoServer server, EngineIoSocketScheduledTaskHandler scheduledTaskHandler) {
+    EngineIoSocket(Object lockObject, String sid, EngineIoServer server, ScheduledExecutorService scheduledTaskHandler) {
         mLockObject = lockObject;
 
         mSid = sid;

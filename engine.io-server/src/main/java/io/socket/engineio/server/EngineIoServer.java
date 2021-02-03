@@ -13,7 +13,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The engine.io server.
@@ -24,11 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class EngineIoServer extends Emitter {
 
     private final Map<String, EngineIoSocket> mClients = new ConcurrentHashMap<>();
-
-    private final EngineIoSocketScheduledTaskHandler mPingTimeoutHandler;
-
-
     private final EngineIoServerOptions mOptions;
+    private final ScheduledExecutorService mScheduledExecutor;
 
     /**
      * Create instance of server with default options.
@@ -46,16 +44,34 @@ public final class EngineIoServer extends Emitter {
     public EngineIoServer(EngineIoServerOptions options) {
         mOptions = options;
         mOptions.lock();
-        mPingTimeoutHandler = new EngineIoSocketScheduledTaskHandler(mOptions.getMaxTimeoutThreadPoolSize());
+
+        mScheduledExecutor = Executors.newScheduledThreadPool(mOptions.getMaxTimeoutThreadPoolSize(), new ThreadFactory() {
+
+            private final AtomicLong mThreadCount = new AtomicLong(0);
+
+            @SuppressWarnings("NullableProblems")
+            @Override
+            public Thread newThread(Runnable runnable) {
+                final Thread thread = new Thread(runnable);
+                thread.setName(String.format("engineIo-threadPool-%d", mThreadCount.incrementAndGet()));
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
     }
 
     /**
      * Gets the configured options for this server instance.
-     *
-     * @return Options for this server instance.
      */
     public EngineIoServerOptions getOptions() {
         return mOptions;
+    }
+
+    /**
+     * Gets the underlying executor used for ping timeout handling.
+     */
+    public ScheduledExecutorService getScheduledExecutor() {
+        return mScheduledExecutor;
     }
 
     /**
@@ -166,7 +182,7 @@ public final class EngineIoServer extends Emitter {
         final String sid = ServerYeast.yeast();
 
         final Object lockObject = new Object();
-        final EngineIoSocket socket = new EngineIoSocket(lockObject, sid, this, mPingTimeoutHandler);
+        final EngineIoSocket socket = new EngineIoSocket(lockObject, sid, this, mScheduledExecutor);
         final Transport transport = new Polling(lockObject);
         socket.init(transport, request);
         transport.onRequest(request, response);
@@ -181,7 +197,7 @@ public final class EngineIoServer extends Emitter {
         final String sid = ServerYeast.yeast();
 
         final Transport transport = new WebSocket(webSocket);
-        final EngineIoSocket socket = new EngineIoSocket(new Object(), sid, this, mPingTimeoutHandler);
+        final EngineIoSocket socket = new EngineIoSocket(new Object(), sid, this, mScheduledExecutor);
         socket.init(transport, null);
 
         mClients.put(sid, socket);

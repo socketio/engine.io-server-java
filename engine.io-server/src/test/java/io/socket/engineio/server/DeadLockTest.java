@@ -14,10 +14,9 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 public final class DeadLockTest {
-
-	private final EngineIoSocketScheduledTaskHandler mPingTimeoutHandler = new EngineIoSocketScheduledTaskHandler(1);
 
 	/**
 	 * Tests for deadlock of server.
@@ -29,7 +28,7 @@ public final class DeadLockTest {
 		final EngineIoSocket socket = new EngineIoSocket(lockObject,
 				ServerYeast.yeast(),
 				new EngineIoServer(),
-				mPingTimeoutHandler);
+				Executors.newSingleThreadScheduledExecutor());
 		final Transport transport = new Polling(lockObject);
 		socket.init(transport, null);
 

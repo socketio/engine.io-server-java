@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public final class EngineIoSocketTest {
 
@@ -54,7 +56,7 @@ public final class EngineIoSocketTest {
         }
     }
 
-    private final EngineIoSocketScheduledTaskHandler mPingTimeoutHandler = new EngineIoSocketScheduledTaskHandler(1);
+    private final ScheduledExecutorService mPingTimeoutHandler = Executors.newSingleThreadScheduledExecutor();
 
     @Test
     public void testInit() {
