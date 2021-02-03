@@ -25,7 +25,7 @@ public final class EngineIoServer extends Emitter {
 
     private final Map<String, EngineIoSocket> mClients = new ConcurrentHashMap<>();
 
-    private final EngineIoSocketTimeoutHandler mPingTimeoutHandler;
+    private final EngineIoSocketScheduledTaskHandler mPingTimeoutHandler;
 
 
     private final EngineIoServerOptions mOptions;
@@ -46,7 +46,7 @@ public final class EngineIoServer extends Emitter {
     public EngineIoServer(EngineIoServerOptions options) {
         mOptions = options;
         mOptions.lock();
-        mPingTimeoutHandler = new EngineIoSocketTimeoutHandler(mOptions.getMaxTimeoutThreadPoolSize());
+        mPingTimeoutHandler = new EngineIoSocketScheduledTaskHandler(mOptions.getMaxTimeoutThreadPoolSize());
     }
 
     /**
@@ -126,7 +126,7 @@ public final class EngineIoServer extends Emitter {
                 mClients.get(sid).onRequest(request, response);
             }
         } else {
-            if(!request.getMethod().toUpperCase().equals("GET")) {
+            if(!request.getMethod().equalsIgnoreCase("GET")) {
                 sendErrorMessage(response, ServerErrors.BAD_HANDSHAKE_METHOD);
             } else {
                 handshakePolling(request, response);

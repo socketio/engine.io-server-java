@@ -43,7 +43,7 @@ public final class EngineIoSocketTest {
         }
     }
 
-    private EngineIoSocketTimeoutHandler mPingTimeoutHandler = new EngineIoSocketTimeoutHandler(1);
+    private final EngineIoSocketScheduledTaskHandler mPingTimeoutHandler = new EngineIoSocketScheduledTaskHandler(1);
 
     @Test
     public void testInit() {
@@ -326,30 +326,33 @@ public final class EngineIoSocketTest {
                 .call(Mockito.eq(packetData));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testTransportPacket_ping() {
         final Transport transport = Mockito.spy(new StubTransport());
-        final EngineIoSocket socket = new EngineIoSocket(new Object(), ServerYeast.yeast(), new EngineIoServer(), mPingTimeoutHandler);
+        final EngineIoServerOptions options = EngineIoServerOptions.newFromDefault()
+                .setPingInterval(1000)
+                .setPingTimeout(1000);
+        final EngineIoSocket socket = new EngineIoSocket(new Object(), ServerYeast.yeast(), new EngineIoServer(options), mPingTimeoutHandler);
         socket.init(transport, null);
-
-        final Packet<String> packet = new Packet<>(Packet.PING);
 
         final Emitter.Listener heartbeatListener = Mockito.mock(Emitter.Listener.class);
         socket.on("heartbeat", heartbeatListener);
 
         Mockito.doAnswer(invocationOnMock -> {
-            final Packet<?> argPacket = ((List<Packet<?>>) invocationOnMock.getArgument(0)).get(0);
-            Assert.assertEquals(Packet.PONG, argPacket.type);
+            final List<Packet<?>> packets = invocationOnMock.getArgument(0);
+            if (packets.size() == 1 && packets.get(0).type.equals(Packet.PING)) {
+                transport.emit("packet", new Packet<>(Packet.PONG));
+            }
             return null;
         }).when(transport).send(Mockito.anyList());
 
-        transport.emit("packet", packet);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ignore) {
+        }
 
-        Mockito.verify(heartbeatListener, Mockito.times(1))
+        Mockito.verify(heartbeatListener, Mockito.atLeast(1))
                 .call();
-        Mockito.verify(transport, Mockito.times(2))
-                .send(Mockito.anyList());
     }
 
     @Test

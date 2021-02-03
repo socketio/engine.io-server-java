@@ -17,7 +17,7 @@ import java.util.Map;
 
 public final class DeadLockTest {
 
-	private final EngineIoSocketTimeoutHandler mPingTimeoutHandler = new EngineIoSocketTimeoutHandler(1);
+	private final EngineIoSocketScheduledTaskHandler mPingTimeoutHandler = new EngineIoSocketScheduledTaskHandler(1);
 
 	/**
 	 * Tests for deadlock of server.

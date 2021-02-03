@@ -80,14 +80,12 @@ public final class Polling extends Transport implements AsyncListener {
             }
 
             @SuppressWarnings("unchecked") final Map<String, String> query = (Map<String, String>) mPollRequest.getAttribute("query");
-
-            final boolean supportsBinary = !query.containsKey("b64");
             final boolean jsonp = query.containsKey("j");
 
             if(packets.size() == 0) {
                 throw new IllegalArgumentException("No packets to send.");
             }
-            ServerParser.encodePayload(packets, supportsBinary, data -> {
+            ServerParser.encodePayload(packets, data -> {
                 final String contentType;
                 final byte[] contentBytes;
 
@@ -232,7 +230,6 @@ public final class Polling extends Transport implements AsyncListener {
     private void onDataRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         @SuppressWarnings("unchecked") final Map<String, String> query = (Map<String, String>) request.getAttribute("query");
 
-        final boolean isBinary = request.getContentType().equals("application/octet-stream");
         final boolean jsonp = query.containsKey("j");
 
         try(final ServletInputStream inputStream = request.getInputStream()) {
@@ -246,7 +243,7 @@ public final class Polling extends Transport implements AsyncListener {
                 final String packetPayload = packetPayloadRaw.replace("\\n", "\n");
                 onData(packetPayload);
             } else {
-                onData((isBinary)? mReadBuffer : (new String(mReadBuffer, StandardCharsets.UTF_8)));
+                onData((new String(mReadBuffer, StandardCharsets.UTF_8)));
             }
         }
 

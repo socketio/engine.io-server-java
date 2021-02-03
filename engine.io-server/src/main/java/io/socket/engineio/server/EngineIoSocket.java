@@ -33,23 +33,25 @@ public final class EngineIoSocket extends Emitter {
     private final String mSid;
     private final EngineIoServer mServer;
     private final LinkedList<Packet<?>> mWriteBuffer = new LinkedList<>();
+    private final Runnable mPingTask = this::sendPing;
     private final Runnable mPingTimeoutTask = () -> onClose("ping timeout", null);
 
     private final Object mLockObject;
-    private final EngineIoSocketTimeoutHandler mPingTimeoutHandler;
-    private ScheduledFuture<?> mPingTimerScheduledReference = null;
+    private final EngineIoSocketScheduledTaskHandler mScheduledTaskHandler;
+    private ScheduledFuture<?> mPingFuture = null;
+    private ScheduledFuture<?> mPintTimeoutFuture = null;
 
+    private final AtomicBoolean mUpgrading = new AtomicBoolean(false);
     private Runnable mCleanupFunction = null;
     private ReadyState mReadyState;
     private Transport mTransport;
-    private AtomicBoolean mUpgrading = new AtomicBoolean(false);
 
-    EngineIoSocket(Object lockObject, String sid, EngineIoServer server, EngineIoSocketTimeoutHandler pingTimeoutHandler) {
+    EngineIoSocket(Object lockObject, String sid, EngineIoServer server, EngineIoSocketScheduledTaskHandler scheduledTaskHandler) {
         mLockObject = lockObject;
 
         mSid = sid;
         mServer = server;
-        mPingTimeoutHandler = pingTimeoutHandler;
+        mScheduledTaskHandler = scheduledTaskHandler;
 
         mReadyState = ReadyState.OPENING;
     }
@@ -178,7 +180,7 @@ public final class EngineIoSocket extends Emitter {
                 emit("upgrade", transport);
                 flush();
 
-                resetPingTimeout();
+                schedulePing();
             } else {
                 cleanup.run();
                 transport.close();
@@ -251,13 +253,13 @@ public final class EngineIoSocket extends Emitter {
         }
 
         emit("open");
-        resetPingTimeout();
+        schedulePing();
     }
 
     private void onClose(String reason, String description) {
         if(mReadyState != ReadyState.CLOSED) {
             mReadyState = ReadyState.CLOSED;
-            mPingTimerScheduledReference.cancel(false);
+            mPingFuture.cancel(false);
 
             clearTransport();
             emit("close", reason, description);
@@ -275,8 +277,8 @@ public final class EngineIoSocket extends Emitter {
             resetPingTimeout();
 
             switch (packet.type) {
-                case Packet.PING:
-                    sendPacket(new Packet<>(Packet.PONG));
+                case Packet.PONG:
+                    schedulePing();
                     emit("heartbeat");
                     break;
                 case Packet.ERROR:
@@ -313,15 +315,35 @@ public final class EngineIoSocket extends Emitter {
         }
     }
 
-    private void resetPingTimeout() {
+    private void sendPing() {
         synchronized (mLockObject) {
-            if(mPingTimerScheduledReference != null) {
-                mPingTimerScheduledReference.cancel(false);
+            sendPacket(new Packet<>(Packet.PING));
+            resetPingTimeout();
+        }
+    }
+
+    private void schedulePing() {
+        synchronized (mLockObject) {
+            if(mPingFuture != null) {
+                mPingFuture.cancel(false);
             }
 
-            mPingTimerScheduledReference = mPingTimeoutHandler.schedule(
+            mPingFuture = mScheduledTaskHandler.schedule(
+                    mPingTask,
+                    mServer.getOptions().getPingInterval(),
+                    TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void resetPingTimeout() {
+        synchronized (mLockObject) {
+            if(mPintTimeoutFuture != null) {
+                mPintTimeoutFuture.cancel(false);
+            }
+
+            mPintTimeoutFuture = mScheduledTaskHandler.schedule(
                     mPingTimeoutTask,
-                    mServer.getOptions().getPingInterval() + mServer.getOptions().getPingTimeout(),
+                    mServer.getOptions().getPingTimeout(),
                     TimeUnit.MILLISECONDS);
         }
     }

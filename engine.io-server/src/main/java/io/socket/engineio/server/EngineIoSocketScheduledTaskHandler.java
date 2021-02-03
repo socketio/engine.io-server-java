@@ -3,7 +3,7 @@ package io.socket.engineio.server;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class EngineIoSocketTimeoutHandler {
+class EngineIoSocketScheduledTaskHandler {
 
     private final ExecutorService executorPool;
     private final ScheduledExecutorService scheduledExecutorService;
@@ -20,7 +20,7 @@ class EngineIoSocketTimeoutHandler {
      *
      * @param maxThreadPoolSize The maximum thread pool size to expand to
      */
-    EngineIoSocketTimeoutHandler(int maxThreadPoolSize) {
+    EngineIoSocketScheduledTaskHandler(int maxThreadPoolSize) {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new EngineIoThreadFactory("scheduler"));
 
         executorPool = new ThreadPoolExecutor(

@@ -11,7 +11,7 @@ getStdin.buffer().then(function (stdin) {
         packets.push({ type: 'message', data: helpers.toArrayBuffer(inputMessages[i]) });
     }
 
-    parser.encodePayload(packets, false, function (encodedValue) {
+    parser.encodePayload(packets, function (encodedValue) {
         stdout.write(encodedValue);
     });
 });
