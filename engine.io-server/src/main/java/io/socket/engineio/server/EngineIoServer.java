@@ -186,6 +186,7 @@ public final class EngineIoServer extends Emitter {
         final Transport transport = new Polling(lockObject);
         socket.init(transport, request);
         transport.onRequest(request, response);
+        socket.updateInitialHeadersFromActiveTransport();
 
         mClients.put(sid, socket);
         socket.once("close", args -> mClients.remove(sid));

@@ -133,6 +133,11 @@ public final class EngineIoSocket extends Emitter {
         onOpen();
     }
 
+    void updateInitialHeadersFromActiveTransport() {
+        mInitialQuery = mTransport.getInitialQuery();
+        mInitialHeaders = mTransport.getInitialHeaders();
+    }
+
     /**
      * Handle an HTTP request.
      *
