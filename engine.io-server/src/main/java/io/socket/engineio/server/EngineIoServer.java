@@ -185,7 +185,7 @@ public final class EngineIoServer extends Emitter {
         final Object lockObject = new Object();
         final EngineIoSocket socket = new EngineIoSocket(lockObject, sid, this, mScheduledExecutor);
         final Transport transport = new Polling(lockObject);
-        socket.init(transport, request);
+        socket.init(transport);
         transport.onRequest(request, response);
         socket.updateInitialHeadersFromActiveTransport();
 
@@ -200,7 +200,7 @@ public final class EngineIoServer extends Emitter {
 
         final Transport transport = new WebSocket(webSocket);
         final EngineIoSocket socket = new EngineIoSocket(new Object(), sid, this, mScheduledExecutor);
-        socket.init(transport, null);
+        socket.init(transport);
 
         mClients.put(sid, socket);
         socket.once("close", args -> mClients.remove(sid));

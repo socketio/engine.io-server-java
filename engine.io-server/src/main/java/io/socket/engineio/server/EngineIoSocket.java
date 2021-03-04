@@ -124,9 +124,8 @@ public final class EngineIoSocket extends Emitter {
      * Called after instance creation to initialize transport.
      *
      * @param transport The opened transport.
-     * @param initialRequest The initial HTTP request the caused the connection.
      */
-    void init(Transport transport, @SuppressWarnings("unused") HttpServletRequest initialRequest) {
+    void init(Transport transport) {
         setTransport(transport);
         mInitialQuery = transport.getInitialQuery();
         mInitialHeaders = transport.getInitialHeaders();

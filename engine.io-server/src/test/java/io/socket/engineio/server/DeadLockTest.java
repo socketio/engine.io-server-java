@@ -30,7 +30,7 @@ public final class DeadLockTest {
 				new EngineIoServer(),
 				Executors.newSingleThreadScheduledExecutor());
 		final Transport transport = new Polling(lockObject);
-		socket.init(transport, null);
+		socket.init(transport);
 
 		final HttpServletRequest request = getConnectRequest(new HashMap<String, String>() {{
 				put("transport", Polling.NAME);
