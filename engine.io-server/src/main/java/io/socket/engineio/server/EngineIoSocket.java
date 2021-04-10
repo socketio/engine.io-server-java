@@ -299,8 +299,6 @@ public final class EngineIoSocket extends Emitter {
         if(mReadyState == ReadyState.OPEN) {
             emit("packet", packet);
 
-            resetPingTimeout();
-
             switch (packet.type) {
                 case Packet.PONG:
                     schedulePing();
