@@ -2,9 +2,6 @@ package io.socket.engineio.server;
 
 import io.socket.engineio.parser.Packet;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
 /**
  * Options for {@link EngineIoServer}
  */
@@ -169,9 +166,6 @@ public final class EngineIoServerOptions {
             // Copy the array to prevent outside modifications
             mAllowedCorsOrigins = new String[allowedCorsOrigins.length];
             System.arraycopy(allowedCorsOrigins, 0, mAllowedCorsOrigins, 0, allowedCorsOrigins.length);
-
-            // Sort the array for faster search on request
-            Arrays.sort(mAllowedCorsOrigins, Comparator.naturalOrder());
         }
 
         return this;

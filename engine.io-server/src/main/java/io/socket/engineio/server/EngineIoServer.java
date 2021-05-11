@@ -12,8 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,6 +29,7 @@ public final class EngineIoServer extends Emitter {
 
     private final Map<String, EngineIoSocket> mClients = new ConcurrentHashMap<>();
     private final EngineIoServerOptions mOptions;
+    private final HashSet<String> mAllowedCorsOrigins;
     private final ScheduledExecutorService mScheduledExecutor;
 
     /**
@@ -48,6 +48,17 @@ public final class EngineIoServer extends Emitter {
     public EngineIoServer(EngineIoServerOptions options) {
         mOptions = options;
         mOptions.lock();
+
+        if (options.getAllowedCorsOrigins() != null) {
+            mAllowedCorsOrigins = new HashSet<>();
+            for (String origin : options.getAllowedCorsOrigins()) {
+                if (origin != null) {
+                    mAllowedCorsOrigins.add(origin.toLowerCase(Locale.getDefault()));
+                }
+            }
+        } else {
+            mAllowedCorsOrigins = null;
+        }
 
         mScheduledExecutor = Executors.newScheduledThreadPool(mOptions.getMaxTimeoutThreadPoolSize(), new ThreadFactory() {
 
@@ -100,8 +111,7 @@ public final class EngineIoServer extends Emitter {
              * */
             final String origin = request.getHeader("Origin");
             boolean sendCors = (origin != null) &&
-                    ((mOptions.getAllowedCorsOrigins() == EngineIoServerOptions.ALLOWED_CORS_ORIGIN_ALL) ||
-                            (Arrays.binarySearch(mOptions.getAllowedCorsOrigins(), origin) >= 0));
+                    ((mAllowedCorsOrigins == null) || mAllowedCorsOrigins.contains(origin.toLowerCase(Locale.getDefault())));
             if (sendCors) {
                 response.addHeader("Access-Control-Allow-Origin", origin);
                 response.addHeader("Access-Control-Allow-Credentials", "true");
