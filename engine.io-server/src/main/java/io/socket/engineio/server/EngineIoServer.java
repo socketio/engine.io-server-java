@@ -120,16 +120,16 @@ public final class EngineIoServer extends Emitter {
             }
         }
 
-        String transport=query.get("transport");
-        if (transport==null || !transport.equals("polling")) {
+        final String transport = query.get("transport");
+        if (transport == null || !transport.equals("polling")) {
             sendErrorMessage(response, ServerErrors.UNKNOWN_TRANSPORT);
             return;
         }
 
         final String sid = query.get("sid");
         if (sid != null) {
-            EngineIoSocket client = mClients.get(sid);
-            if(client==null) {
+            final EngineIoSocket client = mClients.get(sid);
+            if(client == null) {
                 sendErrorMessage(response, ServerErrors.UNKNOWN_SID);
             } else if(transport.equals(client.getCurrentTransportName())) {
                 sendErrorMessage(response, ServerErrors.BAD_REQUEST);
