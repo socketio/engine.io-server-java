@@ -33,7 +33,7 @@ public final class EngineIoServerOptions {
 
     static {
         DEFAULT.setCorsHandlingDisabled(false);
-        DEFAULT.setPingTimeout(5000);
+        DEFAULT.setPingTimeout(20000);
         DEFAULT.setPingInterval(25000);
         DEFAULT.setAllowedCorsOrigins(ALLOWED_CORS_ORIGIN_ALL);
         DEFAULT.setMaxTimeoutThreadPoolSize(20);
