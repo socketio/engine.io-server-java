@@ -1,8 +1,8 @@
 package io.socket.engineio.server.transport;
 
-import io.socket.engineio.parser.Packet;
 import io.socket.engineio.parser.Parser;
-import io.socket.engineio.parser.ServerParser;
+import io.socket.engineio.parser.Packet;
+import io.socket.engineio.parser.ParserV3;
 import io.socket.engineio.server.EngineIoWebSocket;
 import io.socket.engineio.server.Transport;
 
@@ -43,7 +43,7 @@ public final class WebSocket extends Transport {
 
     @Override
     public void send(List<Packet<?>> packets) {
-        final Parser.EncodeCallback<?> encodeCallback = data -> {
+        final Parser.EncodeCallback<Object> encodeCallback = data -> {
             try {
                 if(data instanceof String) {
                     mConnection.write((String) data);
@@ -55,7 +55,7 @@ public final class WebSocket extends Transport {
             }
         };
         for (Packet<?> packet : packets) {
-            ServerParser.encodePacket(packet, true, encodeCallback);
+            ParserV3.encodePacket(packet, true, encodeCallback);
         }
     }
 

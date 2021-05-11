@@ -2,7 +2,7 @@ package io.socket.engineio.server;
 
 import io.socket.emitter.Emitter;
 import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.ServerParser;
+import io.socket.engineio.parser.ParserV4;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -108,7 +108,7 @@ public abstract class Transport extends Emitter {
      * @param data Encoded data received by transport.
      */
     protected void onData(Object data) {
-        onPacket(ServerParser.decodePacket(data));
+        onPacket(ParserV4.decodePacket(data));
     }
 
     /**

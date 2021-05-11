@@ -1,11 +1,9 @@
 package io.socket.engineio.parser;
 
+import io.socket.engineio.TestUtils;
 import org.json.JSONArray;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,16 +11,16 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Test {@link ServerParser} against reference JS implementation.
+ * Test {@link ParserV4} against reference JS implementation.
  */
-public final class ServerParserTest {
+public final class ParserV4Test {
 
     /**
      * This is just to remove the warning on the field.
      */
     @Test
     public void testProtocolVersion() {
-        assertEquals(4, ServerParser.PROTOCOL);
+        assertEquals(4, ParserV4.PROTOCOL);
     }
 
     @Test
@@ -30,14 +28,14 @@ public final class ServerParserTest {
         final Packet<String> packet = new Packet<>(Packet.MESSAGE);
 
         packet.data = "Hello World";
-        ServerParser.encodePacket(packet, false, data -> {
-            String result = runScriptAndGetOutput("src/test/resources/testEncodePacket_string.js", packet.data, String.class);
+        ParserV4.encodePacket(packet, false, data -> {
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePacket_string.js", packet.data, String.class);
             assertEquals(result, data);
         });
 
         packet.data = "Engine.IO";
-        ServerParser.encodePacket(packet, false, data -> {
-            String result = runScriptAndGetOutput("src/test/resources/testEncodePacket_string.js", packet.data, String.class);
+        ParserV4.encodePacket(packet, false, data -> {
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePacket_string.js", packet.data, String.class);
             assertEquals(result, data);
         });
     }
@@ -47,8 +45,8 @@ public final class ServerParserTest {
         final Packet<byte[]> packet = new Packet<>(Packet.MESSAGE);
 
         packet.data = new byte[] { 1, 2, 3, 4, 5 };
-        ServerParser.encodePacket(packet, true, data -> {
-            byte[] result = runScriptAndGetOutput("src/test/resources/testEncodePacket_binary.js", packet.data, byte[].class);
+        ParserV4.encodePacket(packet, true, data -> {
+            byte[] result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePacket_binary.js", packet.data, byte[].class);
             assertArrayEquals(result, (byte[]) data);
         });
     }
@@ -58,8 +56,8 @@ public final class ServerParserTest {
         final Packet<byte[]> packet = new Packet<>(Packet.MESSAGE);
 
         packet.data = new byte[] { 1, 2, 3, 4, 5 };
-        ServerParser.encodePacket(packet, false, data -> {
-            String result = runScriptAndGetOutput("src/test/resources/testEncodePacket_base64.js", packet.data, String.class);
+        ParserV4.encodePacket(packet, false, data -> {
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePacket_base64.js", packet.data, String.class);
             assertEquals(result, data);
         });
     }
@@ -69,8 +67,8 @@ public final class ServerParserTest {
         final List<Packet<?>> packets = new ArrayList<>();
         final JSONArray jsonArray = new JSONArray();
 
-        ServerParser.encodePayload(packets, data -> {
-            String result = runScriptAndGetOutput("src/test/resources/testEncodePayload_string.js", jsonArray.toString(), String.class);
+        Parser.PROTOCOL_V4.encodePayload(packets, false, data -> {
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePayload_string.js", jsonArray.toString(), String.class);
             assertEquals(result, data);
         });
     }
@@ -91,8 +89,8 @@ public final class ServerParserTest {
             packets.add(packet);
         }
 
-        ServerParser.encodePayload(packets, data -> {
-            String result = runScriptAndGetOutput("src/test/resources/testEncodePayload_string.js", jsonArray.toString(), String.class);
+        Parser.PROTOCOL_V4.encodePayload(packets, true, data -> {
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePayload_string.js", jsonArray.toString(), String.class);
             assertEquals(result, data);
         });
     }
@@ -112,15 +110,15 @@ public final class ServerParserTest {
             packets.add(packet);
         }
 
-        ServerParser.encodePayload(packets, data -> {
-            String result = runScriptAndGetOutput("src/test/resources/testEncodePayload_base64.js", jsonArray.toString(), String.class);
+        Parser.PROTOCOL_V4.encodePayload(packets, true, data -> {
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePayload_base64.js", jsonArray.toString(), String.class);
             assertEquals(result, data);
         });
     }
 
     @Test
     public void testDecodePacket_null() {
-        Packet<?> packet = ServerParser.decodePacket(null);
+        Packet<?> packet = ParserV4.decodePacket(null);
         assertNotNull(packet);
         assertEquals(Packet.ERROR, packet.type);
         assertEquals("parser error", packet.data);
@@ -129,14 +127,14 @@ public final class ServerParserTest {
     @Test(expected = IllegalArgumentException.class)
     public void testDecodePacket_error() {
         // Pass an int to get exception
-        ServerParser.decodePacket(0);
+        ParserV4.decodePacket(0);
     }
 
     @Test
     public void testDecodePacket_string() {
         final Packet<String> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO");
-        ServerParser.encodePacket(packetOriginal, false, data -> {
-            Packet<?> packetDecoded = ServerParser.decodePacket(data);
+        ParserV4.encodePacket(packetOriginal, true, data -> {
+            Packet<?> packetDecoded = ParserV4.decodePacket(data);
             assertEquals(Packet.MESSAGE, packetDecoded.type);
             assertEquals(String.class, packetDecoded.data.getClass());
             assertEquals(packetOriginal.data, packetDecoded.data);
@@ -146,8 +144,8 @@ public final class ServerParserTest {
     @Test
     public void testDecodePacket_binary() {
         final Packet<byte[]> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
-        ServerParser.encodePacket(packetOriginal, true, data -> {
-            Packet<?> packetDecoded = ServerParser.decodePacket(data);
+        ParserV4.encodePacket(packetOriginal, true, data -> {
+            Packet<?> packetDecoded = ParserV4.decodePacket(data);
             assertEquals(Packet.MESSAGE, packetDecoded.type);
             assertEquals(byte[].class, packetDecoded.data.getClass());
             assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
@@ -157,8 +155,8 @@ public final class ServerParserTest {
     @Test
     public void testDecodePacket_base64() {
         final Packet<byte[]> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
-        ServerParser.encodePacket(packetOriginal, false, data -> {
-            Packet<?> packetDecoded = ServerParser.decodePacket(data);
+        ParserV4.encodePacket(packetOriginal, true, data -> {
+            Packet<?> packetDecoded = ParserV4.decodePacket(data);
             assertEquals(Packet.MESSAGE, packetDecoded.type);
             assertEquals(byte[].class, packetDecoded.data.getClass());
             assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
@@ -167,7 +165,7 @@ public final class ServerParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testDecodePayload_error() {
-        ServerParser.decodePayload("abcxyz", (packet, index, total) -> false);
+        Parser.PROTOCOL_V4.decodePayload("abcxyz", (packet, index, total) -> false);
     }
 
     @Test
@@ -176,10 +174,10 @@ public final class ServerParserTest {
         packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO"));
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
 
-        ServerParser.encodePayload(packets, data -> {
+        Parser.PROTOCOL_V4.encodePayload(packets, false, data -> {
             assertEquals(String.class, data.getClass());
 
-            ServerParser.decodePayload(data, (packet, index, total) -> {
+            Parser.PROTOCOL_V4.decodePayload(data, (packet, index, total) -> {
                 Packet<?> originalPacket = packets.get(index);
                 assertEquals(originalPacket.data.getClass(), packet.data.getClass());
                 assertEquals(originalPacket.type, packet.type);
@@ -196,10 +194,10 @@ public final class ServerParserTest {
         packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8)));
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8)));
 
-        ServerParser.encodePayload(packets, data -> {
+        Parser.PROTOCOL_V4.encodePayload(packets, false, data -> {
             assertEquals(String.class, data.getClass());
 
-            ServerParser.decodePayload(data, (packet, index, total) -> {
+            Parser.PROTOCOL_V4.decodePayload(data, (packet, index, total) -> {
                 Packet<?> originalPacket = packets.get(index);
                 assertEquals(originalPacket.data.getClass(), packet.data.getClass());
                 assertEquals(originalPacket.type, packet.type);
@@ -216,10 +214,10 @@ public final class ServerParserTest {
         packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO"));
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
 
-        ServerParser.encodePayload(packets, data -> {
+        Parser.PROTOCOL_V4.encodePayload(packets, true, data -> {
             assertEquals(String.class, data.getClass());
 
-            ServerParser.decodePayload(data, (packet, index, total) -> {
+            Parser.PROTOCOL_V4.decodePayload(data, (packet, index, total) -> {
                 assertEquals(0, index);
 
                 Packet<?> originalPacket = packets.get(index);
@@ -230,47 +228,5 @@ public final class ServerParserTest {
                 return false;
             });
         });
-    }
-
-    @SuppressWarnings({"ConstantConditions", "ResultOfMethodCallIgnored"})
-    private <T> T runScriptAndGetOutput(String script, Object input, Class<T> outputClass) {
-        byte[] nodeInputBytes;
-        if (input instanceof String) {
-            nodeInputBytes = ((String) input).getBytes(StandardCharsets.UTF_8);
-        } else if (input instanceof byte[]) {
-            nodeInputBytes = (byte[]) input;
-        } else {
-            throw new RuntimeException("Invalid input type: " + input.getClass().getSimpleName());
-        }
-
-        if(!outputClass.equals(String.class) && !outputClass.equals(byte[].class)) {
-            throw new RuntimeException("Invalid output type: " + outputClass.getSimpleName());
-        }
-
-        try {
-            Process process = Runtime.getRuntime().exec("node " + script);
-
-            OutputStream processOutputStream = process.getOutputStream();
-            processOutputStream.write(nodeInputBytes);
-            processOutputStream.close();
-
-            process.waitFor();
-
-            InputStream processInputStream = process.getInputStream();
-            byte[] result = new byte[processInputStream.available()];
-            processInputStream.read(result);
-            processInputStream.close();
-
-            if(outputClass.equals(String.class)) {
-                @SuppressWarnings("unchecked") T t = (T) new String(result, StandardCharsets.UTF_8);
-                return t;
-            } else if (outputClass.equals(byte[].class)) {
-                return (T) result;
-            } else {
-                throw new RuntimeException("Should never be here.");
-            }
-        } catch (IOException | InterruptedException ex) {
-            throw new RuntimeException(ex);
-        }
     }
 }

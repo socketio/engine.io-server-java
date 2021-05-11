@@ -1,7 +1,7 @@
 package io.socket.engineio.server.transport;
 
 import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.ServerParser;
+import io.socket.engineio.parser.Parser;
 import io.socket.engineio.server.Transport;
 import io.socket.parseqs.ParseQS;
 import org.json.JSONArray;
@@ -120,7 +120,7 @@ public final class Polling extends Transport implements AsyncListener {
             if(packets.size() == 0) {
                 throw new IllegalArgumentException("No packets to send.");
             }
-            ServerParser.encodePayload(packets, data -> {
+            Parser.PROTOCOL_V4.encodePayload(packets, true, data -> {
                 final String contentType;
                 final byte[] contentBytes;
 
@@ -188,7 +188,7 @@ public final class Polling extends Transport implements AsyncListener {
 
     @Override
     protected void onData(Object data) {
-        ServerParser.decodePayload(data, (packet, index, total) -> {
+        Parser.PROTOCOL_V4.decodePayload(data, (packet, index, total) -> {
             if(packet.type.equals(Packet.CLOSE)) {
                 onClose();
                 return false;

@@ -1,9 +1,8 @@
 package io.socket.engineio.server.transport;
 
 import io.socket.emitter.Emitter;
-import io.socket.engineio.parser.Packet;
 import io.socket.engineio.parser.Parser;
-import io.socket.engineio.parser.ServerParser;
+import io.socket.engineio.parser.Packet;
 import io.socket.engineio.server.HttpServletResponseImpl;
 import io.socket.engineio.server.ServletInputStreamWrapper;
 import org.junit.Ignore;
@@ -84,7 +83,7 @@ public final class PollingTest {
         Mockito.verify(drainListener, Mockito.times(1)).call();
 
         final String responseString = new String(response.getByteOutputStream().toByteArray(), StandardCharsets.UTF_8);
-        ServerParser.decodePayload(responseString, (packet, index, total) -> {
+        Parser.PROTOCOL_V4.decodePayload(responseString, (packet, index, total) -> {
             assertEquals(1, total);
             assertEquals(Packet.MESSAGE, packet.type);
             assertEquals("Test Data", packet.data);
@@ -124,7 +123,7 @@ public final class PollingTest {
         assertTrue(responseString.startsWith("___eio[100]("));
 
         final String payloadString = responseString.substring("___eio[100](".length() + 1, responseString.length() - 2);
-        ServerParser.decodePayload(payloadString, (packet, index, total) -> {
+        Parser.PROTOCOL_V4.decodePayload(payloadString, (packet, index, total) -> {
             assertEquals(1, total);
             assertEquals(Packet.MESSAGE, packet.type);
             assertEquals("Test Data", packet.data);
@@ -144,7 +143,7 @@ public final class PollingTest {
         });
 
         final Packet<String> requestPacket = new Packet<>(Packet.MESSAGE, messageData);
-        ServerParser.encodePayload(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, dataString -> {
+        Parser.PROTOCOL_V4.encodePayload(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, true, dataString -> {
             final byte[] data = ((String) dataString).getBytes(StandardCharsets.UTF_8);
             final ByteArrayInputStream requestInputStream = new ByteArrayInputStream(data);
             final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
@@ -253,7 +252,7 @@ public final class PollingTest {
                 .send(Mockito.eq(sendPacketList));
 
         final String responseString = new String(response.getByteOutputStream().toByteArray(), StandardCharsets.UTF_8);
-        final Parser.DecodePayloadCallback<String> decodePayloadCallback = Mockito.mock(Parser.DecodePayloadCallback.class);
+        final Parser.DecodePayloadCallback<Object> decodePayloadCallback = Mockito.mock(Parser.DecodePayloadCallback.class);
         Mockito.doAnswer(invocation -> {
             final Packet<String> packet = invocation.getArgument(0);
 
@@ -261,7 +260,7 @@ public final class PollingTest {
             assertEquals("Test Data", packet.data);
             return true;
         }).when(decodePayloadCallback).call(Mockito.any(), Mockito.anyInt(), Mockito.anyInt());
-        ServerParser.decodePayload(responseString, decodePayloadCallback);
+        Parser.PROTOCOL_V4.decodePayload(responseString, decodePayloadCallback);
         Mockito.verify(decodePayloadCallback, Mockito.times(1))
                 .call(Mockito.any(), Mockito.anyInt(), Mockito.anyInt());
     }
@@ -271,7 +270,7 @@ public final class PollingTest {
         final Polling polling = Mockito.spy(new Polling(new Object()));
 
         final Packet<String> requestPacket = new Packet<>(Packet.CLOSE);
-        ServerParser.encodePayload(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, dataString -> {
+        Parser.PROTOCOL_V4.encodePayload(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, true, dataString -> {
             final byte[] data = ((String) dataString).getBytes(StandardCharsets.UTF_8);
             final ByteArrayInputStream requestInputStream = new ByteArrayInputStream(data);
             final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
@@ -323,7 +322,7 @@ public final class PollingTest {
                 .emit(Mockito.eq("close"));
 
         final String responseString = new String(response.getByteOutputStream().toByteArray(), StandardCharsets.UTF_8);
-        ServerParser.decodePayload(responseString, (packet, index, total) -> {
+        Parser.PROTOCOL_V4.decodePayload(responseString, (packet, index, total) -> {
             assertEquals(2, total);
             if (index == 0) {
                 assertEquals(Packet.NOOP, packet.type);
@@ -341,7 +340,7 @@ public final class PollingTest {
         polling.on("drain", args -> polling.close());
 
         final Packet<String> requestPacket = new Packet<>(Packet.CLOSE);
-        ServerParser.encodePayload(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, data -> {
+        Parser.PROTOCOL_V4.encodePayload(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, true, data -> {
             final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
             Mockito.doAnswer(invocationOnMock -> "GET").when(request).getMethod();
             Mockito.doAnswer(invocationOnMock -> {
@@ -363,7 +362,7 @@ public final class PollingTest {
                     .emit(Mockito.eq("close"));
 
             final String responseString = new String(response.getByteOutputStream().toByteArray(), StandardCharsets.UTF_8);
-            ServerParser.decodePayload(responseString, (packet, index, total) -> {
+            Parser.PROTOCOL_V4.decodePayload(responseString, (packet, index, total) -> {
                 assertEquals(1, total);
                 assertEquals(Packet.CLOSE, packet.type);
                 return true;

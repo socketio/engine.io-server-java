@@ -2,7 +2,7 @@ package io.socket.engineio.server.transport;
 
 import io.socket.emitter.Emitter;
 import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.ServerParser;
+import io.socket.engineio.parser.ParserV3;
 import io.socket.engineio.server.EngineIoWebSocket;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -92,7 +92,7 @@ public final class WebSocketTest {
 
         Mockito.verify(webSocket, Mockito.times(1)).send(Mockito.anyList());
 
-        ServerParser.encodePacket(packet, true, data -> {
+        ParserV3.encodePacket(packet, true, data -> {
             try {
                 Mockito.verify(webSocketConnection, Mockito.times(1))
                         .write(Mockito.eq((String) data));
@@ -114,7 +114,7 @@ public final class WebSocketTest {
 
         Mockito.verify(webSocket, Mockito.times(1)).send(Mockito.anyList());
 
-        ServerParser.encodePacket(packet, true, data -> {
+        ParserV3.encodePacket(packet, true, data -> {
             try {
                 Mockito.verify(webSocketConnection, Mockito.times(1))
                         .write(Mockito.eq((byte[]) data));
@@ -185,7 +185,7 @@ public final class WebSocketTest {
         }).when(packetListener).call(Mockito.any());
         webSocket.on("packet", packetListener);
 
-        ServerParser.encodePacket(packet, true, data -> {
+        ParserV3.encodePacket(packet, true, data -> {
             webSocketConnection.emit("message", data);
 
             Mockito.verify(packetListener, Mockito.times(1))

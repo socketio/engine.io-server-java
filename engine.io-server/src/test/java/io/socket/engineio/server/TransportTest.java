@@ -1,7 +1,7 @@
 package io.socket.engineio.server;
 
 import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.ServerParser;
+import io.socket.engineio.parser.ParserV3;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -136,7 +136,7 @@ public final class TransportTest {
         final TestTransport transport = Mockito.spy(new TestTransport());
 
         final Packet<?> testPacket = new Packet<>(Packet.MESSAGE, "test");
-        ServerParser.encodePacket(testPacket, false, data -> {
+        ParserV3.encodePacket(testPacket, false, data -> {
             String packetData = (String) data;
 
             transport.onData(packetData);
