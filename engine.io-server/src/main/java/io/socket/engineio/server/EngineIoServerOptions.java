@@ -47,6 +47,7 @@ public final class EngineIoServerOptions {
     private Packet<Object> mInitialPacket;
     private int mMaxTimeoutThreadPoolSize;
     private ScheduledExecutorService mScheduledExecutorService;
+    private EngineIoServer.HandshakeInterceptor mHandshakeInterceptor;
 
     private EngineIoServerOptions() {
         mIsLocked = false;
@@ -257,5 +258,27 @@ public final class EngineIoServerOptions {
         }
 
         mScheduledExecutorService = scheduledExecutorService;
+    }
+
+    /**
+     * Gets the {@link io.socket.engineio.server.EngineIoServer.HandshakeInterceptor} for the server.
+     * {@link io.socket.engineio.server.EngineIoServer.HandshakeInterceptor} can be used to allow or block handshake.
+     */
+    public EngineIoServer.HandshakeInterceptor getHandshakeInterceptor() {
+        return mHandshakeInterceptor;
+    }
+
+    /**
+     * Sets a {@link io.socket.engineio.server.EngineIoServer.HandshakeInterceptor} for the server.
+     * {@link io.socket.engineio.server.EngineIoServer.HandshakeInterceptor} can be used to allow or block handshake.
+     *
+     * @param handshakeInterceptor Interceptor object to set for the server or null to remove it.
+     */
+    public void setHandshakeInterceptor(EngineIoServer.HandshakeInterceptor handshakeInterceptor) {
+        if (mIsLocked) {
+            throw new IllegalStateException("Handshake interceptor cannot be set. Instance is locked.");
+        }
+
+        mHandshakeInterceptor = handshakeInterceptor;
     }
 }

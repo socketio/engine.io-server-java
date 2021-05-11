@@ -27,10 +27,24 @@ import java.util.concurrent.atomic.AtomicLong;
 @SuppressWarnings("WeakerAccess")
 public final class EngineIoServer extends Emitter {
 
+    public interface HandshakeInterceptor {
+
+        /**
+         * Intercept and either allow or block the connection.
+         * If blocked, a bad request error is returned to the client.
+         *
+         * @param query Query parameters of the connection.
+         * @param headers Headers in the connection request.
+         * @return Return true to allow the connection or false to block.
+         */
+        boolean intercept(Map<String, String> query, Map<String, List<String>> headers);
+    }
+
     private final Map<String, EngineIoSocket> mClients = new ConcurrentHashMap<>();
     private final EngineIoServerOptions mOptions;
     private final HashSet<String> mAllowedCorsOrigins;
     private final ScheduledExecutorService mScheduledExecutor;
+    private final HandshakeInterceptor mHandshakeInterceptor;
 
     /**
      * Create instance of server with default options.
@@ -77,6 +91,8 @@ public final class EngineIoServer extends Emitter {
                 }
             });
         }
+
+        mHandshakeInterceptor = mOptions.getHandshakeInterceptor();
     }
 
     /**
@@ -155,7 +171,21 @@ public final class EngineIoServer extends Emitter {
             if(!request.getMethod().equalsIgnoreCase("GET")) {
                 sendErrorMessage(response, ServerErrors.BAD_HANDSHAKE_METHOD);
             } else {
-                handshakePolling(request, response);
+                if (mHandshakeInterceptor != null) {
+                    final HashMap<String, List<String>> headers = new HashMap<>();
+                    final Enumeration<String> headerNamesEnum = request.getHeaderNames();
+                    while (headerNamesEnum.hasMoreElements()) {
+                        final String headerName = headerNamesEnum.nextElement();
+                        headers.put(headerName, Collections.list(request.getHeaders(headerName)));
+                    }
+                    if (mHandshakeInterceptor.intercept(query, headers)) {
+                        handshakePolling(request, response);
+                    } else {
+                        sendErrorMessage(response, ServerErrors.BAD_REQUEST);
+                    }
+                } else {
+                    handshakePolling(request, response);
+                }
             }
         }
     }
@@ -182,7 +212,12 @@ public final class EngineIoServer extends Emitter {
                 socket.upgrade(transport);
             }
         } else {
-            handshakeWebSocket(webSocket);
+            if (mHandshakeInterceptor == null ||
+                    mHandshakeInterceptor.intercept(webSocket.getQuery(), webSocket.getConnectionHeaders())) {
+                handshakeWebSocket(webSocket);
+            } else {
+                webSocket.close();
+            }
         }
     }
 
