@@ -5,7 +5,8 @@ enum ServerErrors {
     UNKNOWN_SID(1, "Session ID unknown"),
     BAD_HANDSHAKE_METHOD(2, "Bad handshake method"),
     BAD_REQUEST(3, "Bad request"),
-    FORBIDDEN(4, "Forbidden");
+    FORBIDDEN(4, "Forbidden"),
+    UNSUPPORTED_PROTOCOL_VERSION(5, "Unsupported protocol version");
 
     private final int mCode;
     private final String mMessage;
