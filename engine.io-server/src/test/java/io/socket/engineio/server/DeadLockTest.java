@@ -24,7 +24,7 @@ public final class DeadLockTest {
 	 * If this runs for 60 seconds, we consider it a success.
 	 */
 	@Test
-	public void testTransportPacket() {
+	public void testTransportDeadlock() {
 		final Object lockObject = new Object();
 		final EngineIoSocket socket = new EngineIoSocket(lockObject,
 				ServerYeast.yeast(),
