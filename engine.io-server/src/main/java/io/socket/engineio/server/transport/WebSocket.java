@@ -21,7 +21,8 @@ public final class WebSocket extends Transport {
 
     private final EngineIoWebSocket mConnection;
 
-    public WebSocket(EngineIoWebSocket webSocket) {
+    public WebSocket(EngineIoWebSocket webSocket, Parser parser) {
+        super(parser);
         mConnection = webSocket;
         mConnection.on("message", args -> onData(args[0]));
         mConnection.on("close", args -> onClose());
@@ -55,7 +56,7 @@ public final class WebSocket extends Transport {
             }
         };
         for (Packet<?> packet : packets) {
-            ParserV3.encodePacket(packet, true, encodeCallback);
+            mParser.encodePacket(packet, true, encodeCallback);
         }
     }
 

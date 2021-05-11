@@ -2,6 +2,7 @@ package io.socket.engineio.server;
 
 import io.socket.emitter.Emitter;
 import io.socket.engineio.parser.Packet;
+import io.socket.engineio.parser.Parser;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
 import io.socket.yeast.ServerYeast;
@@ -22,6 +23,10 @@ public final class EngineIoSocketTest {
 
     private static final String SUB_TRANSPORT_NAME = "stubTransport";
     private static final class StubTransport extends Transport {
+
+        public StubTransport() {
+            super(Parser.PROTOCOL_V4);
+        }
 
         @Override
         public Map<String, String> getInitialQuery() {

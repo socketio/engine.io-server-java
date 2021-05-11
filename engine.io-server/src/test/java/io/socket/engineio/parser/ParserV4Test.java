@@ -28,13 +28,13 @@ public final class ParserV4Test {
         final Packet<String> packet = new Packet<>(Packet.MESSAGE);
 
         packet.data = "Hello World";
-        ParserV4.encodePacket(packet, false, data -> {
+        Parser.PROTOCOL_V4.encodePacket(packet, false, data -> {
             String result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePacket_string.js", packet.data, String.class);
             assertEquals(result, data);
         });
 
         packet.data = "Engine.IO";
-        ParserV4.encodePacket(packet, false, data -> {
+        Parser.PROTOCOL_V4.encodePacket(packet, false, data -> {
             String result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePacket_string.js", packet.data, String.class);
             assertEquals(result, data);
         });
@@ -45,7 +45,7 @@ public final class ParserV4Test {
         final Packet<byte[]> packet = new Packet<>(Packet.MESSAGE);
 
         packet.data = new byte[] { 1, 2, 3, 4, 5 };
-        ParserV4.encodePacket(packet, true, data -> {
+        Parser.PROTOCOL_V4.encodePacket(packet, true, data -> {
             byte[] result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePacket_binary.js", packet.data, byte[].class);
             assertArrayEquals(result, (byte[]) data);
         });
@@ -56,7 +56,7 @@ public final class ParserV4Test {
         final Packet<byte[]> packet = new Packet<>(Packet.MESSAGE);
 
         packet.data = new byte[] { 1, 2, 3, 4, 5 };
-        ParserV4.encodePacket(packet, false, data -> {
+        Parser.PROTOCOL_V4.encodePacket(packet, false, data -> {
             String result = TestUtils.runScriptAndGetOutput("src/test/resources/testEncodePacket_base64.js", packet.data, String.class);
             assertEquals(result, data);
         });
@@ -118,7 +118,7 @@ public final class ParserV4Test {
 
     @Test
     public void testDecodePacket_null() {
-        Packet<?> packet = ParserV4.decodePacket(null);
+        Packet<?> packet = Parser.PROTOCOL_V4.decodePacket(null);
         assertNotNull(packet);
         assertEquals(Packet.ERROR, packet.type);
         assertEquals("parser error", packet.data);
@@ -127,14 +127,14 @@ public final class ParserV4Test {
     @Test(expected = IllegalArgumentException.class)
     public void testDecodePacket_error() {
         // Pass an int to get exception
-        ParserV4.decodePacket(0);
+        Parser.PROTOCOL_V4.decodePacket(0);
     }
 
     @Test
     public void testDecodePacket_string() {
         final Packet<String> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO");
-        ParserV4.encodePacket(packetOriginal, true, data -> {
-            Packet<?> packetDecoded = ParserV4.decodePacket(data);
+        Parser.PROTOCOL_V4.encodePacket(packetOriginal, true, data -> {
+            Packet<?> packetDecoded = Parser.PROTOCOL_V4.decodePacket(data);
             assertEquals(Packet.MESSAGE, packetDecoded.type);
             assertEquals(String.class, packetDecoded.data.getClass());
             assertEquals(packetOriginal.data, packetDecoded.data);
@@ -144,8 +144,8 @@ public final class ParserV4Test {
     @Test
     public void testDecodePacket_binary() {
         final Packet<byte[]> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
-        ParserV4.encodePacket(packetOriginal, true, data -> {
-            Packet<?> packetDecoded = ParserV4.decodePacket(data);
+        Parser.PROTOCOL_V4.encodePacket(packetOriginal, true, data -> {
+            Packet<?> packetDecoded = Parser.PROTOCOL_V4.decodePacket(data);
             assertEquals(Packet.MESSAGE, packetDecoded.type);
             assertEquals(byte[].class, packetDecoded.data.getClass());
             assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
@@ -155,8 +155,8 @@ public final class ParserV4Test {
     @Test
     public void testDecodePacket_base64() {
         final Packet<byte[]> packetOriginal = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
-        ParserV4.encodePacket(packetOriginal, true, data -> {
-            Packet<?> packetDecoded = ParserV4.decodePacket(data);
+        Parser.PROTOCOL_V4.encodePacket(packetOriginal, true, data -> {
+            Packet<?> packetDecoded = Parser.PROTOCOL_V4.decodePacket(data);
             assertEquals(Packet.MESSAGE, packetDecoded.type);
             assertEquals(byte[].class, packetDecoded.data.getClass());
             assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);

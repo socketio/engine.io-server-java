@@ -2,6 +2,7 @@ package io.socket.engineio.server;
 
 import io.socket.emitter.Emitter;
 import io.socket.engineio.parser.Packet;
+import io.socket.engineio.parser.Parser;
 import io.socket.engineio.parser.ParserV4;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,10 +16,11 @@ import java.util.Map;
  */
 public abstract class Transport extends Emitter {
 
-    @SuppressWarnings("WeakerAccess")
+    protected final Parser mParser;
     protected ReadyState mReadyState;
 
-    protected Transport() {
+    protected Transport(Parser parser) {
+        mParser = parser;
         mReadyState = ReadyState.OPEN;
     }
 
@@ -108,7 +110,7 @@ public abstract class Transport extends Emitter {
      * @param data Encoded data received by transport.
      */
     protected void onData(Object data) {
-        onPacket(ParserV4.decodePacket(data));
+        onPacket(mParser.decodePacket(data));
     }
 
     /**

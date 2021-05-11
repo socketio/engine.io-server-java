@@ -42,7 +42,8 @@ public final class Polling extends Transport implements AsyncListener {
     private Map<String, String> mQuery;
     private Map<String, List<String>> mHeaders;
 
-    public Polling(Object lockObject) {
+    public Polling(Object lockObject, Parser parser) {
+        super(parser);
         mLockObject = lockObject;
 
         mWritable = false;
@@ -120,7 +121,7 @@ public final class Polling extends Transport implements AsyncListener {
             if(packets.size() == 0) {
                 throw new IllegalArgumentException("No packets to send.");
             }
-            Parser.PROTOCOL_V4.encodePayload(packets, true, data -> {
+            mParser.encodePayload(packets, true, data -> {
                 final String contentType;
                 final byte[] contentBytes;
 
@@ -188,7 +189,7 @@ public final class Polling extends Transport implements AsyncListener {
 
     @Override
     protected void onData(Object data) {
-        Parser.PROTOCOL_V4.decodePayload(data, (packet, index, total) -> {
+        mParser.decodePayload(data, (packet, index, total) -> {
             if(packet.type.equals(Packet.CLOSE)) {
                 onClose();
                 return false;

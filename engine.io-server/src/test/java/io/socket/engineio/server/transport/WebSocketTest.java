@@ -2,7 +2,7 @@ package io.socket.engineio.server.transport;
 
 import io.socket.emitter.Emitter;
 import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.ParserV3;
+import io.socket.engineio.parser.Parser;
 import io.socket.engineio.server.EngineIoWebSocket;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -48,28 +48,28 @@ public final class WebSocketTest {
 
     @Test
     public void testName() {
-        final WebSocket webSocket = new WebSocket(Mockito.mock(EngineIoWebSocket.class));
+        final WebSocket webSocket = new WebSocket(Mockito.mock(EngineIoWebSocket.class), Parser.PROTOCOL_V4);
 
         assertEquals(WebSocket.NAME, webSocket.getName());
     }
 
     @Test
     public void testWritable() {
-        final WebSocket webSocket = new WebSocket(Mockito.mock(EngineIoWebSocket.class));
+        final WebSocket webSocket = new WebSocket(Mockito.mock(EngineIoWebSocket.class), Parser.PROTOCOL_V4);
 
         assertTrue(webSocket.isWritable());
     }
 
     @Test
     public void testOnRequest() {
-        final WebSocket webSocket = new WebSocket(Mockito.mock(EngineIoWebSocket.class));
+        final WebSocket webSocket = new WebSocket(Mockito.mock(EngineIoWebSocket.class), Parser.PROTOCOL_V4);
         webSocket.onRequest(Mockito.mock(HttpServletRequest.class), Mockito.mock(HttpServletResponse.class));
     }
 
     @Test
     public void testClose() {
         final EngineIoWebSocket webSocketConnection = Mockito.mock(EngineIoWebSocket.class);
-        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
+        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection, Parser.PROTOCOL_V4));
 
         webSocket.close();
 
@@ -82,7 +82,7 @@ public final class WebSocketTest {
     @Test
     public void testSend_string() {
         final EngineIoWebSocket webSocketConnection = Mockito.mock(EngineIoWebSocket.class);
-        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
+        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection, Parser.PROTOCOL_V4));
 
         final String stringData = "Test string";
         final Packet<?> packet = new Packet<>(Packet.MESSAGE, stringData);
@@ -92,7 +92,7 @@ public final class WebSocketTest {
 
         Mockito.verify(webSocket, Mockito.times(1)).send(Mockito.anyList());
 
-        ParserV3.encodePacket(packet, true, data -> {
+        Parser.PROTOCOL_V4.encodePacket(packet, true, data -> {
             try {
                 Mockito.verify(webSocketConnection, Mockito.times(1))
                         .write(Mockito.eq((String) data));
@@ -104,7 +104,7 @@ public final class WebSocketTest {
     @Test
     public void testSend_binary() {
         final EngineIoWebSocket webSocketConnection = Mockito.mock(EngineIoWebSocket.class);
-        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
+        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection, Parser.PROTOCOL_V4));
 
         final byte[] binaryData = "Test string".getBytes(StandardCharsets.UTF_8);
         final Packet<?> packet = new Packet<>(Packet.MESSAGE, binaryData);
@@ -114,7 +114,7 @@ public final class WebSocketTest {
 
         Mockito.verify(webSocket, Mockito.times(1)).send(Mockito.anyList());
 
-        ParserV3.encodePacket(packet, true, data -> {
+        Parser.PROTOCOL_V4.encodePacket(packet, true, data -> {
             try {
                 Mockito.verify(webSocketConnection, Mockito.times(1))
                         .write(Mockito.eq((byte[]) data));
@@ -126,7 +126,7 @@ public final class WebSocketTest {
     @Test
     public void testSend_error() throws IOException {
         final EngineIoWebSocket webSocketConnection = Mockito.mock(EngineIoWebSocket.class);
-        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
+        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection, Parser.PROTOCOL_V4));
 
         Mockito.doThrow(new IOException()).when(webSocketConnection).write(Mockito.anyString());
         webSocket.on("error", args -> { });
@@ -146,7 +146,7 @@ public final class WebSocketTest {
     @Test
     public void testConnection_close() {
         final EngineIoWebSocket webSocketConnection = new EngineIoWebSocketStub();
-        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
+        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection, Parser.PROTOCOL_V4));
 
         final Emitter.Listener closeListener = Mockito.mock(Emitter.Listener.class);
         webSocket.on("close", closeListener);
@@ -159,7 +159,7 @@ public final class WebSocketTest {
     @Test
     public void testConnection_error() {
         final EngineIoWebSocket webSocketConnection = Mockito.spy(new EngineIoWebSocketStub());
-        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
+        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection, Parser.PROTOCOL_V4));
 
         final Emitter.Listener errorListener = Mockito.mock(Emitter.Listener.class);
         webSocket.on("error", errorListener);
@@ -172,7 +172,7 @@ public final class WebSocketTest {
     @Test
     public void testConnection_message() {
         final EngineIoWebSocket webSocketConnection = Mockito.spy(new EngineIoWebSocketStub());
-        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection));
+        final WebSocket webSocket = Mockito.spy(new WebSocket(webSocketConnection, Parser.PROTOCOL_V4));
 
         final Packet<String> packet = new Packet<>(Packet.MESSAGE, "Test Message");
         final Emitter.Listener packetListener = Mockito.mock(Emitter.Listener.class);
@@ -185,7 +185,7 @@ public final class WebSocketTest {
         }).when(packetListener).call(Mockito.any());
         webSocket.on("packet", packetListener);
 
-        ParserV3.encodePacket(packet, true, data -> {
+        Parser.PROTOCOL_V4.encodePacket(packet, true, data -> {
             webSocketConnection.emit("message", data);
 
             Mockito.verify(packetListener, Mockito.times(1))

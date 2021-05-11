@@ -17,7 +17,8 @@ public final class ParserV4 implements Parser {
      * @param supportsBinary Whether the transport supports binary encoding.
      * @param callback The callback to be called with the encoded data.
      */
-    public static void encodePacket(Packet<?> packet, boolean supportsBinary, EncodeCallback<Object> callback) {
+    @Override
+    public void encodePacket(Packet<?> packet, boolean supportsBinary, EncodeCallback<Object> callback) {
         if (packet.data instanceof byte[]) {
             encodeByteArray((Packet<byte[]>) packet, supportsBinary, callback);
         } else {
@@ -54,7 +55,7 @@ public final class ParserV4 implements Parser {
             final Packet<?> packet = packets.get(i);
 
             final int packetIdx = i;
-            ParserV4.encodePacket(packet, false, data -> encodedPackets[packetIdx] = (String) data);
+            encodePacket(packet, false, data -> encodedPackets[packetIdx] = (String) data);
         }
 
         callback.call(String.join(SEPARATOR, encodedPackets));
@@ -98,7 +99,8 @@ public final class ParserV4 implements Parser {
      * @param data Data received from transport.
      * @return Packet decoded from data.
      */
-    public static Packet<?> decodePacket(Object data) {
+    @Override
+    public Packet<?> decodePacket(Object data) {
         if(data == null) {
             return ERROR_PACKET;
         }

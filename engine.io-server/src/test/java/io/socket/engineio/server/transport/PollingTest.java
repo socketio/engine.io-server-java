@@ -24,21 +24,21 @@ public final class PollingTest {
 
     @Test
     public void testName() {
-        final Polling polling = new Polling(new Object());
+        final Polling polling = new Polling(new Object(), Parser.PROTOCOL_V4);
 
         assertEquals(Polling.NAME, polling.getName());
     }
 
     @Test
     public void testWritable_normal() {
-        final Polling polling = new Polling(new Object());
+        final Polling polling = new Polling(new Object(), Parser.PROTOCOL_V4);
 
         assertFalse(polling.isWritable());
     }
 
     @Test
     public void testOnRequest_error() throws IOException {
-        final Polling polling = Mockito.spy(new Polling(new Object()));
+        final Polling polling = Mockito.spy(new Polling(new Object(), Parser.PROTOCOL_V4));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.doAnswer(invocationOnMock -> "DELETE").when(request).getMethod();
@@ -57,7 +57,7 @@ public final class PollingTest {
 
     @Test
     public void testOnRequest_poll() throws IOException {
-        final Polling polling = Mockito.spy(new Polling(new Object()));
+        final Polling polling = Mockito.spy(new Polling(new Object(), Parser.PROTOCOL_V4));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.doAnswer(invocationOnMock -> "GET").when(request).getMethod();
@@ -93,7 +93,7 @@ public final class PollingTest {
 
     @Test
     public void testOnRequest_poll_jsonp() throws IOException {
-        final Polling polling = Mockito.spy(new Polling(new Object()));
+        final Polling polling = Mockito.spy(new Polling(new Object(), Parser.PROTOCOL_V4));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.doAnswer(invocationOnMock -> "GET").when(request).getMethod();
@@ -135,7 +135,7 @@ public final class PollingTest {
     public void testOnRequest_data() {
         final String messageData = "Test Data";
 
-        final Polling polling = Mockito.spy(new Polling(new Object()));
+        final Polling polling = Mockito.spy(new Polling(new Object(), Parser.PROTOCOL_V4));
         polling.on("packet", args -> {
             final Packet<?> packet = (Packet<Object>) args[0];
             assertEquals(Packet.MESSAGE, packet.type);
@@ -177,7 +177,7 @@ public final class PollingTest {
     public void testOnRequest_data_jsonp() {
         final String messageData = "Test Data";
 
-        final Polling polling = Mockito.spy(new Polling(new Object()));
+        final Polling polling = Mockito.spy(new Polling(new Object(), Parser.PROTOCOL_V4));
         polling.on("packet", args -> {
             final Packet<?> packet = (Packet<Object>) args[0];
             assertEquals(Packet.MESSAGE, packet.type);
@@ -214,7 +214,7 @@ public final class PollingTest {
 
     @Test
     public void testOnRequest_async() throws IOException {
-        final Polling polling = Mockito.spy(new Polling(new Object()));
+        final Polling polling = Mockito.spy(new Polling(new Object(), Parser.PROTOCOL_V4));
 
         final AsyncContext asyncContext = Mockito.mock(AsyncContext.class);
 
@@ -267,7 +267,7 @@ public final class PollingTest {
 
     @Test
     public void testClose_client() {
-        final Polling polling = Mockito.spy(new Polling(new Object()));
+        final Polling polling = Mockito.spy(new Polling(new Object(), Parser.PROTOCOL_V4));
 
         final Packet<String> requestPacket = new Packet<>(Packet.CLOSE);
         Parser.PROTOCOL_V4.encodePayload(new ArrayList<Packet<?>>() {{ add(requestPacket); }}, true, dataString -> {
@@ -301,7 +301,7 @@ public final class PollingTest {
 
     @Test
     public void testClose_server1() throws IOException {
-        final Polling polling = Mockito.spy(new Polling(new Object()));
+        final Polling polling = Mockito.spy(new Polling(new Object(), Parser.PROTOCOL_V4));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.doAnswer(invocationOnMock -> "GET").when(request).getMethod();
@@ -335,7 +335,7 @@ public final class PollingTest {
 
     @Test
     public void testClose_server2() {
-        final Polling polling = Mockito.spy(new Polling(new Object()));
+        final Polling polling = Mockito.spy(new Polling(new Object(), Parser.PROTOCOL_V4));
 
         polling.on("drain", args -> polling.close());
 

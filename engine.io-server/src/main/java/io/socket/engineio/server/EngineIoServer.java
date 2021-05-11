@@ -1,6 +1,7 @@
 package io.socket.engineio.server;
 
 import io.socket.emitter.Emitter;
+import io.socket.engineio.parser.Parser;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
 import io.socket.parseqs.ParseQS;
@@ -13,7 +14,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -149,7 +153,7 @@ public final class EngineIoServer extends Emitter {
             } else if(!socket.canUpgrade(WebSocket.NAME)) {
                 webSocket.close();
             } else {
-                Transport transport = new WebSocket(webSocket);
+                final Transport transport = new WebSocket(webSocket, parserFromQuery(webSocket.getQuery()));
                 socket.upgrade(transport);
             }
         } else {
@@ -179,12 +183,13 @@ public final class EngineIoServer extends Emitter {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void handshakePolling(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String sid = ServerYeast.yeast();
 
         final Object lockObject = new Object();
         final EngineIoSocket socket = new EngineIoSocket(lockObject, sid, this, mScheduledExecutor);
-        final Transport transport = new Polling(lockObject);
+        final Transport transport = new Polling(lockObject, parserFromQuery((Map<String, String>) request.getAttribute("query")));
         socket.init(transport);
         transport.onRequest(request, response);
         socket.updateInitialHeadersFromActiveTransport();
@@ -198,7 +203,7 @@ public final class EngineIoServer extends Emitter {
     private void handshakeWebSocket(EngineIoWebSocket webSocket) {
         final String sid = ServerYeast.yeast();
 
-        final Transport transport = new WebSocket(webSocket);
+        final Transport transport = new WebSocket(webSocket, parserFromQuery(webSocket.getQuery()));
         final EngineIoSocket socket = new EngineIoSocket(new Object(), sid, this, mScheduledExecutor);
         socket.init(transport);
 
@@ -206,5 +211,11 @@ public final class EngineIoServer extends Emitter {
         socket.once("close", args -> mClients.remove(sid));
 
         emit("connection", socket);
+    }
+
+    private static Parser parserFromQuery(Map<String, String> query) {
+        return (query != null &&
+                query.containsKey("EIO") &&
+                query.get("EIO").equals("4"))? Parser.PROTOCOL_V4 : Parser.PROTOCOL_V3;
     }
 }
