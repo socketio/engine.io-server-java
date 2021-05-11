@@ -11,9 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -24,6 +22,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class EngineIoSocket extends Emitter {
 
+    public interface SocketedListener {
+
+        void call(EngineIoSocket socket, Object... data);
+    }
+
     private static final List<Packet<?>> PAYLOAD_NOOP = new ArrayList<Packet<?>>() {{
         add(new Packet<>(Packet.NOOP));
     }};
@@ -31,11 +34,12 @@ public final class EngineIoSocket extends Emitter {
     private final String mSid;
     private final EngineIoServer mServer;
     private final LinkedList<Packet<?>> mWriteBuffer = new LinkedList<>();
-    private final Runnable mPingTask = this::sendPing;
-    private final Runnable mPingTimeoutTask = () -> onClose("ping timeout", null);
+    private final ConcurrentHashMap<String, ConcurrentLinkedQueue<SocketedListener>> mCallbacks = new ConcurrentHashMap<>();
 
     private final Object mLockObject;
     private final ScheduledExecutorService mScheduledTaskHandler;
+    private final Runnable mPingTask = this::sendPing;
+    private final Runnable mPingTimeoutTask = () -> onClose("ping timeout", null);
     private ScheduledFuture<?> mPingFuture = null;
     private ScheduledFuture<?> mPintTimeoutFuture = null;
 
@@ -118,6 +122,64 @@ public final class EngineIoSocket extends Emitter {
                 closeTransport();
             }
         }
+    }
+
+    /**
+     * Listen on the event.
+     * NOTE: Unstable api. Might change in the future.
+     *
+     * @param event Event name
+     * @param fn Event listener
+     * @return A reference to this object
+     */
+    public EngineIoSocket on(String event, SocketedListener fn) {
+        this.mCallbacks.computeIfAbsent(event, s -> new ConcurrentLinkedQueue<>());
+        final ConcurrentLinkedQueue<SocketedListener> callbacks = this.mCallbacks.get(event);
+        callbacks.add(fn);
+        return this;
+    }
+
+    /**
+     * Removes the listener.
+     * NOTE: Unstable api. Might change in the future.
+     *
+     * @param event an event name.
+     * @param fn Event listener.
+     * @return a reference to this object.
+     */
+    public EngineIoSocket off(String event, SocketedListener fn) {
+        final ConcurrentLinkedQueue<SocketedListener> callbacks = this.mCallbacks.get(event);
+        if (callbacks != null) {
+            Iterator<SocketedListener> it = callbacks.iterator();
+            while (it.hasNext()) {
+                SocketedListener internal = it.next();
+                if (fn.equals(internal)) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public EngineIoSocket off(String event) {
+        this.mCallbacks.remove(event);
+        return (EngineIoSocket)super.off(event);
+    }
+
+    @Override
+    public Emitter emit(String event, Object... args) {
+        final ConcurrentLinkedQueue<SocketedListener> callbacks = this.mCallbacks.get(event);
+        if (callbacks != null) {
+            for (SocketedListener fn : callbacks) {
+                try {
+                    fn.call(this, args);
+                } catch (Exception ignore) {
+                }
+            }
+        }
+        return super.emit(event, args);
     }
 
     /**

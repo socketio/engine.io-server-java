@@ -119,7 +119,10 @@ public class Emitter {
         final ConcurrentLinkedQueue<Listener> callbacks = this.mCallbacks.get(event);
         if (callbacks != null) {
             for (Listener fn : callbacks) {
-                fn.call(args);
+                try {
+                    fn.call(this, args);
+                } catch (Exception ignore) {
+                }
             }
         }
         return this;
