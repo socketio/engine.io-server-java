@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 /*
  * TODO: Find a way to test this.
  */
+@Ignore
 public final class PollingJsonpTest {
 
     private static SeleniumServer sSeleniumServer;
@@ -40,7 +41,6 @@ public final class PollingJsonpTest {
         sSeleniumServer.stop();
     }
 
-    @Ignore
     @Test
     public void echoTest_string() throws Exception {
         final ServerWrapper serverWrapper = new ServerWrapper();
@@ -62,7 +62,6 @@ public final class PollingJsonpTest {
         }
     }
 
-    @Ignore
     @Test
     public void reverseEchoTest() throws Exception {
         final ServerWrapper serverWrapper = new ServerWrapper();
