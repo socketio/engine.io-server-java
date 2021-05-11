@@ -38,33 +38,26 @@ public final class DeadLockTest {
 		}});
 
 		final boolean[] terminate = new boolean[3];
-		terminate[0] = false;
-		terminate[1] = false;
-		terminate[2] = false;
 
-		final Thread sender = new Thread() {
-			public void run() {
-				while (!terminate[1]) {
-					Packet<String> packet = new Packet<>(Packet.NOOP);
-					socket.send(packet);
-				}
+		final Thread sender = new Thread(() -> {
+			while (!terminate[1]) {
+				Packet<String> packet = new Packet<>(Packet.NOOP);
+				socket.send(packet);
 			}
-		};
+		});
 		sender.start();
 
-		final Thread poller = new Thread() {
-			public void run() {
-				while (!terminate[2]) {
-					HttpServletResponseImpl response = new HttpServletResponseImpl();
-					try {
-						socket.onRequest(request, response);
-					} catch (IOException e) {
-						e.printStackTrace();
-						System.exit(-1);
-					}
+		final Thread poller = new Thread(() -> {
+			while (!terminate[2]) {
+				HttpServletResponseImpl response = new HttpServletResponseImpl();
+				try {
+					socket.onRequest(request, response);
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.exit(-1);
 				}
 			}
-		};
+		});
 		poller.start();
 
 		final Thread interrupter = new Thread(() -> {
@@ -122,7 +115,8 @@ public final class DeadLockTest {
 			attributes.put(name, value);
 			return null;
 		}).when(request).setAttribute(Mockito.anyString(), Mockito.any());
-		Mockito.doAnswer(invocationOnMock -> attributes.get(invocationOnMock.getArgument(0))).when(request)
+		Mockito.doAnswer(invocationOnMock -> attributes.get((String)invocationOnMock.getArgument(0)))
+				.when(request)
 				.getAttribute(Mockito.anyString());
 		return request;
 	}
