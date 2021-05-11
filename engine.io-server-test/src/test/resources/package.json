@@ -1,8 +1,8 @@
 {
   "private": true,
   "dependencies": {
-    "engine.io": "^4.1.1",
-    "engine.io-client": "^4.1.1",
+    "engine.io": "^5.1.0",
+    "engine.io-client": "^5.1.1",
     "engine.io-parser": "^4.0.2",
     "get-stdin": "^6.0.0"
   }
