@@ -60,19 +60,23 @@ public final class EngineIoServer extends Emitter {
             mAllowedCorsOrigins = null;
         }
 
-        mScheduledExecutor = Executors.newScheduledThreadPool(mOptions.getMaxTimeoutThreadPoolSize(), new ThreadFactory() {
+        if (mOptions.getScheduledExecutorService() != null) {
+            mScheduledExecutor = mOptions.getScheduledExecutorService();
+        } else {
+            mScheduledExecutor = Executors.newScheduledThreadPool(mOptions.getMaxTimeoutThreadPoolSize(), new ThreadFactory() {
 
-            private final AtomicLong mThreadCount = new AtomicLong(0);
+                private final AtomicLong mThreadCount = new AtomicLong(0);
 
-            @SuppressWarnings("NullableProblems")
-            @Override
-            public Thread newThread(Runnable runnable) {
-                final Thread thread = new Thread(runnable);
-                thread.setName(String.format("engineIo-threadPool-%d", mThreadCount.incrementAndGet()));
-                thread.setDaemon(true);
-                return thread;
-            }
-        });
+                @SuppressWarnings("NullableProblems")
+                @Override
+                public Thread newThread(Runnable runnable) {
+                    final Thread thread = new Thread(runnable);
+                    thread.setName(String.format("engineIo-threadPool-%d", mThreadCount.incrementAndGet()));
+                    thread.setDaemon(true);
+                    return thread;
+                }
+            });
+        }
     }
 
     /**
@@ -87,6 +91,17 @@ public final class EngineIoServer extends Emitter {
      */
     public ScheduledExecutorService getScheduledExecutor() {
         return mScheduledExecutor;
+    }
+
+    /**
+     * Releases resources such as threads and clients.
+     */
+    public void shutdown() {
+        if (mOptions.getScheduledExecutorService() == null) {
+            // Only call shutdown if we created this executor service
+            mScheduledExecutor.shutdownNow();
+        }
+        mClients.clear();
     }
 
     /**

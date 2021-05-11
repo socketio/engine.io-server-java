@@ -2,6 +2,8 @@ package io.socket.engineio.server;
 
 import io.socket.engineio.parser.Packet;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 /**
  * Options for {@link EngineIoServer}
  */
@@ -44,6 +46,7 @@ public final class EngineIoServerOptions {
     private String[] mAllowedCorsOrigins;
     private Packet<Object> mInitialPacket;
     private int mMaxTimeoutThreadPoolSize;
+    private ScheduledExecutorService mScheduledExecutorService;
 
     private EngineIoServerOptions() {
         mIsLocked = false;
@@ -67,8 +70,6 @@ public final class EngineIoServerOptions {
 
     /**
      * Gets the value of 'isCorsHandlingDisabled' option.
-     *
-     * @return Boolean value indicating if CORS handling is disabled.
      */
     public boolean isCorsHandlingDisabled() {
         return mCorsHandlingDisabled;
@@ -91,9 +92,7 @@ public final class EngineIoServerOptions {
     }
 
     /**
-     * Gets the ping interval option.
-     *
-     * @return Ping interval in milliseconds.
+     * Gets the ping interval option in milliseconds.
      */
     public long getPingInterval() {
         return mPingInterval;
@@ -116,9 +115,7 @@ public final class EngineIoServerOptions {
     }
 
     /**
-     * Gets the ping timeout option.
-     *
-     * @return Ping timeout in milliseconds.
+     * Gets the ping timeout option in milliseconds.
      */
     public long getPingTimeout() {
         return mPingTimeout;
@@ -142,8 +139,6 @@ public final class EngineIoServerOptions {
 
     /**
      * Gets the allowed CORS origins option.
-     *
-     * @return Array of strings containing allowed CORS origins.
      */
     public String[] getAllowedCorsOrigins() {
         return mAllowedCorsOrigins;
@@ -173,8 +168,6 @@ public final class EngineIoServerOptions {
 
     /**
      * Gets the initial packet option.
-     *
-     * @return Initial packet.
      */
     public Packet<?> getInitialPacket() {
         return mInitialPacket;
@@ -220,8 +213,6 @@ public final class EngineIoServerOptions {
 
     /**
      * Gets the max threadpool size for the ping timeout timers.
-     *
-     * @return Max threadpool size for ping timeout timers.
      */
     public int getMaxTimeoutThreadPoolSize() {
         return mMaxTimeoutThreadPoolSize;
@@ -241,5 +232,30 @@ public final class EngineIoServerOptions {
 
         mMaxTimeoutThreadPoolSize = maxTimeoutThreadPoolSize;
         return this;
+    }
+
+    /**
+     * Gets the custom {@link ScheduledExecutorService} for the server to use or null to let
+     * the server create it's own executor.
+     */
+    public ScheduledExecutorService getScheduledExecutorService() {
+        return mScheduledExecutorService;
+    }
+
+    /**
+     * Sets a custom {@link ScheduledExecutorService} for the server to use.
+     * This might be a good option if the application using this library already has
+     * an executor service it manages and uses.
+     *
+     * NOTE: Caller is responsible for shutting down this executor.
+     *
+     * @param scheduledExecutorService Custom {@link ScheduledExecutorService} to use for timed tasks.
+     */
+    public void setScheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
+        if (mIsLocked) {
+            throw new IllegalStateException("Executor service cannot be set. Instance is locked.");
+        }
+
+        mScheduledExecutorService = scheduledExecutorService;
     }
 }
