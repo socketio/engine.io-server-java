@@ -109,13 +109,27 @@
                 <version>1.6.0</version>
                 <executions>
                     <execution>
-                        <id>npm-install</id>
+                        <id>npm-install-parser_v3</id>
                         <phase>process-test-resources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <workingDirectory>./src/test/resources</workingDirectory>
+                            <workingDirectory>./src/test/resources/parser_v3</workingDirectory>
+                            <executable>npm</executable>
+                            <arguments>
+                                <argument>install</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-install-parser_v4</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>./src/test/resources/parser_v4</workingDirectory>
                             <executable>npm</executable>
                             <arguments>
                                 <argument>install</argument>
