@@ -98,18 +98,65 @@ public final class ParserV3Test {
     }
 
     @Test
-    public void testEncodePayload_base64() {
-        final byte[][] messages = new byte[][] {
-                {1, 2, 3, 4, 5}, {11, 12, 13, 14, 15}
-        };
+    public void testEncodePayload_binary() {
         final List<Packet<?>> packets = new ArrayList<>();
-        final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < messages.length; i++) {
-            jsonArray.put(i, messages[i]);
+        packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8)));
+        packets.add(new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8)));
 
-            Packet<byte[]> packet = new Packet<>(Packet.MESSAGE);
-            packet.data = messages[i];
-            packets.add(packet);
+        final JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < packets.size(); i++) {
+            jsonArray.put(i, packets.get(i).data);
+        }
+
+        Parser.PROTOCOL_V3.encodePayload(packets, true, data -> {
+            byte[] result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_binary.js", jsonArray.toString(), byte[].class);
+            assertArrayEquals(result, (byte[]) data);
+        });
+    }
+
+    @Test
+    public void testEncodePayload_binary_mixed() {
+        final List<Packet<?>> packets = new ArrayList<>();
+        packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8)));
+        packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
+
+        final JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < packets.size(); i++) {
+            jsonArray.put(i, packets.get(i).data);
+        }
+
+        Parser.PROTOCOL_V3.encodePayload(packets, true, data -> {
+            byte[] result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_binary.js", jsonArray.toString(), byte[].class);
+            assertArrayEquals(result, (byte[]) data);
+        });
+    }
+
+    @Test
+    public void testEncodePayload_base64() {
+        final List<Packet<?>> packets = new ArrayList<>();
+        packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8)));
+        packets.add(new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8)));
+
+        final JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < packets.size(); i++) {
+            jsonArray.put(i, packets.get(i).data);
+        }
+
+        Parser.PROTOCOL_V3.encodePayload(packets, false, data -> {
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_base64.js", jsonArray.toString(), String.class);
+            assertEquals(result, data);
+        });
+    }
+
+    @Test
+    public void testEncodePayload_base64_mixed() {
+        final List<Packet<?>> packets = new ArrayList<>();
+        packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8)));
+        packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
+
+        final JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < packets.size(); i++) {
+            jsonArray.put(i, packets.get(i).data);
         }
 
         Parser.PROTOCOL_V3.encodePayload(packets, false, data -> {
@@ -191,6 +238,50 @@ public final class ParserV3Test {
     }
 
     @Test
+    public void testDecodePayload_binary() {
+        final List<Packet<?>> packets = new ArrayList<>();
+        packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8)));
+        packets.add(new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8)));
+
+        Parser.PROTOCOL_V3.encodePayload(packets, true, data -> {
+            assertEquals(byte[].class, data.getClass());
+
+            Parser.PROTOCOL_V3.decodePayload(data, (packet, index, total) -> {
+                Packet<?> originalPacket = packets.get(index);
+                assertEquals(originalPacket.data.getClass(), packet.data.getClass());
+                assertEquals(originalPacket.type, packet.type);
+                assertArrayEquals((byte[]) originalPacket.data, (byte[]) packet.data);
+
+                return true;
+            });
+        });
+    }
+
+    @Test
+    public void testDecodePayload_binary_mixed() {
+        final List<Packet<?>> packets = new ArrayList<>();
+        packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8)));
+        packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
+
+        Parser.PROTOCOL_V3.encodePayload(packets, true, data -> {
+            assertEquals(byte[].class, data.getClass());
+
+            Parser.PROTOCOL_V3.decodePayload(data, (packet, index, total) -> {
+                Packet<?> originalPacket = packets.get(index);
+                assertEquals(originalPacket.data.getClass(), packet.data.getClass());
+                assertEquals(originalPacket.type, packet.type);
+                if (originalPacket.data instanceof byte[]) {
+                    assertArrayEquals((byte[]) originalPacket.data, (byte[]) packet.data);
+                } else {
+                    assertEquals(originalPacket.data, packet.data);
+                }
+
+                return true;
+            });
+        });
+    }
+
+    @Test
     public void testDecodePayload_base64() {
         final List<Packet<?>> packets = new ArrayList<>();
         packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8)));
@@ -204,6 +295,30 @@ public final class ParserV3Test {
                 assertEquals(originalPacket.data.getClass(), packet.data.getClass());
                 assertEquals(originalPacket.type, packet.type);
                 assertArrayEquals((byte[]) originalPacket.data, (byte[]) packet.data);
+
+                return true;
+            });
+        });
+    }
+
+    @Test
+    public void testDecodePayload_base64_mixed() {
+        final List<Packet<?>> packets = new ArrayList<>();
+        packets.add(new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8)));
+        packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
+
+        Parser.PROTOCOL_V3.encodePayload(packets, false, data -> {
+            assertEquals(String.class, data.getClass());
+
+            Parser.PROTOCOL_V3.decodePayload(data, (packet, index, total) -> {
+                Packet<?> originalPacket = packets.get(index);
+                assertEquals(originalPacket.data.getClass(), packet.data.getClass());
+                assertEquals(originalPacket.type, packet.type);
+                if (originalPacket.data instanceof byte[]) {
+                    assertArrayEquals((byte[]) originalPacket.data, (byte[]) packet.data);
+                } else {
+                    assertEquals(originalPacket.data, packet.data);
+                }
 
                 return true;
             });
