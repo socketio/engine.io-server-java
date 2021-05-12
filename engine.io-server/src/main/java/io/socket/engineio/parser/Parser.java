@@ -37,9 +37,10 @@ public interface Parser {
         boolean call(Packet<T> packet, int index, int total);
     }
 
-    Packet<?> decodePacket(Object data);
+    int getProtocolVersion();
 
     void encodePacket(Packet<?> packet, boolean supportsBinary, EncodeCallback<Object> callback);
+    Packet<?> decodePacket(Object data);
 
     void encodePayload(List<Packet<?>> packets, boolean supportsBinary, EncodeCallback<Object> callback);
     void decodePayload(Object data, DecodePayloadCallback<Object> callback);

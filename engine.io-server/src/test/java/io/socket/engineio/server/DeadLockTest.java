@@ -2,6 +2,7 @@ package io.socket.engineio.server;
 
 import io.socket.engineio.parser.Packet;
 import io.socket.engineio.parser.Parser;
+import io.socket.engineio.parser.ParserV4;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.parseqs.ParseQS;
 import io.socket.yeast.ServerYeast;
@@ -28,6 +29,7 @@ public final class DeadLockTest {
 		final Object lockObject = new Object();
 		final EngineIoSocket socket = new EngineIoSocket(lockObject,
 				ServerYeast.yeast(),
+				ParserV4.PROTOCOL,
 				new EngineIoServer(),
 				Executors.newSingleThreadScheduledExecutor());
 		final Transport transport = new Polling(lockObject, Parser.PROTOCOL_V4);

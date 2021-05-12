@@ -248,8 +248,9 @@ public final class EngineIoServer extends Emitter {
         final String sid = ServerYeast.yeast();
 
         final Object lockObject = new Object();
-        final EngineIoSocket socket = new EngineIoSocket(lockObject, sid, this, mScheduledExecutor);
-        final Transport transport = new Polling(lockObject, parserFromQuery((Map<String, String>) request.getAttribute("query")));
+        final Parser parser = parserFromQuery((Map<String, String>) request.getAttribute("query"));
+        final EngineIoSocket socket = new EngineIoSocket(lockObject, sid, parser.getProtocolVersion(), this, mScheduledExecutor);
+        final Transport transport = new Polling(lockObject, parser);
         socket.init(transport);
         transport.onRequest(request, response);
         socket.updateInitialHeadersFromActiveTransport();
@@ -263,8 +264,9 @@ public final class EngineIoServer extends Emitter {
     private void handshakeWebSocket(EngineIoWebSocket webSocket) {
         final String sid = ServerYeast.yeast();
 
-        final Transport transport = new WebSocket(webSocket, parserFromQuery(webSocket.getQuery()));
-        final EngineIoSocket socket = new EngineIoSocket(new Object(), sid, this, mScheduledExecutor);
+        final Parser parser = parserFromQuery(webSocket.getQuery());
+        final Transport transport = new WebSocket(webSocket, parser);
+        final EngineIoSocket socket = new EngineIoSocket(new Object(), sid, parser.getProtocolVersion(), this, mScheduledExecutor);
         socket.init(transport);
 
         mClients.put(sid, socket);

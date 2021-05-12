@@ -10,6 +10,11 @@ public final class ParserV4 implements Parser {
     public static final int PROTOCOL = 4;
     private static final String SEPARATOR = "\u001E";   // (char) 30
 
+    @Override
+    public int getProtocolVersion() {
+        return PROTOCOL;
+    }
+
     /**
      * Encode a packet for transfer over transport.
      *

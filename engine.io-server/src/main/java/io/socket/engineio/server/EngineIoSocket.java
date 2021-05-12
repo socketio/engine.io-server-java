@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Objects of this class represents connections to remote clients
  * one per object.
  */
+@SuppressWarnings("unused")
 public final class EngineIoSocket extends Emitter {
 
     public interface SocketedListener {
@@ -32,6 +33,7 @@ public final class EngineIoSocket extends Emitter {
     }};
 
     private final String mSid;
+    private final int mProtocol;
     private final EngineIoServer mServer;
     private final LinkedList<Packet<?>> mWriteBuffer = new LinkedList<>();
     private final ConcurrentHashMap<String, ConcurrentLinkedQueue<SocketedListener>> mCallbacks = new ConcurrentHashMap<>();
@@ -41,7 +43,7 @@ public final class EngineIoSocket extends Emitter {
     private final Runnable mPingTask = this::sendPing;
     private final Runnable mPingTimeoutTask = () -> onClose("ping timeout", null);
     private ScheduledFuture<?> mPingFuture = null;
-    private ScheduledFuture<?> mPintTimeoutFuture = null;
+    private ScheduledFuture<?> mPingTimeoutFuture = null;
 
     private final AtomicBoolean mUpgrading = new AtomicBoolean(false);
     private Runnable mCleanupFunction = null;
@@ -50,10 +52,11 @@ public final class EngineIoSocket extends Emitter {
     private Map<String, String> mInitialQuery;
     private Map<String, List<String>> mInitialHeaders;
 
-    EngineIoSocket(Object lockObject, String sid, EngineIoServer server, ScheduledExecutorService scheduledTaskHandler) {
+    EngineIoSocket(Object lockObject, String sid, int protocol, EngineIoServer server, ScheduledExecutorService scheduledTaskHandler) {
         mLockObject = lockObject;
 
         mSid = sid;
+        mProtocol = protocol;
         mServer = server;
         mScheduledTaskHandler = scheduledTaskHandler;
 
@@ -339,7 +342,17 @@ public final class EngineIoSocket extends Emitter {
         }
 
         emit("open");
-        schedulePing();
+
+        switch (mProtocol) {
+            case 3:
+                resetPingTimeout(mServer.getOptions().getPingTimeout() + mServer.getOptions().getPingInterval());
+                break;
+            case 4:
+                schedulePing();
+                break;
+            default:
+                throw new RuntimeException("Invalid protocol version");
+        }
     }
 
     private void onClose(String reason, String description) {
@@ -360,9 +373,17 @@ public final class EngineIoSocket extends Emitter {
         if(mReadyState == ReadyState.OPEN) {
             emit("packet", packet);
 
-            resetPingTimeout();
+            resetPingTimeout(mServer.getOptions().getPingTimeout() + mServer.getOptions().getPingInterval());
 
             switch (packet.type) {
+                case Packet.PING:
+                    if (mProtocol != 3) {
+                        onError();
+                    } else {
+                        sendPacket(new Packet<>(Packet.PONG));
+                        emit("heartbeat");
+                    }
+                    break;
                 case Packet.PONG:
                     schedulePing();
                     emit("heartbeat");
@@ -404,7 +425,7 @@ public final class EngineIoSocket extends Emitter {
     private void sendPing() {
         synchronized (mLockObject) {
             sendPacket(new Packet<>(Packet.PING));
-            resetPingTimeout();
+            resetPingTimeout(mServer.getOptions().getPingTimeout());
         }
     }
 
@@ -421,15 +442,15 @@ public final class EngineIoSocket extends Emitter {
         }
     }
 
-    private void resetPingTimeout() {
+    private void resetPingTimeout(long timeout) {
         synchronized (mLockObject) {
-            if(mPintTimeoutFuture != null) {
-                mPintTimeoutFuture.cancel(false);
+            if(mPingTimeoutFuture != null) {
+                mPingTimeoutFuture.cancel(false);
             }
 
-            mPintTimeoutFuture = mScheduledTaskHandler.schedule(
+            mPingTimeoutFuture = mScheduledTaskHandler.schedule(
                     mPingTimeoutTask,
-                    mServer.getOptions().getPingTimeout(),
+                    timeout,
                     TimeUnit.MILLISECONDS);
         }
     }

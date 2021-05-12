@@ -10,6 +10,11 @@ public final class ParserV3 implements Parser {
 
     public static final int PROTOCOL = 3;
 
+    @Override
+    public int getProtocolVersion() {
+        return PROTOCOL;
+    }
+
     /**
      * Encode a packet for transfer over transport.
      *
