@@ -4,8 +4,6 @@ import io.socket.engineio.parser.Packet;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 public final class EngineIoServerOptionsTest {
 
     @Test(expected = IllegalStateException.class)
@@ -33,26 +31,23 @@ public final class EngineIoServerOptionsTest {
         EngineIoServerOptions options = EngineIoServerOptions.newFromDefault();
 
         String[] origins = new String[] {
-                "http://www.example.com",
-                "http://www.example.org",
-                "http://example.com",
-                "http://example.org",
+                "https://www.example.com",
+                "https://www.example.org",
+                "https://example.com",
+                "https://example.org",
         };
         options.setAllowedCorsOrigins(origins);
-
-        Arrays.sort(origins, String::compareTo);
-
         Assert.assertArrayEquals(origins, options.getAllowedCorsOrigins());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSetInitialPacket_error1() {
-        EngineIoServerOptions.newFromDefault().setInitialPacket(new Packet(Packet.PING));
+        EngineIoServerOptions.newFromDefault().setInitialPacket(new Packet<>(Packet.PING));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSetInitialPacket_error2() {
-        EngineIoServerOptions.newFromDefault().setInitialPacket(new Packet(Packet.MESSAGE));
+        EngineIoServerOptions.newFromDefault().setInitialPacket(new Packet<>(Packet.MESSAGE));
     }
 
     @Test(expected = IllegalStateException.class)

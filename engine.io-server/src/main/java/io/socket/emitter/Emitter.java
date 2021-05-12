@@ -120,7 +120,7 @@ public class Emitter {
         if (callbacks != null) {
             for (Listener fn : callbacks) {
                 try {
-                    fn.call(this, args);
+                    fn.call(args);
                 } catch (Exception ignore) {
                 }
             }
