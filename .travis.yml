@@ -23,7 +23,7 @@ matrix:
     - name: "GitHub Pages"
       jdk: openjdk8
       env: TESTENV=cover FYI="this also builds documentation for tags"
-      script: '[[ -n "$TRAVIS_TAG" ]] && ./deploy-docs.sh'
+      script: '[[ -n "$TRAVIS_TAG" ]] && ./deploy-docs.sh || true'
       addons:
         apt:
           packages:
