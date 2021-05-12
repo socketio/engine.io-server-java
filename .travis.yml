@@ -18,11 +18,12 @@ matrix:
   include:
     - name: "Java 8 Tests"
       jdk: openjdk8
+      env: TESTENV=tests
       script: travis_retry mvn test
-    - name: "Coverage"
+    - name: "GitHub Pages"
       jdk: openjdk8
       env: TESTENV=cover FYI="this also builds documentation for tags"
-      script: mvn clean test
+      script: '[[ -n "$TRAVIS_TAG" ]] && ./deploy-docs.sh'
       addons:
         apt:
           packages:
@@ -32,5 +33,4 @@ matrix:
             - make
 
 after_success:
-  - '[[ "$TESTENV" == "cover" ]] && bash <(curl -s https://codecov.io/bash)'
-  - '[[ "$TESTENV" == "cover" ]] && [[ -n "$TRAVIS_TAG" ]] && ./deploy-docs.sh'
+  - '[[ "$TESTENV" == "tests" ]] && bash <(curl -s https://codecov.io/bash) -f engine.io-server-coverage/target/site/jacoco-aggregate/jacoco.xml'
