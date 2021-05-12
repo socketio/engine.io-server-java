@@ -22,7 +22,7 @@ matrix:
     - name: "Coverage"
       jdk: openjdk8
       env: TESTENV=cover FYI="this also builds documentation for tags"
-      script: mvn clean cobertura:cobertura
+      script: mvn clean test
       addons:
         apt:
           packages:
