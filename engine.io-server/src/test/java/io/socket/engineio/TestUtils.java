@@ -33,6 +33,10 @@ public final class TestUtils {
 
             process.waitFor();
 
+            if (process.exitValue() != 0) {
+                throw new RuntimeException("Script exited with code: " + process.exitValue());
+            }
+
             InputStream processInputStream = process.getInputStream();
             byte[] result = new byte[processInputStream.available()];
             processInputStream.read(result);

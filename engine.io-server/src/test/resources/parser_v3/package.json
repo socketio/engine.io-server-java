@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "engine.io-parser": "^2.2.1",
+    "get-stdin": "^6.0.0"
+  }
+}

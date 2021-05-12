@@ -1,4 +1,4 @@
-var helpers = require('./helpers');
+var helpers = require('../helpers');
 var getStdin = require('get-stdin');
 var parser = require('engine.io-parser');
 
