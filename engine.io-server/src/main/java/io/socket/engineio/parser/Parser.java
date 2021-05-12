@@ -1,8 +1,10 @@
 package io.socket.engineio.parser;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@SuppressWarnings("unchecked")
 public interface Parser {
 
     Map<String, Integer> PACKETS = Collections.unmodifiableMap(new HashMap<String, Integer>() {{
@@ -44,21 +46,4 @@ public interface Parser {
 
     void encodePayload(List<Packet<?>> packets, boolean supportsBinary, EncodeCallback<Object> callback);
     void decodePayload(Object data, DecodePayloadCallback<Object> callback);
-
-    static byte[] concatBuffer(byte[] ...arrays) {
-        int length = 0;
-        for (byte[] item : arrays) {
-            length += item.length;
-        }
-
-        final byte[] result = new byte[length];
-        int idx = 0;
-        for (byte[] item : arrays) {
-            System.arraycopy(item, 0, result, idx, item.length);
-            idx += item.length;
-        }
-
-        return result;
-    }
-
 }

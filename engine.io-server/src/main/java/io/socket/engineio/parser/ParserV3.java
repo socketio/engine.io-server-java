@@ -179,7 +179,7 @@ public final class ParserV3 implements Parser {
                         sizeBuffer[i + 1] = (byte)(encodingLength.charAt(i) - '0');
                     }
                     sizeBuffer[sizeBuffer.length - 1] = (byte)255;
-                    results.add(Parser.concatBuffer(sizeBuffer, ((String) encodedPacket).getBytes(StandardCharsets.UTF_8)));
+                    results.add(concatBuffer(sizeBuffer, ((String) encodedPacket).getBytes(StandardCharsets.UTF_8)));
                 } else {
                     final String encodingLength = String.valueOf(((byte[]) encodedPacket).length);
                     final byte[] sizeBuffer = new byte[encodingLength.length() + 2];
@@ -189,12 +189,12 @@ public final class ParserV3 implements Parser {
                         sizeBuffer[i + 1] = (byte)(encodingLength.charAt(i) - '0');
                     }
                     sizeBuffer[sizeBuffer.length - 1] = (byte)255;
-                    results.add(Parser.concatBuffer(sizeBuffer, (byte[]) encodedPacket));
+                    results.add(concatBuffer(sizeBuffer, (byte[]) encodedPacket));
                 }
             });
         }
 
-        callback.call(Parser.concatBuffer(results.toArray(new byte[results.size()][])));
+        callback.call(concatBuffer(results.toArray(new byte[results.size()][])));
     }
 
     /**
@@ -235,5 +235,21 @@ public final class ParserV3 implements Parser {
 
     private static String setLengthHeader(String message) {
         return message.length() + ":" + message;
+    }
+
+    private static byte[] concatBuffer(byte[]... arrays) {
+        int length = 0;
+        for (byte[] item : arrays) {
+            length += item.length;
+        }
+
+        final byte[] result = new byte[length];
+        int idx = 0;
+        for (byte[] item : arrays) {
+            System.arraycopy(item, 0, result, idx, item.length);
+            idx += item.length;
+        }
+
+        return result;
     }
 }

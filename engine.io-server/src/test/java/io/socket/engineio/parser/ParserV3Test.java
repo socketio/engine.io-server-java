@@ -22,6 +22,7 @@ public final class ParserV3Test {
     @Test
     public void testProtocolVersion() {
         assertEquals(3, ParserV3.PROTOCOL);
+        assertEquals(3, Parser.PROTOCOL_V3.getProtocolVersion());
     }
 
     @Test

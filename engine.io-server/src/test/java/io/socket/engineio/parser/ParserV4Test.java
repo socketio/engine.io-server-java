@@ -3,6 +3,7 @@ package io.socket.engineio.parser;
 import io.socket.engineio.TestUtils;
 import org.json.JSONArray;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public final class ParserV4Test {
     @Test
     public void testProtocolVersion() {
         assertEquals(4, ParserV4.PROTOCOL);
+        assertEquals(4, Parser.PROTOCOL_V4.getProtocolVersion());
     }
 
     @Test
@@ -166,6 +168,11 @@ public final class ParserV4Test {
     @Test(expected = IllegalArgumentException.class)
     public void testDecodePayload_error() {
         Parser.PROTOCOL_V4.decodePayload("abcxyz", (packet, index, total) -> false);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDecodePayload_error_binary() {
+        Parser.PROTOCOL_V4.decodePayload(new byte[10], (packet, index, total) -> false);
     }
 
     @Test

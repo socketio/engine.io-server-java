@@ -15,7 +15,6 @@ public class Packet<T> {
     public String type;
     public T data;
 
-
     public Packet(String type) {
         this(type, null);
     }
