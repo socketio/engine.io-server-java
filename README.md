@@ -23,7 +23,7 @@ Add the following dependency to your `pom.xml`.
   <dependency>
     <groupId>io.socket</groupId>
     <artifactId>engine.io-server</artifactId>
-    <version>4.0.3</version>
+    <version>5.0.0</version>
   </dependency>
 </dependencies>
 ```
@@ -32,7 +32,7 @@ Add the following dependency to your `pom.xml`.
 Add it as a gradle dependency in `build.gradle`.
 
 ```groovy
-compile ('io.socket:engine.io-server:4.0.3')
+compile ('io.socket:engine.io-server:5.0.0')
 ```
 
 #### Engine.IO Protocol 1.x suppport
