@@ -16,7 +16,7 @@ public final class WebSocketTest {
         ServerWrapper serverWrapper = new ServerWrapper();
         try {
             serverWrapper.startServer();
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testWebSocket_connect.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testWebSocket_connect.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -36,7 +36,7 @@ public final class WebSocketTest {
                 });
             });
 
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testWebSocket_echo_string.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testWebSocket_echo_string.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -56,7 +56,7 @@ public final class WebSocketTest {
                 });
             });
 
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testWebSocket_echo_binary.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testWebSocket_echo_binary.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -76,7 +76,7 @@ public final class WebSocketTest {
                 });
             });
 
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testWebSocket_echo_base64.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testWebSocket_echo_base64.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }
@@ -97,7 +97,7 @@ public final class WebSocketTest {
                 socket.send(packet);
             });
 
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testWebSocket_reverseEcho.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testWebSocket_reverseEcho.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }

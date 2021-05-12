@@ -162,7 +162,7 @@ public final class EngineIoServer extends Emitter {
             final EngineIoSocket client = mClients.get(sid);
             if(client == null) {
                 sendErrorMessage(response, ServerErrors.UNKNOWN_SID);
-            } else if(transport.equals(client.getCurrentTransportName())) {
+            } else if(!transport.equals(client.getCurrentTransportName())) {
                 sendErrorMessage(response, ServerErrors.BAD_REQUEST);
             } else {
                 client.onRequest(request, response);

@@ -24,7 +24,7 @@ public final class UpgradeTest {
                 });
             });
 
-            assertEquals(0, Utils.executeScriptForResult("src/test/resources/testUpgrade_echo.js", serverWrapper.getPort()));
+            assertEquals(0, TestUtils.executeScriptForResult("src/test/resources/testUpgrade_echo.js", serverWrapper.getPort()));
         } finally {
             serverWrapper.stopServer();
         }

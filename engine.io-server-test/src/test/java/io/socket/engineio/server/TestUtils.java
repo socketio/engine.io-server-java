@@ -4,13 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-final class Utils {
+final class TestUtils {
 
-    private Utils() {
+    private TestUtils() {
     }
 
     static int executeScriptForResult(String script, int port) throws IOException {
-        Process process = Runtime.getRuntime().exec("node " + script, new String[] {
+        final String nodeExec = (System.getenv("NODE_PATH") != null)? System.getenv("NODE_PATH") : "node";
+
+        Process process = Runtime.getRuntime().exec(nodeExec + " " + script, new String[] {
                 "PORT=" + port
         });
         try {
