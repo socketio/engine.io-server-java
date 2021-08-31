@@ -358,7 +358,9 @@ public final class EngineIoSocket extends Emitter {
     private void onClose(String reason, String description) {
         if(mReadyState != ReadyState.CLOSED) {
             mReadyState = ReadyState.CLOSED;
-            mPingFuture.cancel(false);
+            if(mPingFuture != null) {
+                mPingFuture.cancel(false);
+            }
 
             clearTransport();
             emit("close", reason, description);
