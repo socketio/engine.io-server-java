@@ -5,7 +5,7 @@ This is the Engine.IO Server Library for Java ported from the [JavaScript server
 
 **NOTE** This library will follow the major version of the JS library starting with version 4.
 
-See also: [Socket.IO-server Java](https://github.com/trinopoty/socket.io-server-java), [Engine.IO-client Java](https://github.com/socketio/engine.io-client-java)
+See also: [Socket.IO-server Java](https://github.com/socketio/socket.io-server-java), [Engine.IO-client Java](https://github.com/socketio/engine.io-client-java)
 
 ## Documentation
 Complete documentation can be found [here](https://socketio.github.io/engine.io-server-java/).
