@@ -6,7 +6,7 @@
     <parent>
         <artifactId>engine.io-server-bom</artifactId>
         <groupId>io.socket</groupId>
-        <version>5.0.1</version>
+        <version>6.0.0</version>
     </parent>
 
     <artifactId>engine.io-server-coverage</artifactId>
