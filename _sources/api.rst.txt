@@ -51,6 +51,7 @@ send
 
 Call this method on a connected ``EngineIoSocket`` instance to queue a packet for sending to
 remote client.
+This method is thread safe.
 
 close
 ^^^^^
@@ -114,7 +115,7 @@ This event is raised just before sending packets to the remote client.
 
 **Arguments**
 
-0. ``Object[]`` of ``Packet`` being sent to the client
+0. ``Collection<Packet<?>>`` being sent to the client
 
 drain
 ^^^^^

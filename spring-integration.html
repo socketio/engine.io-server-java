@@ -1,0 +1,407 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Spring Integration &mdash; Engine.IO Java Server  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Javadocs" href="javadocs/index.html" />
+    <link rel="prev" title="API" href="api.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Engine.IO Java Server
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Spring Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="javadocs/index.html">Javadocs</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Engine.IO Java Server</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Spring Integration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/spring-integration.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="spring-integration">
+<h1>Spring Integration<a class="headerlink" href="#spring-integration" title="Permalink to this headline">¶</a></h1>
+<p>This guide describes how to configure engine.io with Spring Framework and Spring Boot.</p>
+<p>Add a class to contain the bulk of engine.io handling code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>import io.socket.engineio.server.EngineIoServer;
+import io.socket.engineio.server.EngineIoWebSocket;
+import io.socket.engineio.server.utils.ParseQS;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.socket.*;
+import org.springframework.web.socket.server.HandshakeInterceptor;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+@Controller
+public final class EngineIoHandler implements HandshakeInterceptor, WebSocketHandler {
+
+    private static final String ATTRIBUTE_ENGINEIO_BRIDGE = &quot;engineIo.bridge&quot;;
+    private static final String ATTRIBUTE_ENGINEIO_QUERY = &quot;engineIo.query&quot;;
+
+    private final EngineIoServer mEngineIoServer;
+
+    public EngineIoHandler(EngineIoServer engineIoServer) {
+        mEngineIoServer = engineIoServer;
+    }
+
+    @RequestMapping(
+            value = &quot;/engine.io/&quot;,
+            method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS},
+            headers = &quot;Connection!=Upgrade&quot;)
+    public void httpHandler(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        mEngineIoServer.handleRequest(request, response);
+    }
+
+    /* HandshakeInterceptor */
+
+    @Override
+    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map&lt;String, Object&gt; attributes) {
+        attributes.put(ATTRIBUTE_ENGINEIO_QUERY, request.getURI().getQuery());
+        return true;
+    }
+
+    @Override
+    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
+    }
+
+    /* WebSocketHandler */
+
+    @Override
+    public boolean supportsPartialMessages() {
+        return false;
+    }
+
+    @Override
+    public void afterConnectionEstablished(WebSocketSession webSocketSession) {
+        final EngineIoSpringWebSocket webSocket = new EngineIoSpringWebSocket(webSocketSession);
+        webSocketSession.getAttributes().put(ATTRIBUTE_ENGINEIO_BRIDGE, webSocket);
+        mEngineIoServer.handleWebSocket(webSocket);
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) {
+        ((EngineIoSpringWebSocket)webSocketSession.getAttributes().get(ATTRIBUTE_ENGINEIO_BRIDGE))
+                .afterConnectionClosed(closeStatus);
+    }
+
+    @Override
+    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage&lt;?&gt; webSocketMessage) {
+        ((EngineIoSpringWebSocket)webSocketSession.getAttributes().get(ATTRIBUTE_ENGINEIO_BRIDGE))
+                .handleMessage(webSocketMessage);
+    }
+
+    @Override
+    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable) {
+        ((EngineIoSpringWebSocket)webSocketSession.getAttributes().get(ATTRIBUTE_ENGINEIO_BRIDGE))
+                .handleTransportError(throwable);
+    }
+
+    private static final class EngineIoSpringWebSocket extends EngineIoWebSocket {
+
+        private final WebSocketSession mSession;
+        private final Map&lt;String, String&gt; mQuery;
+
+        EngineIoSpringWebSocket(WebSocketSession session) {
+            mSession = session;
+
+            final String queryString = (String)mSession.getAttributes().get(ATTRIBUTE_ENGINEIO_QUERY);
+            if (queryString != null) {
+                mQuery = ParseQS.decode(queryString);
+            } else {
+                mQuery = new HashMap&lt;&gt;();
+            }
+        }
+
+        /* EngineIoWebSocket */
+
+        @Override
+        public Map&lt;String, String&gt; getQuery() {
+            return mQuery;
+        }
+
+        @Override
+        public void write(String message) throws IOException {
+            mSession.sendMessage(new TextMessage(message));
+        }
+
+        @Override
+        public void write(byte[] message) throws IOException {
+            mSession.sendMessage(new BinaryMessage(message));
+        }
+
+        @Override
+        public void close() {
+            try {
+                mSession.close();
+            } catch (IOException ignore) {
+            }
+        }
+
+        /* WebSocketHandler */
+
+        void afterConnectionClosed(CloseStatus closeStatus) {
+            emit(&quot;close&quot;);
+        }
+
+        void handleMessage(WebSocketMessage&lt;?&gt; message) {
+            if (message.getPayload() instanceof String || message.getPayload() instanceof byte[]) {
+                emit(&quot;message&quot;, (Object) message.getPayload());
+            } else {
+                throw new RuntimeException(String.format(
+                        &quot;Invalid message type received: %s. Expected String or byte[].&quot;,
+                        message.getPayload().getClass().getName()));
+            }
+        }
+
+        void handleTransportError(Throwable exception) {
+            emit(&quot;error&quot;, &quot;write error&quot;, exception.getMessage());
+        }
+    }
+}
+</pre></div>
+</div>
+<p><strong>NOTE</strong> If this class is discovered/instantiated multiple times, it may cause problems so place it accordingly.</p>
+<p>Next, add bean declarations for the engine.io server:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">bean</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;engineIoServer&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;io.socket.engineio.server.EngineIoServer&quot;</span> <span class="o">/&gt;</span>
+</pre></div>
+</div>
+<p>Next, add websocket handling for engine.io server in XML:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">websocket</span><span class="p">:</span><span class="n">handlers</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">websocket</span><span class="p">:</span><span class="n">mapping</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/engine.io/&quot;</span> <span class="n">handler</span><span class="o">=</span><span class="s2">&quot;engineIoHandler&quot;</span> <span class="o">/&gt;</span>
+
+    <span class="o">&lt;</span><span class="n">websocket</span><span class="p">:</span><span class="n">handshake</span><span class="o">-</span><span class="n">interceptors</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">beans</span><span class="p">:</span><span class="n">ref</span> <span class="n">bean</span><span class="o">=</span><span class="s2">&quot;engineIoHandler&quot;</span> <span class="o">/&gt;</span>
+    <span class="o">&lt;/</span><span class="n">websocket</span><span class="p">:</span><span class="n">handshake</span><span class="o">-</span><span class="n">interceptors</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">websocket</span><span class="p">:</span><span class="n">handlers</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Or in Java:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@Configuration</span>
+<span class="nd">@EnableWebSocket</span>
+<span class="n">public</span> <span class="k">class</span> <span class="nc">EngineIoConfigurator</span> <span class="n">implements</span> <span class="n">WebSocketConfigurer</span> <span class="p">{</span>
+
+    <span class="n">private</span> <span class="n">final</span> <span class="n">EngineIoHandler</span> <span class="n">mEngineIoHandler</span><span class="p">;</span>
+
+    <span class="n">public</span> <span class="n">EngineIoConfigurator</span><span class="p">(</span><span class="n">EngineIoHandler</span> <span class="n">engineIoHandler</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">mEngineIoHandler</span> <span class="o">=</span> <span class="n">engineIoHandler</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="n">public</span> <span class="n">void</span> <span class="n">registerWebSocketHandlers</span><span class="p">(</span><span class="n">WebSocketHandlerRegistry</span> <span class="n">registry</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">registry</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">mEngineIoHandler</span><span class="p">,</span> <span class="s2">&quot;/engine.io/&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">addInterceptors</span><span class="p">(</span><span class="n">mEngineIoHandler</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This serves as a gateway for engine.io and is same for all other server that builds on top of engine.io, viz. Socket.io .</p>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="javadocs/index.html" class="btn btn-neutral float-right" title="Javadocs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="api.html" class="btn btn-neutral" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Trinopoty Biswas.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/documentation_options.js"></script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

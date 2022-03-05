@@ -13,4 +13,5 @@ Welcome to Engine.IO Java Server's documentation!
    install
    using
    api
+   spring-integration
    javadocs/index
