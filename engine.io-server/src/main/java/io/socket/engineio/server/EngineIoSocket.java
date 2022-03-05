@@ -32,7 +32,7 @@ public final class EngineIoSocket extends Emitter {
     }};
 
     private final String mSid;
-    private final int mProtocol;
+    private final int mProtocolVersion;
     private final EngineIoServer mServer;
     private final LinkedList<Packet<?>> mWriteBuffer = new LinkedList<>();
     private final ConcurrentHashMap<String, ConcurrentLinkedQueue<SocketedListener>> mCallbacks = new ConcurrentHashMap<>();
@@ -51,11 +51,15 @@ public final class EngineIoSocket extends Emitter {
     private Map<String, String> mInitialQuery;
     private Map<String, List<String>> mInitialHeaders;
 
-    EngineIoSocket(Object lockObject, String sid, int protocol, EngineIoServer server, ScheduledExecutorService scheduledTaskHandler) {
+    EngineIoSocket(Object lockObject,
+                   String sid,
+                   int protocolVersion,
+                   EngineIoServer server,
+                   ScheduledExecutorService scheduledTaskHandler) {
         mLockObject = lockObject;
 
         mSid = sid;
-        mProtocol = protocol;
+        mProtocolVersion = protocolVersion;
         mServer = server;
         mScheduledTaskHandler = scheduledTaskHandler;
 
@@ -64,8 +68,6 @@ public final class EngineIoSocket extends Emitter {
 
     /**
      * Gets the sid of this socket.
-     *
-     * @return String sid value.
      */
     @SuppressWarnings("WeakerAccess")
     public String getId() {
@@ -73,9 +75,14 @@ public final class EngineIoSocket extends Emitter {
     }
 
     /**
+     * Gets the protocol version of this socket.
+     */
+    public int getProtocolVersion() {
+        return mProtocolVersion;
+    }
+
+    /**
      * Gets the ready state of this socket.
-     *
-     * @return Socket ready state.
      */
     @SuppressWarnings("WeakerAccess")
     public ReadyState getReadyState() {
@@ -84,8 +91,6 @@ public final class EngineIoSocket extends Emitter {
 
     /**
      * Get the query parameters of the initial HTTP connection.
-     *
-     * @return Query parameters of the initial HTTP connection.
      */
     public Map<String, String> getInitialQuery() {
         return mInitialQuery;
@@ -93,8 +98,6 @@ public final class EngineIoSocket extends Emitter {
 
     /**
      * Get the headers of the initial HTTP connection.
-     *
-     * @return Headers of the initial HTTP connection.
      */
     public Map<String, List<String>> getInitialHeaders() {
         return mInitialHeaders;
@@ -211,8 +214,9 @@ public final class EngineIoSocket extends Emitter {
     void onRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         mTransport.onRequest(request, response);
 
-        if (mUpgrading.get() && mTransport.isWritable() && mWriteBuffer.isEmpty())
+        if (mUpgrading.get() && mTransport.isWritable() && mWriteBuffer.isEmpty()) {
             mTransport.send(PAYLOAD_NOOP);
+        }
     }
 
     /**
@@ -342,7 +346,7 @@ public final class EngineIoSocket extends Emitter {
 
         emit("open");
 
-        switch (mProtocol) {
+        switch (mProtocolVersion) {
             case 3:
                 resetPingTimeout(mServer.getOptions().getPingTimeout() + mServer.getOptions().getPingInterval());
                 break;
@@ -378,7 +382,7 @@ public final class EngineIoSocket extends Emitter {
 
             switch (packet.type) {
                 case Packet.PING:
-                    if (mProtocol != 3) {
+                    if (mProtocolVersion != 3) {
                         onError();
                     } else {
                         sendPacket(new Packet<>(Packet.PONG));
