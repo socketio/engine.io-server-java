@@ -1,7 +1,6 @@
 package io.socket.engineio.server.parser;
 
-
-public class Packet<T> {
+public final class Packet<T> {
 
     static final public String OPEN = "open";
     static final public String CLOSE = "close";
