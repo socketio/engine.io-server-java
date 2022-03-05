@@ -1,6 +1,6 @@
 package io.socket.engineio.server;
 
-import io.socket.parseqs.ParseQS;
+import io.socket.engineio.server.utils.ParseQS;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 

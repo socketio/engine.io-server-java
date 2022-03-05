@@ -1,4 +1,4 @@
-package io.socket.parseqs;
+package io.socket.engineio.server.utils;
 
 
 import java.io.UnsupportedEncodingException;
@@ -9,12 +9,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ParseQS {
+public interface ParseQS {
 
-    private ParseQS() {
-    }
-
-    public static String encode(Map<String, String> query) {
+    static String encode(Map<String, String> query) {
         return query.entrySet().stream()
                 .map(entry -> {
                     try {
@@ -29,7 +26,7 @@ public class ParseQS {
                 .orElse("");
     }
 
-    public static Map<String, String> decode(String qs) {
+    static Map<String, String> decode(String qs) {
         return Arrays.stream(qs.split("&"))
                 .map(s -> s.split("="))
                 .collect(Collectors.toMap(

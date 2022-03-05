@@ -1,4 +1,4 @@
-package io.socket.emitter;
+package io.socket.engineio.server;
 
 import java.util.ArrayList;
 import java.util.Collections;

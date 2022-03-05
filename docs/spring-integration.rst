@@ -8,7 +8,7 @@ Add a class to contain the bulk of engine.io handling code::
 
     import io.socket.engineio.server.EngineIoServer;
     import io.socket.engineio.server.EngineIoWebSocket;
-    import io.socket.parseqs.ParseQS;
+    import io.socket.engineio.server.utils.ParseQS;
     import org.springframework.http.server.ServerHttpRequest;
     import org.springframework.http.server.ServerHttpResponse;
     import org.springframework.stereotype.Controller;

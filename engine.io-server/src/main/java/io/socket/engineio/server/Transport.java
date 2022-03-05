@@ -1,9 +1,7 @@
 package io.socket.engineio.server;
 
-import io.socket.emitter.Emitter;
-import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.Parser;
-import io.socket.engineio.parser.ParserV4;
+import io.socket.engineio.server.parser.Packet;
+import io.socket.engineio.server.parser.Parser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

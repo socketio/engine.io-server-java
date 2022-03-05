@@ -1,17 +1,17 @@
-package io.socket.yeast;
+package io.socket.engineio.server.utils;
 
 import java.security.SecureRandom;
 
-public final class ServerYeast {
+public interface ServerYeast {
 
     /**
      * A ThreadLocal is used to improve thread performance since {@link SecureRandom} do not perform well with
      * thread contention.
      */
-    private static final ThreadLocal<SecureRandom> THREAD_RANDOM = new ThreadLocal<>();
-    private static final char[] alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_".toCharArray();
+    ThreadLocal<SecureRandom> THREAD_RANDOM = new ThreadLocal<>();
+    char[] ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_".toCharArray();
 
-    public static String yeast() {
+    static String yeast() {
         SecureRandom secureRandom = THREAD_RANDOM.get();
         if (secureRandom == null) {
             secureRandom = new SecureRandom();
@@ -21,12 +21,12 @@ public final class ServerYeast {
         return encode(secureRandom.nextLong() & 0x7fffffffffffffffL);
     }
 
-    public static String encode(long num) {
+    static String encode(long num) {
         final StringBuilder encoded = new StringBuilder();
         long dividedNum = num;
         do {
-            encoded.insert(0, alphabet[(int)(dividedNum % alphabet.length)]);
-            dividedNum = dividedNum / alphabet.length;
+            encoded.insert(0, ALPHABET[(int)(dividedNum % ALPHABET.length)]);
+            dividedNum = dividedNum / ALPHABET.length;
         } while (dividedNum > 0);
 
         return encoded.toString();

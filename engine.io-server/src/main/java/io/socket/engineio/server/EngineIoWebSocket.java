@@ -1,7 +1,5 @@
 package io.socket.engineio.server;
 
-import io.socket.emitter.Emitter;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package io.socket.engineio.parser;
+package io.socket.engineio.server.parser;
 
 
 public class Packet<T> {

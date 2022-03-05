@@ -1,7 +1,6 @@
 package io.socket.engineio.server;
 
-import io.socket.emitter.Emitter;
-import io.socket.engineio.parser.Packet;
+import io.socket.engineio.server.parser.Packet;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
 import org.json.JSONArray;

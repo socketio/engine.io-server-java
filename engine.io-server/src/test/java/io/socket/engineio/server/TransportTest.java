@@ -1,7 +1,7 @@
 package io.socket.engineio.server;
 
-import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.Parser;
+import io.socket.engineio.server.parser.Packet;
+import io.socket.engineio.server.parser.Parser;
 import org.junit.Test;
 import org.mockito.Mockito;
 

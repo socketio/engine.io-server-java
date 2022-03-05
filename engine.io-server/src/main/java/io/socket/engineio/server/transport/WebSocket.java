@@ -1,8 +1,7 @@
 package io.socket.engineio.server.transport;
 
-import io.socket.engineio.parser.Parser;
-import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.ParserV3;
+import io.socket.engineio.server.parser.Parser;
+import io.socket.engineio.server.parser.Packet;
 import io.socket.engineio.server.EngineIoWebSocket;
 import io.socket.engineio.server.Transport;
 

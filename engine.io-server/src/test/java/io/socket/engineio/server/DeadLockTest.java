@@ -1,13 +1,12 @@
 package io.socket.engineio.server;
 
-import io.socket.engineio.parser.Packet;
-import io.socket.engineio.parser.Parser;
-import io.socket.engineio.parser.ParserV4;
+import io.socket.engineio.server.parser.Packet;
+import io.socket.engineio.server.parser.Parser;
+import io.socket.engineio.server.parser.ParserV4;
 import io.socket.engineio.server.transport.Polling;
-import io.socket.parseqs.ParseQS;
-import io.socket.yeast.ServerYeast;
+import io.socket.engineio.server.utils.ParseQS;
+import io.socket.engineio.server.utils.ServerYeast;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 

@@ -1,6 +1,6 @@
 package io.socket.engineio.server;
 
-import io.socket.engineio.parser.Packet;
+import io.socket.engineio.server.parser.Packet;
 
 import java.util.concurrent.ScheduledExecutorService;
 

@@ -1,4 +1,4 @@
-package io.socket.engineio.parser;
+package io.socket.engineio.server.parser;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

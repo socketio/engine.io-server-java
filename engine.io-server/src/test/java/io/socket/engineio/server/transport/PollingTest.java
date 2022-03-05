@@ -1,8 +1,8 @@
 package io.socket.engineio.server.transport;
 
-import io.socket.emitter.Emitter;
-import io.socket.engineio.parser.Parser;
-import io.socket.engineio.parser.Packet;
+import io.socket.engineio.server.Emitter;
+import io.socket.engineio.server.parser.Parser;
+import io.socket.engineio.server.parser.Packet;
 import io.socket.engineio.server.HttpServletResponseImpl;
 import io.socket.engineio.server.ServletInputStreamWrapper;
 import org.junit.Ignore;

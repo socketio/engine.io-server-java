@@ -1,7 +1,7 @@
 package io.socket.engineio.server;
 
 import io.socket.engineio.server.transport.WebSocket;
-import io.socket.parseqs.ParseQS;
+import io.socket.engineio.server.utils.ParseQS;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;

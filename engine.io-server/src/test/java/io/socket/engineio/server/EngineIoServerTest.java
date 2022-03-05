@@ -1,9 +1,8 @@
 package io.socket.engineio.server;
 
-import io.socket.emitter.Emitter;
 import io.socket.engineio.server.transport.Polling;
-import io.socket.parseqs.ParseQS;
-import io.socket.yeast.ServerYeast;
+import io.socket.engineio.server.utils.ParseQS;
+import io.socket.engineio.server.utils.ServerYeast;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
