@@ -405,25 +405,25 @@ public final class EngineIoSocket extends Emitter {
     }
 
     private void sendPacket(Packet<?> packet) {
-        if((mReadyState != ReadyState.CLOSING) && (mReadyState != ReadyState.CLOSED)) {
-            synchronized (mLockObject) {
+        synchronized (mLockObject) {
+            if ((mReadyState != ReadyState.CLOSING) && (mReadyState != ReadyState.CLOSED)) {
                 mWriteBuffer.add(packet);
-            }
 
-            flush();
+                flush();
+            }
         }
     }
 
     private void flush() {
-        if((mReadyState != ReadyState.CLOSED) && (mTransport.isWritable()) && (mWriteBuffer.size() > 0)) {
-            synchronized (mLockObject) {
+        synchronized (mLockObject) {
+            if ((mReadyState != ReadyState.CLOSED) && (mTransport.isWritable()) && (mWriteBuffer.size() > 0)) {
                 emit("flush", Collections.unmodifiableCollection(mWriteBuffer));
 
                 mTransport.send(mWriteBuffer);
                 mWriteBuffer.clear();
-            }
 
-            emit("drain");
+                emit("drain");
+            }
         }
     }
 
