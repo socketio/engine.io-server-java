@@ -156,6 +156,11 @@ public final class EngineIoServer extends Emitter {
             return;
         }
 
+        if (!request.isAsyncSupported() && !mOptions.isSyncPollingAllowed()) {
+            sendErrorMessage(response, ServerErrors.FORBIDDEN);
+            return;
+        }
+
         final String sid = query.get("sid");
         if (sid != null) {
             final EngineIoSocket client = mClients.get(sid);

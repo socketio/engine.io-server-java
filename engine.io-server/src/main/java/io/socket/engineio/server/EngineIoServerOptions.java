@@ -41,6 +41,7 @@ public final class EngineIoServerOptions {
 
     private boolean mIsLocked;
     private boolean mCorsHandlingDisabled;
+    private boolean mAllowSyncPolling;
     private long mPingInterval;
     private long mPingTimeout;
     private String[] mAllowedCorsOrigins;
@@ -62,6 +63,7 @@ public final class EngineIoServerOptions {
     public static EngineIoServerOptions newFromDefault() {
         return (new EngineIoServerOptions())
                 .setCorsHandlingDisabled(DEFAULT.isCorsHandlingDisabled())
+                .setAllowSyncPolling(false)
                 .setPingInterval(DEFAULT.getPingInterval())
                 .setPingTimeout(DEFAULT.getPingTimeout())
                 .setAllowedCorsOrigins(DEFAULT.getAllowedCorsOrigins())
@@ -89,6 +91,29 @@ public final class EngineIoServerOptions {
         }
 
         mCorsHandlingDisabled = corsHandlingDisabled;
+        return this;
+    }
+
+    /**
+     * Whether sync polling transport is allowed or not.
+     *
+     * WARNING: Sync polling can cause the client to flood the server with requests.
+     */
+    public boolean isSyncPollingAllowed() {
+        return mAllowSyncPolling;
+    }
+
+    /**
+     * Sets whether sync polling transport is allowed or not.
+     *
+     * WARNING: Sync polling can cause the client to flood the server with requests.
+     */
+    public EngineIoServerOptions setAllowSyncPolling(boolean allowSyncPolling) {
+        if (mIsLocked) {
+            throw new IllegalStateException("Sync polling cannot be set. Instance is locked.");
+        }
+
+        mAllowSyncPolling = allowSyncPolling;
         return this;
     }
 
