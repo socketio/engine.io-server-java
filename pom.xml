@@ -6,7 +6,7 @@
 
     <groupId>io.socket</groupId>
     <artifactId>engine.io-server-bom</artifactId>
-    <version>6.1.0</version>
+    <version>6.2.0</version>
     <packaging>pom</packaging>
     <name>engine.io</name>
     <description>Engine.IO server library for Java</description>
