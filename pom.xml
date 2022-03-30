@@ -138,6 +138,9 @@
                         <phase>site</phase>
                     </execution>
                 </executions>
+                <configuration>
+                    <additionalOptions>-Xdoclint:none</additionalOptions>
+                </configuration>
             </plugin>
             <!-- JaCoCo Plugin -->
             <plugin>
