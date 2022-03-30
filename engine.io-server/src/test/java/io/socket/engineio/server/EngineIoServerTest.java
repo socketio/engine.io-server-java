@@ -92,7 +92,8 @@ public final class EngineIoServerTest {
 
     @Test
     public void testHandleRequest_bad_handshake_method() throws IOException {
-        final EngineIoServer server = new EngineIoServer();
+        final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
+                .setAllowSyncPolling(true));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.doAnswer(invocationOnMock -> {
@@ -118,7 +119,8 @@ public final class EngineIoServerTest {
 
     @Test
     public void testHandleRequest_unknown_sid() throws IOException {
-        final EngineIoServer server = new EngineIoServer();
+        final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
+                .setAllowSyncPolling(true));
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.doAnswer(invocationOnMock -> {
@@ -144,7 +146,8 @@ public final class EngineIoServerTest {
 
     @Test
     public void testHandleRequest_connect() throws IOException {
-        final EngineIoServer server = new EngineIoServer();
+        final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
+                .setAllowSyncPolling(true));
 
         final HttpServletRequest request = getConnectRequest(new HashMap<String, String>() {{
             put("transport", Polling.NAME);
