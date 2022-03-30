@@ -5,8 +5,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Getting Started &mdash; Engine.IO Java Server  documentation</title>
@@ -27,8 +26,6 @@
 
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="API" href="api.html" />
@@ -81,7 +78,7 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
@@ -164,12 +161,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="getting-started">
+  <div class="section" id="getting-started">
 <h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <p>Create a servlet for handling incoming HTTP connections and call
 <code class="docutils literal notranslate"><span class="pre">EngineIoServer</span></code> class’s <code class="docutils literal notranslate"><span class="pre">handleRequest</span></code> method on receiving an HTTP
 request.</p>
-<section id="example-servlet">
+<div class="section" id="example-servlet">
 <h2>Example servlet<a class="headerlink" href="#example-servlet" title="Permalink to this headline">¶</a></h2>
 <p>Example servlet class:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@WebServlet</span><span class="p">(</span><span class="s2">&quot;/engine.io/*&quot;</span><span class="p">)</span>
@@ -186,8 +183,8 @@ request.</p>
 </div>
 <p>In the example servlet above, a static instance of <code class="docutils literal notranslate"><span class="pre">EngineIoServer</span></code> is defined and
 the method <code class="docutils literal notranslate"><span class="pre">service</span></code> is overridden to call <code class="docutils literal notranslate"><span class="pre">handleRequest</span></code>.</p>
-</section>
-<section id="listening-for-connections">
+</div>
+<div class="section" id="listening-for-connections">
 <h2>Listening for connections<a class="headerlink" href="#listening-for-connections" title="Permalink to this headline">¶</a></h2>
 <p>Attach a listener to the <code class="docutils literal notranslate"><span class="pre">connection</span></code> event of <code class="docutils literal notranslate"><span class="pre">EngineIoServer</span></code> to listen for
 new connections.</p>
@@ -201,8 +198,8 @@ new connections.</p>
 <span class="p">});</span>
 </pre></div>
 </div>
-</section>
-<section id="listening-for-message-from-client">
+</div>
+<div class="section" id="listening-for-message-from-client">
 <h2>Listening for message from client<a class="headerlink" href="#listening-for-message-from-client" title="Permalink to this headline">¶</a></h2>
 <p>Attach a listener to the <code class="docutils literal notranslate"><span class="pre">message</span></code> event of <code class="docutils literal notranslate"><span class="pre">EngineIoSocket</span></code> to listen for
 messages from client.</p>
@@ -217,21 +214,21 @@ messages from client.</p>
 <span class="p">});</span>
 </pre></div>
 </div>
-</section>
-<section id="sending-message-to-client">
+</div>
+<div class="section" id="sending-message-to-client">
 <h2>Sending message to client<a class="headerlink" href="#sending-message-to-client" title="Permalink to this headline">¶</a></h2>
 <p>Call the <code class="docutils literal notranslate"><span class="pre">send</span></code> method on <code class="docutils literal notranslate"><span class="pre">EngineIoSocket</span></code> to send packet to remote client.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">socket</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">new</span> <span class="n">Packet</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">Packet</span><span class="o">.</span><span class="n">MESSAGE</span><span class="p">,</span> <span class="s2">&quot;foo&quot;</span><span class="p">));</span>
 </pre></div>
 </div>
-</section>
-<section id="websocket-connections">
+</div>
+<div class="section" id="websocket-connections">
 <h2>WebSocket connections<a class="headerlink" href="#websocket-connections" title="Permalink to this headline">¶</a></h2>
 <p>Handling WebSocket connections involves creating an instance of <code class="docutils literal notranslate"><span class="pre">EngineIoWebSocket</span></code> and
 passing it in a call to <code class="docutils literal notranslate"><span class="pre">handleWebSocket</span></code> method of <code class="docutils literal notranslate"><span class="pre">EngineIoServer</span></code>. The process to do
 this is different for each server (<em>viz.</em> Tomcat, Jetty).</p>
-<section id="generic-server">
+<div class="section" id="generic-server">
 <h3>Generic server<a class="headerlink" href="#generic-server" title="Permalink to this headline">¶</a></h3>
 <p>Add an endpoint like the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">public</span> <span class="n">final</span> <span class="k">class</span> <span class="nc">EngineIoEndpoint</span> <span class="n">extends</span> <span class="n">Endpoint</span> <span class="p">{</span>
@@ -339,8 +336,8 @@ class like the following:</p>
 }
 </pre></div>
 </div>
-</section>
-<section id="jetty-server">
+</div>
+<div class="section" id="jetty-server">
 <h3>Jetty server<a class="headerlink" href="#jetty-server" title="Permalink to this headline">¶</a></h3>
 <p>For Jetty server, add the <a class="reference internal" href="install.html#install-jetty-ws-adapter"><span class="std std-ref">Jetty WebSocket Adapter</span></a> dependency.
 Then, the following code can be used to listen for WebSocket connections:</p>
@@ -355,16 +352,16 @@ Then, the following code can be used to listen for WebSocket connections:</p>
 <span class="p">});</span>
 </pre></div>
 </div>
-</section>
-</section>
-<section id="async-polling">
+</div>
+</div>
+<div class="section" id="async-polling">
 <h2>Async Polling<a class="headerlink" href="#async-polling" title="Permalink to this headline">¶</a></h2>
 <p>To enable async polling, mark the servlet with <code class="docutils literal notranslate"><span class="pre">asyncSupported</span></code> set to <code class="docutils literal notranslate"><span class="pre">true</span></code>.
 This can be done with annotations as <code class="docutils literal notranslate"><span class="pre">&#64;WebServlet(value</span> <span class="pre">=</span> <span class="pre">&quot;/engine.io/*&quot;,</span> <span class="pre">asyncSupported</span> <span class="pre">=</span> <span class="pre">true)</span></code>.
 Or with XML as <code class="docutils literal notranslate"><span class="pre">&lt;async-supported&gt;true&lt;/async-supported&gt;</span></code>.
 Enabling async is recommended as the server is bombarded with GET requests if async is disabled.</p>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
@@ -416,7 +413,6 @@ Enabling async is recommended as the server is bombarded with GET requests if as
             SOURCELINK_SUFFIX: '.txt'
         };
     </script>
-      <script type="text/javascript" src="_static/documentation_options.js"></script>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
