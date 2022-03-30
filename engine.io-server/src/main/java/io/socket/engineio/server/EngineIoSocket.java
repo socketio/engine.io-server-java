@@ -1,10 +1,10 @@
 package io.socket.engineio.server;
 
+import io.socket.engineio.server.json.JSONArray;
+import io.socket.engineio.server.json.JSONObject;
 import io.socket.engineio.server.parser.Packet;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -327,7 +327,7 @@ public final class EngineIoSocket extends Emitter {
         mReadyState = ReadyState.OPEN;
 
         JSONArray upgrades = new JSONArray();
-        upgrades.put(WebSocket.NAME);
+        upgrades.add(WebSocket.NAME);
 
         JSONObject handshakePacket = new JSONObject();
         handshakePacket.put("sid", mSid);
@@ -336,7 +336,7 @@ public final class EngineIoSocket extends Emitter {
         handshakePacket.put("pingTimeout", mServer.getOptions().getPingTimeout());
 
         Packet<String> openPacket = new Packet<>(Packet.OPEN);
-        openPacket.data = handshakePacket.toString();
+        openPacket.data = JSONObject.toJSONString(handshakePacket);
 
         sendPacket(openPacket);
 

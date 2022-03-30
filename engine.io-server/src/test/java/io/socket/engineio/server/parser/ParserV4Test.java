@@ -1,7 +1,7 @@
 package io.socket.engineio.server.parser;
 
 import io.socket.engineio.server.TestUtils;
-import org.json.JSONArray;
+import io.socket.engineio.server.json.JSONArray;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -69,7 +69,7 @@ public final class ParserV4Test {
         final JSONArray jsonArray = new JSONArray();
 
         Parser.PROTOCOL_V4.encodePayload(packets, false, data -> {
-            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_string.js", jsonArray.toString(), String.class);
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_string.js", jsonArray.toJSONString(), String.class);
             assertEquals(result, data);
         });
     }
@@ -81,12 +81,12 @@ public final class ParserV4Test {
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
 
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < packets.size(); i++) {
-            jsonArray.put(i, packets.get(i).data);
+        for (Packet<?> packet : packets) {
+            jsonArray.add(packet.data);
         }
 
         Parser.PROTOCOL_V4.encodePayload(packets, true, data -> {
-            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_string.js", jsonArray.toString(), String.class);
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_string.js", jsonArray.toJSONString(), String.class);
             assertEquals(result, data);
         });
     }
@@ -98,12 +98,12 @@ public final class ParserV4Test {
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8)));
 
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < packets.size(); i++) {
-            jsonArray.put(i, packets.get(i).data);
+        for (Packet<?> packet : packets) {
+            jsonArray.add(packet.data);
         }
 
         Parser.PROTOCOL_V4.encodePayload(packets, true, data -> {
-            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_binary.js", jsonArray.toString(), String.class);
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_binary.js", jsonArray.toJSONString(), String.class);
             assertEquals(result, data);
         });
     }
@@ -115,12 +115,12 @@ public final class ParserV4Test {
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
 
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < packets.size(); i++) {
-            jsonArray.put(i, packets.get(i).data);
+        for (Packet<?> packet : packets) {
+            jsonArray.add(packet.data);
         }
 
         Parser.PROTOCOL_V4.encodePayload(packets, true, data -> {
-            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_binary.js", jsonArray.toString(), String.class);
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_binary.js", jsonArray.toJSONString(), String.class);
             assertEquals(result, data);
         });
     }
@@ -132,12 +132,12 @@ public final class ParserV4Test {
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8)));
 
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < packets.size(); i++) {
-            jsonArray.put(i, packets.get(i).data);
+        for (Packet<?> packet : packets) {
+            jsonArray.add(packet.data);
         }
 
         Parser.PROTOCOL_V4.encodePayload(packets, false, data -> {
-            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_base64.js", jsonArray.toString(), String.class);
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_base64.js", jsonArray.toJSONString(), String.class);
             assertEquals(result, data);
         });
     }
@@ -149,12 +149,12 @@ public final class ParserV4Test {
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
 
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < packets.size(); i++) {
-            jsonArray.put(i, packets.get(i).data);
+        for (Packet<?> packet : packets) {
+            jsonArray.add(packet.data);
         }
 
         Parser.PROTOCOL_V4.encodePayload(packets, false, data -> {
-            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_base64.js", jsonArray.toString(), String.class);
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v4/testEncodePayload_base64.js", jsonArray.toJSONString(), String.class);
             assertEquals(result, data);
         });
     }

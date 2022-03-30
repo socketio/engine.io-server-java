@@ -1,7 +1,7 @@
 package io.socket.engineio.server.parser;
 
 import io.socket.engineio.server.TestUtils;
-import org.json.JSONArray;
+import io.socket.engineio.server.json.JSONArray;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Test {@link ParserV3} against reference JS implementation.
@@ -70,7 +69,7 @@ public final class ParserV3Test {
         final JSONArray jsonArray = new JSONArray();
 
         Parser.PROTOCOL_V3.encodePayload(packets, false, data -> {
-            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_string.js", jsonArray.toString(), String.class);
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_string.js", jsonArray.toJSONString(), String.class);
             assertEquals(result, data);
         });
     }
@@ -83,16 +82,16 @@ public final class ParserV3Test {
         };
         final List<Packet<?>> packets = new ArrayList<>();
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < messages.length; i++) {
-            jsonArray.put(i, messages[i]);
+        for (String message : messages) {
+            jsonArray.add(message);
 
             Packet<String> packet = new Packet<>(Packet.MESSAGE);
-            packet.data = messages[i];
+            packet.data = message;
             packets.add(packet);
         }
 
         Parser.PROTOCOL_V3.encodePayload(packets, true, data -> {
-            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_string.js", jsonArray.toString(), String.class);
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_string.js", jsonArray.toJSONString(), String.class);
             assertEquals(result, data);
         });
     }
@@ -104,12 +103,12 @@ public final class ParserV3Test {
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8)));
 
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < packets.size(); i++) {
-            jsonArray.put(i, packets.get(i).data);
+        for (Packet<?> packet : packets) {
+            jsonArray.add(packet.data);
         }
 
         Parser.PROTOCOL_V3.encodePayload(packets, true, data -> {
-            byte[] result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_binary.js", jsonArray.toString(), byte[].class);
+            byte[] result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_binary.js", jsonArray.toJSONString(), byte[].class);
             assertArrayEquals(result, (byte[]) data);
         });
     }
@@ -121,12 +120,12 @@ public final class ParserV3Test {
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
 
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < packets.size(); i++) {
-            jsonArray.put(i, packets.get(i).data);
+        for (Packet<?> packet : packets) {
+            jsonArray.add(packet.data);
         }
 
         Parser.PROTOCOL_V3.encodePayload(packets, true, data -> {
-            byte[] result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_binary.js", jsonArray.toString(), byte[].class);
+            byte[] result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_binary.js", jsonArray.toJSONString(), byte[].class);
             assertArrayEquals(result, (byte[]) data);
         });
     }
@@ -138,12 +137,12 @@ public final class ParserV3Test {
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data".getBytes(StandardCharsets.UTF_8)));
 
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < packets.size(); i++) {
-            jsonArray.put(i, packets.get(i).data);
+        for (Packet<?> packet : packets) {
+            jsonArray.add(packet.data);
         }
 
         Parser.PROTOCOL_V3.encodePayload(packets, false, data -> {
-            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_base64.js", jsonArray.toString(), String.class);
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_base64.js", jsonArray.toJSONString(), String.class);
             assertEquals(result, data);
         });
     }
@@ -155,12 +154,12 @@ public final class ParserV3Test {
         packets.add(new Packet<>(Packet.MESSAGE, "Test.Data"));
 
         final JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < packets.size(); i++) {
-            jsonArray.put(i, packets.get(i).data);
+        for (Packet<?> packet : packets) {
+            jsonArray.add(packet.data);
         }
 
         Parser.PROTOCOL_V3.encodePayload(packets, false, data -> {
-            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_base64.js", jsonArray.toString(), String.class);
+            String result = TestUtils.runScriptAndGetOutput("src/test/resources/parser_v3/testEncodePayload_base64.js", jsonArray.toJSONString(), String.class);
             assertEquals(result, data);
         });
     }

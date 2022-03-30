@@ -1,11 +1,11 @@
 package io.socket.engineio.server.transport;
 
+import io.socket.engineio.server.Transport;
+import io.socket.engineio.server.json.JSONArray;
+import io.socket.engineio.server.json.JSONValue;
 import io.socket.engineio.server.parser.Packet;
 import io.socket.engineio.server.parser.Parser;
-import io.socket.engineio.server.Transport;
 import io.socket.engineio.server.utils.ParseQS;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
@@ -128,8 +128,8 @@ public final class Polling extends Transport implements AsyncListener {
                 if (jsonp) {
                     final String jsonpIndex = query.get("j").replaceAll("[^0-9]", "");
                     final String jsonContentString = (data instanceof String)?
-                            JSONObject.quote((String)data) :
-                            JSONObject.valueToString(new JSONArray(data));
+                            JSONValue.toJSONString(data) :
+                            serializeByteArray((byte[])data);
                     final String jsContentString = jsonContentString
                             .replace("\u2028", "\\u2028")
                             .replace("\u2029", "\\u2029");
@@ -285,5 +285,13 @@ public final class Polling extends Transport implements AsyncListener {
 
         response.setContentType("text/html");
         response.getWriter().write("ok");
+    }
+
+    private String serializeByteArray(byte[] input) {
+        final List<Object> result = new ArrayList<>(input.length);
+        for (final byte item : input) {
+            result.add(item);
+        }
+        return JSONArray.toJSONString(result);
     }
 }

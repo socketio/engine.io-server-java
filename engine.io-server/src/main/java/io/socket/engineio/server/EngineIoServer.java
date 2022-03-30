@@ -1,11 +1,11 @@
 package io.socket.engineio.server;
 
+import io.socket.engineio.server.json.JSONObject;
 import io.socket.engineio.server.parser.Parser;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
 import io.socket.engineio.server.utils.ParseQS;
 import io.socket.engineio.server.utils.ServerYeast;
-import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -231,19 +231,19 @@ public final class EngineIoServer extends Emitter {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         if(code != null) {
-            response.setStatus(400);
-
-            JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject();
             jsonObject.put("code", code.getCode());
             jsonObject.put("message", code.getMessage());
-            response.getWriter().write(jsonObject.toString());
-        } else {
-            response.setStatus(403);
 
-            JSONObject jsonObject = new JSONObject();
+            response.setStatus(400);
+            response.getWriter().write(JSONObject.toJSONString(jsonObject));
+        } else {
+            final JSONObject jsonObject = new JSONObject();
             jsonObject.put("code", ServerErrors.FORBIDDEN.getCode());
             jsonObject.put("message", ServerErrors.FORBIDDEN.getMessage());
-            response.getWriter().write(jsonObject.toString());
+
+            response.setStatus(403);
+            response.getWriter().write(JSONObject.toJSONString(jsonObject));
         }
     }
 
