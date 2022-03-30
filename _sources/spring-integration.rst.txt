@@ -28,6 +28,7 @@ Add a class to contain the bulk of engine.io handling code::
 
         private static final String ATTRIBUTE_ENGINEIO_BRIDGE = "engineIo.bridge";
         private static final String ATTRIBUTE_ENGINEIO_QUERY = "engineIo.query";
+        private static final String ATTRIBUTE_ENGINEIO_HEADERS = "engineIo.headers";
 
         private final EngineIoServer mEngineIoServer;
 
@@ -48,6 +49,7 @@ Add a class to contain the bulk of engine.io handling code::
         @Override
         public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) {
             attributes.put(ATTRIBUTE_ENGINEIO_QUERY, request.getURI().getQuery());
+            attributes.put(ATTRIBUTE_ENGINEIO_HEADERS, request.getHeaders());
             return true;
         }
 
@@ -91,6 +93,7 @@ Add a class to contain the bulk of engine.io handling code::
 
             private final WebSocketSession mSession;
             private final Map<String, String> mQuery;
+            private final Map<String, List<String>> mHeaders;
 
             EngineIoSpringWebSocket(WebSocketSession session) {
                 mSession = session;
@@ -101,6 +104,7 @@ Add a class to contain the bulk of engine.io handling code::
                 } else {
                     mQuery = new HashMap<>();
                 }
+                this.mHeaders = (Map<String, List<String>>) mSession.getAttributes().get(ATTRIBUTE_ENGINEIO_HEADERS);
             }
 
             /* EngineIoWebSocket */
@@ -108,6 +112,11 @@ Add a class to contain the bulk of engine.io handling code::
             @Override
             public Map<String, String> getQuery() {
                 return mQuery;
+            }
+
+            @Override
+            public Map<String, List<String>> getConnectionHeaders() {
+                return mHeaders;
             }
 
             @Override

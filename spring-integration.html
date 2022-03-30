@@ -175,6 +175,7 @@ public final class EngineIoHandler implements HandshakeInterceptor, WebSocketHan
 
     private static final String ATTRIBUTE_ENGINEIO_BRIDGE = &quot;engineIo.bridge&quot;;
     private static final String ATTRIBUTE_ENGINEIO_QUERY = &quot;engineIo.query&quot;;
+    private static final String ATTRIBUTE_ENGINEIO_HEADERS = &quot;engineIo.headers&quot;;
 
     private final EngineIoServer mEngineIoServer;
 
@@ -195,6 +196,7 @@ public final class EngineIoHandler implements HandshakeInterceptor, WebSocketHan
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map&lt;String, Object&gt; attributes) {
         attributes.put(ATTRIBUTE_ENGINEIO_QUERY, request.getURI().getQuery());
+        attributes.put(ATTRIBUTE_ENGINEIO_HEADERS, request.getHeaders());
         return true;
     }
 
@@ -238,6 +240,7 @@ public final class EngineIoHandler implements HandshakeInterceptor, WebSocketHan
 
         private final WebSocketSession mSession;
         private final Map&lt;String, String&gt; mQuery;
+        private final Map&lt;String, List&lt;String&gt;&gt; mHeaders;
 
         EngineIoSpringWebSocket(WebSocketSession session) {
             mSession = session;
@@ -248,6 +251,7 @@ public final class EngineIoHandler implements HandshakeInterceptor, WebSocketHan
             } else {
                 mQuery = new HashMap&lt;&gt;();
             }
+            this.mHeaders = (Map&lt;String, List&lt;String&gt;&gt;) mSession.getAttributes().get(ATTRIBUTE_ENGINEIO_HEADERS);
         }
 
         /* EngineIoWebSocket */
@@ -255,6 +259,11 @@ public final class EngineIoHandler implements HandshakeInterceptor, WebSocketHan
         @Override
         public Map&lt;String, String&gt; getQuery() {
             return mQuery;
+        }
+
+        @Override
+        public Map&lt;String, List&lt;String&gt;&gt; getConnectionHeaders() {
+            return mHeaders;
         }
 
         @Override
