@@ -1,4 +1,4 @@
-package io.socket.engineio;
+package io.socket.engineio.server;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,9 +1,6 @@
-package io.socket.engineio.parser;
+package io.socket.engineio.server.parser;
 
-import io.socket.engineio.TestUtils;
-import io.socket.engineio.server.parser.Packet;
-import io.socket.engineio.server.parser.Parser;
-import io.socket.engineio.server.parser.ParserV4;
+import io.socket.engineio.server.TestUtils;
 import org.json.JSONArray;
 import org.junit.Test;
 

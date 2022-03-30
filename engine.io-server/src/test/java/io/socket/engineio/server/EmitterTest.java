@@ -1,6 +1,5 @@
-package io.socket.emitter;
+package io.socket.engineio.server;
 
-import io.socket.engineio.server.Emitter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
