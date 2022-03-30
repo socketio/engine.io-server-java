@@ -2,9 +2,7 @@ package io.socket.engineio.server;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.http.pathmap.ServletPathSpec;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Log;
@@ -14,7 +12,6 @@ import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,17 +40,15 @@ final class ServerWrapper {
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setContextPath("/");
 
-        servletContextHandler.addServlet(new ServletHolder(new HttpServlet() {
+        final ServletHolder serverHolder = new ServletHolder(new HttpServlet() {
             @Override
             protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-                mEngineIoServer.handleRequest(new HttpServletRequestWrapper(request) {
-                    @Override
-                    public boolean isAsyncSupported() {
-                        return false;
-                    }
-                }, response);
+                mEngineIoServer.handleRequest(request, response);
             }
-        }), "/engine.io/*");
+        });
+        serverHolder.setAsyncSupported(true);
+        servletContextHandler.addServlet(serverHolder, "/engine.io/*");
+
         servletContextHandler.addServlet(new ServletHolder(new HttpServlet() {
             @Override
             protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -76,7 +71,7 @@ final class ServerWrapper {
         }), "/*");
 
         try {
-            WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(servletContextHandler);
+            WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configure(servletContextHandler);
             webSocketUpgradeFilter.addMapping(
                     new ServletPathSpec("/engine.io/*"),
                     (servletUpgradeRequest, servletUpgradeResponse) -> new JettyWebSocketHandler(mEngineIoServer));
@@ -84,9 +79,7 @@ final class ServerWrapper {
             ex.printStackTrace();
         }
 
-        HandlerList handlerList = new HandlerList();
-        handlerList.setHandlers(new Handler[] { servletContextHandler });
-        mServer.setHandler(handlerList);
+        mServer.setHandler(servletContextHandler);
     }
 
     void startServer() throws Exception {
