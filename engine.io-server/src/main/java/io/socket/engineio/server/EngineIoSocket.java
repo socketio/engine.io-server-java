@@ -1,10 +1,9 @@
 package io.socket.engineio.server;
 
-import io.socket.engineio.server.json.JSONArray;
-import io.socket.engineio.server.json.JSONObject;
 import io.socket.engineio.server.parser.Packet;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
+import io.socket.engineio.server.utils.JsonUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +29,10 @@ public final class EngineIoSocket extends Emitter {
     private static final List<Packet<?>> PAYLOAD_NOOP = new ArrayList<Packet<?>>() {{
         add(new Packet<>(Packet.NOOP));
     }};
+
+    private static final String EMPTY_UPGRADES = JsonUtils.toJson(new String[]{});
+    private static final String WEBSOCKET_UPGRADES = JsonUtils.toJson(new String[] { WebSocket.NAME });
+    private static final String HANDSHAKE_JSON = "{\"sid\": \"%s\", \"upgrades\": %s, \"pingInterval\": %d, \"pingTimeout\": %d}";
 
     private final String mSid;
     private final int mProtocolVersion;
@@ -326,17 +329,20 @@ public final class EngineIoSocket extends Emitter {
     private void onOpen() {
         mReadyState = ReadyState.OPEN;
 
-        JSONArray upgrades = new JSONArray();
-        upgrades.add(WebSocket.NAME);
-
-        JSONObject handshakePacket = new JSONObject();
-        handshakePacket.put("sid", mSid);
-        handshakePacket.put("upgrades", upgrades);
-        handshakePacket.put("pingInterval", mServer.getOptions().getPingInterval());
-        handshakePacket.put("pingTimeout", mServer.getOptions().getPingTimeout());
+        final String upgrades;
+        if (mTransport.getName().equals(Polling.NAME)) {
+            upgrades = WEBSOCKET_UPGRADES;
+        } else {
+            upgrades = EMPTY_UPGRADES;
+        }
 
         Packet<String> openPacket = new Packet<>(Packet.OPEN);
-        openPacket.data = JSONObject.toJSONString(handshakePacket);
+        openPacket.data = String.format(
+                HANDSHAKE_JSON,
+                JsonUtils.escape(mSid),
+                upgrades,
+                mServer.getOptions().getPingInterval(),
+                mServer.getOptions().getPingTimeout());
 
         sendPacket(openPacket);
 

@@ -1,9 +1,9 @@
 package io.socket.engineio.server;
 
-import io.socket.engineio.server.json.JSONObject;
 import io.socket.engineio.server.parser.Parser;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
+import io.socket.engineio.server.utils.JsonUtils;
 import io.socket.engineio.server.utils.ParseQS;
 import io.socket.engineio.server.utils.ServerYeast;
 
@@ -38,6 +38,8 @@ public final class EngineIoServer extends Emitter {
          */
         boolean intercept(Map<String, String> query, Map<String, List<String>> headers);
     }
+
+    private static final String ERROR_JSON = "{\"code\": %d, \"message\": \"%s\"}";
 
     private final Map<String, EngineIoSocket> mClients = new ConcurrentHashMap<>();
     private final EngineIoServerOptions mOptions;
@@ -231,19 +233,17 @@ public final class EngineIoServer extends Emitter {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         if(code != null) {
-            final JSONObject jsonObject = new JSONObject();
-            jsonObject.put("code", code.getCode());
-            jsonObject.put("message", code.getMessage());
-
             response.setStatus(400);
-            response.getWriter().write(JSONObject.toJSONString(jsonObject));
+            response.getWriter().write(String.format(
+                    ERROR_JSON,
+                    code.getCode(),
+                    JsonUtils.escape(code.getMessage())));
         } else {
-            final JSONObject jsonObject = new JSONObject();
-            jsonObject.put("code", ServerErrors.FORBIDDEN.getCode());
-            jsonObject.put("message", ServerErrors.FORBIDDEN.getMessage());
-
             response.setStatus(403);
-            response.getWriter().write(JSONObject.toJSONString(jsonObject));
+            response.getWriter().write(String.format(
+                    ERROR_JSON,
+                    ServerErrors.FORBIDDEN.getCode(),
+                    JsonUtils.escape(ServerErrors.FORBIDDEN.getMessage())));
         }
     }
 
