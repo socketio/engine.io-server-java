@@ -1,13 +1,12 @@
 package io.socket.engineio.server;
 
-import io.socket.engineio.server.json.JSONObject;
-import io.socket.engineio.server.json.parser.JSONParser;
 import io.socket.engineio.server.parser.Packet;
 import io.socket.engineio.server.parser.Parser;
 import io.socket.engineio.server.parser.ParserV4;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
 import io.socket.engineio.server.utils.ServerYeast;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -73,8 +72,8 @@ public final class EngineIoSocketTest {
             final List<Packet<?>> packetList = invocationOnMock.getArgument(0);
             for (Packet<?> packet : packetList) {
                 if (packet.type.equals(Packet.OPEN)) {
-                    final JSONObject jsonObject = (JSONObject) JSONParser.parse((String) packet.data);
-                    Assert.assertTrue(jsonObject.containsKey("sid"));
+                    final JSONObject jsonObject = new JSONObject((String) packet.data);
+                    Assert.assertTrue(jsonObject.has("sid"));
                     Assert.assertEquals(socket.getId(), jsonObject.get("sid"));
                 }
             }

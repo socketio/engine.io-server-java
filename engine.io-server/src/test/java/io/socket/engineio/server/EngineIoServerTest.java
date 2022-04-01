@@ -1,11 +1,9 @@
 package io.socket.engineio.server;
 
-import io.socket.engineio.server.json.JSONObject;
-import io.socket.engineio.server.json.parser.JSONParseException;
-import io.socket.engineio.server.json.parser.JSONParser;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.utils.ParseQS;
 import io.socket.engineio.server.utils.ServerYeast;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -68,7 +66,7 @@ public final class EngineIoServerTest {
     }
 
     @Test
-    public void testHandleRequest_unknown_transport() throws IOException, JSONParseException {
+    public void testHandleRequest_unknown_transport() throws IOException {
         final EngineIoServer server = new EngineIoServer();
 
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
@@ -85,15 +83,15 @@ public final class EngineIoServerTest {
 
         response.flushWriterIfNecessary();
         final String responseStr = new String(response.getByteOutputStream().toByteArray(), StandardCharsets.UTF_8);
-        final JSONObject responseObject = (JSONObject) JSONParser.parse(responseStr);
-        assertTrue(responseObject.containsKey("code"));
-        assertEquals(ServerErrors.UNKNOWN_TRANSPORT.getCode(), (long) responseObject.get("code"));
-        assertTrue(responseObject.containsKey("message"));
+        final JSONObject responseObject = new JSONObject(responseStr);
+        assertTrue(responseObject.has("code"));
+        assertEquals(ServerErrors.UNKNOWN_TRANSPORT.getCode(), (int) responseObject.get("code"));
+        assertTrue(responseObject.has("message"));
         assertEquals(ServerErrors.UNKNOWN_TRANSPORT.getMessage(), responseObject.get("message"));
     }
 
     @Test
-    public void testHandleRequest_bad_handshake_method() throws IOException, JSONParseException {
+    public void testHandleRequest_bad_handshake_method() throws IOException {
         final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
                 .setAllowSyncPolling(true));
 
@@ -112,15 +110,15 @@ public final class EngineIoServerTest {
 
         response.flushWriterIfNecessary();
         final String responseStr = new String(response.getByteOutputStream().toByteArray(), StandardCharsets.UTF_8);
-        final JSONObject responseObject = (JSONObject) JSONParser.parse(responseStr);
-        assertTrue(responseObject.containsKey("code"));
-        assertEquals(ServerErrors.BAD_HANDSHAKE_METHOD.getCode(), (long) responseObject.get("code"));
-        assertTrue(responseObject.containsKey("message"));
+        final JSONObject responseObject = new JSONObject(responseStr);
+        assertTrue(responseObject.has("code"));
+        assertEquals(ServerErrors.BAD_HANDSHAKE_METHOD.getCode(), (int) responseObject.get("code"));
+        assertTrue(responseObject.has("message"));
         assertEquals(ServerErrors.BAD_HANDSHAKE_METHOD.getMessage(), responseObject.get("message"));
     }
 
     @Test
-    public void testHandleRequest_unknown_sid() throws IOException, JSONParseException {
+    public void testHandleRequest_unknown_sid() throws IOException {
         final EngineIoServer server = new EngineIoServer(EngineIoServerOptions.newFromDefault()
                 .setAllowSyncPolling(true));
 
@@ -139,10 +137,10 @@ public final class EngineIoServerTest {
 
         response.flushWriterIfNecessary();
         final String responseStr = new String(response.getByteOutputStream().toByteArray(), StandardCharsets.UTF_8);
-        final JSONObject responseObject = (JSONObject) JSONParser.parse(responseStr);
-        assertTrue(responseObject.containsKey("code"));
-        assertEquals(ServerErrors.UNKNOWN_SID.getCode(), (long) responseObject.get("code"));
-        assertTrue(responseObject.containsKey("message"));
+        final JSONObject responseObject = new JSONObject(responseStr);
+        assertTrue(responseObject.has("code"));
+        assertEquals(ServerErrors.UNKNOWN_SID.getCode(), (int) responseObject.get("code"));
+        assertTrue(responseObject.has("message"));
         assertEquals(ServerErrors.UNKNOWN_SID.getMessage(), responseObject.get("message"));
     }
 
