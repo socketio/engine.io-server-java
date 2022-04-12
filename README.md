@@ -111,4 +111,4 @@ This library supports all of the features the JS server does, including events, 
 
 ## License
 
-MIT
+Apache 2.0
