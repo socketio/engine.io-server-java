@@ -7,6 +7,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
+import org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitializer;
 import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
 
 import javax.servlet.ServletException;
@@ -71,10 +72,13 @@ final class ServerWrapper {
         }), "/*");
 
         try {
-            WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configure(servletContextHandler);
-            webSocketUpgradeFilter.addMapping(
-                    new ServletPathSpec("/engine.io/*"),
-                    (servletUpgradeRequest, servletUpgradeResponse) -> new JettyWebSocketHandler(mEngineIoServer));
+            WebSocketUpgradeFilter.configure(servletContextHandler);
+            NativeWebSocketServletContainerInitializer.configure(servletContextHandler, (ctx, container) -> {
+                container.addMapping(
+                        new ServletPathSpec("/engine.io/*"),
+                        (servletUpgradeRequest, servletUpgradeResponse) -> new JettyWebSocketHandler(mEngineIoServer)
+                );
+            });
         } catch (ServletException ex) {
             ex.printStackTrace();
         }
