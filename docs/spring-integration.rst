@@ -39,7 +39,7 @@ Add a class to contain the bulk of engine.io handling code::
         @RequestMapping(
                 value = "/engine.io/",
                 method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS},
-                headers = "Connection!=Upgrade")
+                headers = "connection!=upgrade")
         public void httpHandler(HttpServletRequest request, HttpServletResponse response) throws IOException {
             mEngineIoServer.handleRequest(request, response);
         }
