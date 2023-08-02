@@ -14,7 +14,6 @@
 
     <modules>
         <module>engine.io-server</module>
-        <module>engine.io-server-jetty</module>
         <module>engine.io-server-test</module>
         <module>engine.io-server-coverage</module>
     </modules>
@@ -22,8 +21,10 @@
     <properties>
         <github.global.server>github</github.global.server>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+
+        <jetty.version>11.0.15</jetty.version>
     </properties>
 
     <licenses>

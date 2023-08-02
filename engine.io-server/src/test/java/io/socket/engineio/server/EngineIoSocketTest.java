@@ -6,13 +6,13 @@ import io.socket.engineio.server.parser.ParserV4;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.transport.WebSocket;
 import io.socket.engineio.server.utils.ServerYeast;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;

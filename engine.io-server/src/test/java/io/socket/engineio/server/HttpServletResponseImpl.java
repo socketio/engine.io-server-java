@@ -1,8 +1,9 @@
 package io.socket.engineio.server;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -38,24 +39,6 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public String encodeRedirectURL(String s) {
-        try {
-            return URLEncoder.encode(s, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException ignore) {
-            return null;
-        }
-    }
-
-    @Override
-    public String encodeUrl(String s) {
-        try {
-            return URLEncoder.encode(s, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException ignore) {
-            return null;
-        }
-    }
-
-    @Override
-    public String encodeRedirectUrl(String s) {
         try {
             return URLEncoder.encode(s, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException ignore) {
@@ -101,11 +84,6 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void setStatus(int i) {
-        mStatus = i;
-    }
-
-    @Override
-    public void setStatus(int i, String s) {
         mStatus = i;
     }
 

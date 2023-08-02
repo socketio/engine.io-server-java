@@ -3,11 +3,11 @@ package io.socket.engineio.server;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.utils.ParseQS;
 import io.socket.engineio.server.utils.ServerYeast;
+import jakarta.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

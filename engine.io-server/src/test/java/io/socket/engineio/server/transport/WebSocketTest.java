@@ -1,14 +1,14 @@
 package io.socket.engineio.server.transport;
 
 import io.socket.engineio.server.Emitter;
+import io.socket.engineio.server.EngineIoWebSocket;
 import io.socket.engineio.server.parser.Packet;
 import io.socket.engineio.server.parser.Parser;
-import io.socket.engineio.server.EngineIoWebSocket;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

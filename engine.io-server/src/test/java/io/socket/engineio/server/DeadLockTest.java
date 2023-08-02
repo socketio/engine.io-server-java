@@ -6,11 +6,11 @@ import io.socket.engineio.server.parser.ParserV4;
 import io.socket.engineio.server.transport.Polling;
 import io.socket.engineio.server.utils.ParseQS;
 import io.socket.engineio.server.utils.ServerYeast;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;

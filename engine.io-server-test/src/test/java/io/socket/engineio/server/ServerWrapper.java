@@ -1,18 +1,21 @@
 package io.socket.engineio.server;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jetty.http.pathmap.ServletPathSpec;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
-import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
+import org.eclipse.jetty.websocket.server.JettyWebSocketServlet;
+import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,18 +43,22 @@ final class ServerWrapper {
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setContextPath("/");
 
-        final ServletHolder serverHolder = new ServletHolder(new HttpServlet() {
+        /*final ServletHolder servletHolder = new ServletHolder(new HttpServlet() {
+            private static final long serialVersionUID = 7089396507926086181L;
+
             @Override
             protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
                 mEngineIoServer.handleRequest(request, response);
             }
         });
-        serverHolder.setAsyncSupported(true);
-        servletContextHandler.addServlet(serverHolder, "/engine.io/*");
+        servletHolder.setAsyncSupported(true);
+        servletContextHandler.addServlet(servletHolder, "/engine.io/*");*/
 
         servletContextHandler.addServlet(new ServletHolder(new HttpServlet() {
+            private static final long serialVersionUID = 6467153647501924502L;
+
             @Override
-            protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+            protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
                 final String path = request.getPathInfo();
                 final File file = new File("src/test/resources", path);
                 if (file.exists()) {
@@ -70,14 +77,34 @@ final class ServerWrapper {
             }
         }), "/*");
 
-        try {
-            WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configure(servletContextHandler);
-            webSocketUpgradeFilter.addMapping(
-                    new ServletPathSpec("/engine.io/*"),
-                    (servletUpgradeRequest, servletUpgradeResponse) -> new JettyWebSocketHandler(mEngineIoServer));
-        } catch (ServletException ex) {
-            ex.printStackTrace();
-        }
+        final JettyWebSocketServlet webSocketServlet = new JettyWebSocketServlet() {
+            private static final long serialVersionUID = 4525525859144703715L;
+
+            @Override
+            protected void configure(JettyWebSocketServletFactory jettyWebSocketServletFactory) {
+                jettyWebSocketServletFactory.addMapping(
+                        "/",
+                        (request, response) -> new JettyEngineIoWebSocketHandler(mEngineIoServer));
+            }
+
+            @Override
+            public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+                if (request instanceof HttpServletRequest) {
+                    final String upgradeHeader = ((HttpServletRequest) request).getHeader("upgrade");
+                    if (upgradeHeader != null) {
+                        super.service(request, response);
+                    } else {
+                        mEngineIoServer.handleRequest((HttpServletRequest) request, (HttpServletResponse) response);
+                    }
+                } else {
+                    super.service(request, response);
+                }
+            }
+        };
+        final ServletHolder webSocketServletHolder = new ServletHolder(webSocketServlet);
+        webSocketServletHolder.setAsyncSupported(true);
+        servletContextHandler.addServlet(webSocketServletHolder, "/engine.io/*");
+        JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
 
         mServer.setHandler(servletContextHandler);
     }

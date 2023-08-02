@@ -4,9 +4,9 @@ import io.socket.engineio.server.parser.Parser;
 import io.socket.engineio.server.parser.Packet;
 import io.socket.engineio.server.EngineIoWebSocket;
 import io.socket.engineio.server.Transport;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
