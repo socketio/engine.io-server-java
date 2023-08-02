@@ -266,20 +266,14 @@ public final class Polling extends Transport implements AsyncListener {
         @SuppressWarnings("unchecked") final Map<String, String> query = (Map<String, String>) request.getAttribute("query");
 
         final boolean jsonp = query.containsKey("j");
+        final byte[] readBuffer = readInput(request);
 
-        try(final ServletInputStream inputStream = request.getInputStream()) {
-            final byte[] mReadBuffer = new byte[request.getContentLength()];
-
-            //noinspection ResultOfMethodCallIgnored
-            inputStream.read(mReadBuffer, 0, mReadBuffer.length);
-
-            if (jsonp) {
-                final String packetPayloadRaw = ParseQS.decode(new String(mReadBuffer, StandardCharsets.UTF_8)).get("d");
-                final String packetPayload = packetPayloadRaw.replace("\\n", "\n");
-                onData(packetPayload);
-            } else {
-                onData((new String(mReadBuffer, StandardCharsets.UTF_8)));
-            }
+        if (jsonp) {
+            final String packetPayloadRaw = ParseQS.decode(new String(readBuffer, StandardCharsets.UTF_8)).get("d");
+            final String packetPayload = packetPayloadRaw.replace("\\n", "\n");
+            onData(packetPayload);
+        } else {
+            onData((new String(readBuffer, StandardCharsets.UTF_8)));
         }
 
         response.setContentType("text/html");
@@ -293,5 +287,18 @@ public final class Polling extends Transport implements AsyncListener {
         }
 
         return '[' + String.join(",", array) + ']';
+    }
+
+    private byte[] readInput(final HttpServletRequest request) throws IOException {
+        try(final ServletInputStream inputStream = request.getInputStream()) {
+            final byte[] readBuffer = new byte[request.getContentLength()];
+
+            int remaining = readBuffer.length;
+            while (remaining > 0) {
+                remaining -= inputStream.read(readBuffer, readBuffer.length - remaining, readBuffer.length);
+            }
+
+            return readBuffer;
+        }
     }
 }
