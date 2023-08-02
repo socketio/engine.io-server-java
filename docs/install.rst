@@ -26,28 +26,3 @@ Gradle
 Add it as a gradle dependency in ``build.gradle``.::
 
     implementation ('io.socket:engine.io-server:6.2.1')
-
-.. _install-jetty-ws-adapter:
-
-Jetty WebSocket Adapter
-=======================
-
-Maven
------
-
-Add the following dependency to your ``pom.xml``.::
-
-    <dependencies>
-      <dependency>
-        <groupId>io.socket</groupId>
-        <artifactId>engine.io-server-jetty</artifactId>
-        <version>6.2.1</version>
-      </dependency>
-    </dependencies>
-
-Gradle
-------
-
-Add it as a gradle dependency in ``build.gradle``.::
-
-    implementation ('io.socket:engine.io-server-jetty:6.2.1')

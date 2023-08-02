@@ -182,22 +182,6 @@ class like the following::
         }
     }
 
-Jetty server
-------------
-
-For Jetty server, add the :ref:`install-jetty-ws-adapter` dependency.
-Then, the following code can be used to listen for WebSocket connections::
-
-    ServletContextHandler servletContextHandler;    // The jetty servlet context handler
-
-    WebSocketUpgradeFilter webSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(servletContextHandler);
-    webSocketUpgradeFilter.addMapping(new ServletPathSpec("/engine.io/*"), new WebSocketCreator() {
-        @Override
-        public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest, ServletUpgradeResponse servletUpgradeResponse) {
-            return new JettyWebSocketHandler(EngineIoServlet.getEngineIoServer());
-        }
-    });
-
 Async Polling
 =============
 
