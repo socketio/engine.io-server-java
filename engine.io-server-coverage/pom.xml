@@ -21,10 +21,6 @@
             <groupId>io.socket</groupId>
             <artifactId>engine.io-server</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.socket</groupId>
-            <artifactId>engine.io-server-jetty</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
