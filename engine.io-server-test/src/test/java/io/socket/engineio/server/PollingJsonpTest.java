@@ -1,15 +1,11 @@
 package io.socket.engineio.server;
 
 import io.socket.engineio.server.parser.Packet;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.grid.internal.utils.configuration.StandaloneConfiguration;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.server.SeleniumServer;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
@@ -25,9 +21,9 @@ import static org.junit.Assert.assertEquals;
 @Ignore
 public final class PollingJsonpTest {
 
-    private static SeleniumServer sSeleniumServer;
+    /*private static SeleniumServer sSeleniumServer;*/
 
-    @Before
+    /*@Before
     public void setup() {
         final StandaloneConfiguration configuration = new StandaloneConfiguration();
         configuration.port = 4444;
@@ -39,7 +35,7 @@ public final class PollingJsonpTest {
     @After
     public void teardown() {
         sSeleniumServer.stop();
-    }
+    }*/
 
     @Test
     public void echoTest_string() throws Exception {
