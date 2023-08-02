@@ -17,8 +17,8 @@ Add a class to contain the bulk of engine.io handling code::
     import org.springframework.web.socket.*;
     import org.springframework.web.socket.server.HandshakeInterceptor;
 
-    import javax.servlet.http.HttpServletRequest;
-    import javax.servlet.http.HttpServletResponse;
+    import jakarta.servlet.http.HttpServletRequest;
+    import jakarta.servlet.http.HttpServletResponse;
     import java.io.IOException;
     import java.util.HashMap;
     import java.util.Map;
