@@ -114,7 +114,8 @@ public final class ParserV4 implements Parser {
             final String stringData = (String) data;
             if(stringData.charAt(0) == 'b') {
                 final Packet<byte[]> packet = new Packet<>(Packet.MESSAGE);
-                packet.data = java.util.Base64.getDecoder().decode(stringData.substring(1));
+                // Ignore line breaks, added by engine.io-client-java during base64 encode
+                packet.data = java.util.Base64.getDecoder().decode(stringData.substring(1).replace("\n", ""));
                 return packet;
             } else {
                 final Packet<String> packet = new Packet<>(PACKETS_REVERSE.get(
