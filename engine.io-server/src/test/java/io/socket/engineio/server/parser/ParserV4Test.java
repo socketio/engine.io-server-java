@@ -204,6 +204,16 @@ public final class ParserV4Test {
             assertEquals(byte[].class, packetDecoded.data.getClass());
             assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
         });
+
+        // Other socket.io libraries may add a line break to their base64 encoded output
+        final Packet<byte[]> packetOriginalLineBreak = new Packet<>(Packet.MESSAGE, "Engine.IO".getBytes(StandardCharsets.UTF_8));
+        Parser.PROTOCOL_V4.encodePacket(packetOriginalLineBreak, false, data -> {
+            data += "\n";
+            Packet<?> packetDecoded = Parser.PROTOCOL_V4.decodePacket(data);
+            assertEquals(Packet.MESSAGE, packetDecoded.type);
+            assertEquals(byte[].class, packetDecoded.data.getClass());
+            assertArrayEquals(packetOriginal.data, (byte[]) packetDecoded.data);
+        });
     }
 
     @Test(expected = IllegalArgumentException.class)
